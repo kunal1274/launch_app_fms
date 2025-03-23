@@ -10,7 +10,7 @@ const AumMrigahApp = expressAumMrigah();
 
 const PORT = 3000;
 
-app.get("/", (req, res) => {
+AumMrigahApp.get("/", (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
 });
 

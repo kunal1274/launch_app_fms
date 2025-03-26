@@ -15,6 +15,8 @@ import { companyRouter } from "./routes/company.routes.js";
 import { customerRouter } from "./routes/customer.routes.js";
 import { itemRouter } from "./routes/item.routes.js";
 import { salesOrderRouter } from "./routes/salesorder.routes.js";
+import { vendorRouter } from "./routes/vendor.routes.js";
+import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -56,9 +58,12 @@ AumMrigahApp.get("/", (req, res) => {
 AumMrigahApp.use("/fms/api/v0/users", userRouter);
 AumMrigahApp.use("/fms/api/v0/userGroups", userGroupRouter);
 AumMrigahApp.use("/fms/api/v0/customers", customerRouter);
+AumMrigahApp.use("/fms/api/v0/vendors", vendorRouter);
 AumMrigahApp.use("/fms/api/v0/items", itemRouter);
 AumMrigahApp.use("/fms/api/v0/companies", companyRouter);
 AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
+AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
+
 AumMrigahApp.get("/env", (req, res) => {
   res.json({ allowedOrigins });
 });

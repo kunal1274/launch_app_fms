@@ -7,6 +7,11 @@ import expressAumMrigah from "express";
 // 3rd-Party Node JS Modules Import
 import cors from "cors"; // new2
 import morgan from "morgan";
+import helmet from "helmet";
+import xss from "xss-clean";
+import rateLimit from "express-rate-limit";
+import hpp from "hpp";
+import ExpressMongoSanitize from "express-mongo-sanitize";
 
 // Project FMS server related imports
 import userGroupRouter from "./routes/userGroupRoutes.js";
@@ -19,16 +24,33 @@ import { salesOrderRouter } from "./routes/salesorder.routes.js";
 import { vendorRouter } from "./routes/vendor.routes.js";
 import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
 import logger from "./utility/logger.util.js";
+import { requestTimer } from "./middleware/requestTimer.js";
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
 
 console.log("This index.js file is working as expected");
-const AumMrigahApp = expressAumMrigah();
 
 // Middleware
+const AumMrigahApp = expressAumMrigah();
 
 AumMrigahApp.use(expressAumMrigah.json());
+
+//// Security middleware
+AumMrigahApp.use(helmet()); // Secure HTTP headers
+AumMrigahApp.use(xss()); // Prevent XSS
+AumMrigahApp.disable("x-powered-by"); // Hide the X-Powered-By header
+AumMrigahApp.use(ExpressMongoSanitize());
+AumMrigahApp.use(hpp());
+
+// Rate Limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests from this IP. Please try again later.",
+});
+//AumMrigahApp.use("/fms/api", limiter); // specific to router
+AumMrigahApp.use(limiter); // to everything
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((ele) => {
@@ -52,6 +74,8 @@ const corsOptions = {
 };
 
 AumMrigahApp.use(cors(corsOptions));
+
+AumMrigahApp.use(requestTimer); // 💥 log for all routes
 
 // we are using after the request processed through json and cors
 // Define a stream for morgan to use Winston

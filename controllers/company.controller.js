@@ -25,13 +25,13 @@ export const createCompany = async (req, res) => {
       !companyData.primaryGSTAddress ||
       !companyData.email
     ) {
-      logger.warn("Company Creation - Missing Required Fields", {
+      logger.warn("Company Creation - ⚠️ Missing Required Fields", {
         context: "createCompany",
         body: companyData,
       });
 
       loggerJsonFormat.warn(
-        "Company Creation - Missing Required Fields [ JSON Format ] ",
+        "Company Creation - ⚠️ Missing Required Fields [ JSON Format ] ",
         {
           context: "createCompany",
           body: companyData,
@@ -41,7 +41,7 @@ export const createCompany = async (req, res) => {
       return res.status(422).json({
         status: "failure",
         message:
-          "Company code, company name, primary GST address, and email are required.",
+          "⚠️ Company code, company name, primary GST address, and email are required.",
       });
     }
 
@@ -52,12 +52,12 @@ export const createCompany = async (req, res) => {
     // Invalidate the "all companies" cache key
     await redisClient.del("/fms/api/v0/companies");
 
-    logger.info("Company Created Successfully", {
+    logger.info("✅ Company Created Successfully", {
       context: "createCompany",
       companyId: company._id,
       timestamp: new Date().toISOString(),
     });
-    loggerJsonFormat.info("Company Created Successfully [ JSON Format ] ", {
+    loggerJsonFormat.info(" ✅ Company Created Successfully [ JSON Format ] ", {
       context: "createCompany",
       companyId: company._id,
       timestamp: new Date().toISOString(),
@@ -65,7 +65,7 @@ export const createCompany = async (req, res) => {
 
     return res.status(201).json({
       status: "success",
-      message: "Company created successfully.",
+      message: " ✅ Company created successfully.",
       data: company,
     });
   } catch (error) {
@@ -80,7 +80,7 @@ export const createCompany = async (req, res) => {
 
     // Handle specific error types
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("Company Creation - Validation Error", error);
+      logStackError("❌ Company Creation - Validation Error", error);
       return res.status(422).send({
         status: "failure",
         message: "Validation error during customer creation.",
@@ -89,7 +89,7 @@ export const createCompany = async (req, res) => {
     }
 
     if (error.code === 11000) {
-      logStackError("Company Creation - Duplicate Error", error);
+      logStackError(" ❌ Company Creation - Duplicate Error", error);
       return res.status(409).send({
         status: "failure",
         message: "A company with this code number or email id  already exists.",
@@ -97,7 +97,7 @@ export const createCompany = async (req, res) => {
     }
 
     if (error.message.includes("network error")) {
-      logStackError("Company Creation - Network Error", error);
+      logStackError("❌ Company Creation - Network Error", error);
       return res.status(503).send({
         status: "failure",
         message: "Service temporarily unavailable. Please try again later.",
@@ -105,7 +105,7 @@ export const createCompany = async (req, res) => {
     }
 
     // General Server Error
-    logStackError("Company Creation - Unknown Error", error);
+    logStackError("❌ Company Creation - Unknown Error", error);
     return res.status(500).send({
       status: "failure",
       message:
@@ -136,26 +136,26 @@ export const getAllCompanies = async (req, res) => {
       EX: 60 * 5, // expire in 5 minutes
     });
 
-    logger.info("Fetched All Companies", {
+    logger.info("👍✅ Fetched All Companies", {
       context: "getAllCompanies",
       count: companies.length,
     });
-    loggerJsonFormat.info("Fetched All Companies", {
+    loggerJsonFormat.info(" 👍✅ Fetched All Companies", {
       context: "getAllCompanies",
       count: companies.length,
     });
     //winstonLogger.info(`Retrieved ${companies.length} companies.`);
     return res.status(200).json({
       status: "success",
-      message: "Companies retrieved successfully.",
+      message: "👍✅ Companies retrieved successfully.",
       count: companies.length,
       data: companies,
     });
   } catch (error) {
-    logStackError("Get All Companies - Fetch Error ", error);
+    logStackError("Get All Companies - 😓❌ Fetch Error ", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error while fetching the Companies",
+      message: "😓❌ Internal Server Error while fetching the Companies",
       error: error.message,
     });
   }

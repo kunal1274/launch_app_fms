@@ -79,6 +79,11 @@ const CompanySchema = new Schema(
       required: true,
       unique: true,
       trim: true,
+      validate: {
+        validator: (v) => /^[A-Za-z0-9_-]+$/.test(v),
+        message:
+          "Company Code can only contain alphanumeric characters, dashes, or underscores.",
+      },
       // You can enforce uppercase if needed by using a pre-save hook.
     },
     companyName: {

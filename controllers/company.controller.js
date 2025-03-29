@@ -1,8 +1,14 @@
 // controllers/1_0_0/company.controller.js
 
 //import { CompanyModel } from "../../models/1_0_0/company.1_0_0.model.js";
+import redisClient from "../middleware/redisClient.js";
 import { CompanyModel } from "../models/company.model.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import logger, {
+  loggerJsonFormat,
+  logStackError,
+} from "../utility/logger.util.js";
+import mongoose from "mongoose";
 
 /**
  * Create a new Company.
@@ -19,6 +25,19 @@ export const createCompany = async (req, res) => {
       !companyData.primaryGSTAddress ||
       !companyData.email
     ) {
+      logger.warn("Company Creation - Missing Required Fields", {
+        context: "createCompany",
+        body: companyData,
+      });
+
+      loggerJsonFormat.warn(
+        "Company Creation - Missing Required Fields [ JSON Format ] ",
+        {
+          context: "createCompany",
+          body: companyData,
+        }
+      );
+
       return res.status(422).json({
         status: "failure",
         message:
@@ -28,26 +47,77 @@ export const createCompany = async (req, res) => {
 
     // Create the company document
     const company = await CompanyModel.create(companyData);
-    winstonLogger.info(`Company created successfully: ${company._id}`);
+    // winstonLogger.info(`Company created successfully: ${company._id}`);
+
+    // Invalidate the "all companies" cache key
+    await redisClient.del("/fms/api/v0/companies");
+
+    logger.info("Company Created Successfully", {
+      context: "createCompany",
+      companyId: company._id,
+      timestamp: new Date().toISOString(),
+    });
+    loggerJsonFormat.info("Company Created Successfully [ JSON Format ] ", {
+      context: "createCompany",
+      companyId: company._id,
+      timestamp: new Date().toISOString(),
+    });
+
     return res.status(201).json({
       status: "success",
       message: "Company created successfully.",
       data: company,
     });
   } catch (error) {
-    logError("Company Creation", error);
-    if (error.name === "ValidationError") {
-      return res.status(422).json({
+    // logError("Company Creation", error);
+    // if (error.name === "ValidationError") {
+    //   return res.status(422).json({
+    //     status: "failure",
+    //     message: "Validation error during company creation.",
+    //     error: error.message,
+    //   });
+    // }
+
+    // Handle specific error types
+    if (error instanceof mongoose.Error.ValidationError) {
+      logStackError("Company Creation - Validation Error", error);
+      return res.status(422).send({
         status: "failure",
-        message: "Validation error during company creation.",
+        message: "Validation error during customer creation.",
         error: error.message,
       });
     }
-    return res.status(500).json({
+
+    if (error.code === 11000) {
+      logStackError("Company Creation - Duplicate Error", error);
+      return res.status(409).send({
+        status: "failure",
+        message: "A company with this code number or email id  already exists.",
+      });
+    }
+
+    if (error.message.includes("network error")) {
+      logStackError("Company Creation - Network Error", error);
+      return res.status(503).send({
+        status: "failure",
+        message: "Service temporarily unavailable. Please try again later.",
+      });
+    }
+
+    // General Server Error
+    logStackError("Company Creation - Unknown Error", error);
+    return res.status(500).send({
       status: "failure",
-      message: "Internal Server Error",
+      message:
+        "An unexpected error occurred. Please try again. It could be internal server error which is unknown ",
       error: error.message,
     });
+
+    // return res.status(500).json({
+    //   status: "failure",
+    //   message: "Internal Server Error",
+    //   error: error.message,
+    // });
   }
 };
 
@@ -57,7 +127,24 @@ export const createCompany = async (req, res) => {
 export const getAllCompanies = async (req, res) => {
   try {
     const companies = await CompanyModel.find();
-    winstonLogger.info(`Retrieved ${companies.length} companies.`);
+
+    // ADDED
+    // 2) store it in Redis for subsequent requests
+    // use the same key used in the cacheMiddleware
+    const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies"
+    await redisClient.set(cacheKey, JSON.stringify(companies), {
+      EX: 60 * 5, // expire in 5 minutes
+    });
+
+    logger.info("Fetched All Companies", {
+      context: "getAllCompanies",
+      count: companies.length,
+    });
+    loggerJsonFormat.info("Fetched All Companies", {
+      context: "getAllCompanies",
+      count: companies.length,
+    });
+    //winstonLogger.info(`Retrieved ${companies.length} companies.`);
     return res.status(200).json({
       status: "success",
       message: "Companies retrieved successfully.",
@@ -65,10 +152,10 @@ export const getAllCompanies = async (req, res) => {
       data: companies,
     });
   } catch (error) {
-    logError("Get All Companies", error);
+    logStackError("Get All Companies - Fetch Error ", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "Internal Server Error while fetching the Companies",
       error: error.message,
     });
   }
@@ -127,6 +214,9 @@ export const updateCompanyById = async (req, res) => {
       });
     }
     winstonLogger.info(`Updated company: ${company._id}`);
+
+    await redisClient.del("/fms/api/v0/companies");
+
     return res.status(200).json({
       status: "success",
       message: "Company updated successfully.",
@@ -156,6 +246,9 @@ export const deleteCompanyById = async (req, res) => {
   try {
     const { companyId } = req.params;
     const company = await CompanyModel.findByIdAndDelete(companyId);
+
+    await redisClient.del("/fms/api/v0/companies");
+
     if (!company) {
       return res.status(404).json({
         status: "failure",

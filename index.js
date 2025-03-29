@@ -6,6 +6,7 @@ import expressAumMrigah from "express";
 
 // 3rd-Party Node JS Modules Import
 import cors from "cors"; // new2
+import morgan from "morgan";
 
 // Project FMS server related imports
 import userGroupRouter from "./routes/userGroupRoutes.js";
@@ -17,6 +18,7 @@ import { itemRouter } from "./routes/item.routes.js";
 import { salesOrderRouter } from "./routes/salesorder.routes.js";
 import { vendorRouter } from "./routes/vendor.routes.js";
 import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
+import logger from "./utility/logger.util.js";
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -25,6 +27,7 @@ console.log("This index.js file is working as expected");
 const AumMrigahApp = expressAumMrigah();
 
 // Middleware
+
 AumMrigahApp.use(expressAumMrigah.json());
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -50,6 +53,14 @@ const corsOptions = {
 
 AumMrigahApp.use(cors(corsOptions));
 
+// we are using after the request processed through json and cors
+// Define a stream for morgan to use Winston
+const stream = {
+  write: (message) => logger.http(message.trim()),
+};
+
+AumMrigahApp.use(morgan("combined", { stream }));
+
 // Routes
 AumMrigahApp.get("/", (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
@@ -66,6 +77,15 @@ AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
 
 AumMrigahApp.get("/env", (req, res) => {
   res.json({ allowedOrigins });
+});
+
+// Global error handler (optional but recommended)
+AumMrigahApp.use((err, req, res, next) => {
+  logger.error("Global Error Handler", { error: err });
+  res.status(500).send({
+    status: "failure",
+    message: "An unexpected error occurred from the Backend for launch-app-fms",
+  });
 });
 
 // final route

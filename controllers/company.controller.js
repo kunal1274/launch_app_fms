@@ -1,6 +1,7 @@
 // controllers/1_0_0/company.controller.js
 
 //import { CompanyModel } from "../../models/1_0_0/company.1_0_0.model.js";
+import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
 import redisClient from "../middleware/redisClient.js";
 import { CompanyModel } from "../models/company.model.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
@@ -49,14 +50,26 @@ export const createCompany = async (req, res) => {
     const company = await CompanyModel.create(companyData);
     // winstonLogger.info(`Company created successfully: ${company._id}`);
 
+    // **** AUDIT LOG: "CREATE" ****
+    await createAuditLog({
+      user: req.user?.username || "System",
+      module: "Company",
+      action: "CREATE",
+      recordId: company._id,
+      changes: { newData: company }, // full doc or partial
+    });
+
     // Invalidate the "all companies" cache key
     await redisClient.del("/fms/api/v0/companies");
 
-    logger.info("✅ Company Created Successfully", {
-      context: "createCompany",
-      companyId: company._id,
-      timestamp: new Date().toISOString(),
-    });
+    logger.info(
+      "✅ Company Created Successfully and logged 🧾 in Audit Logs ",
+      {
+        context: "createCompany",
+        companyId: company._id,
+        timestamp: new Date().toISOString(),
+      }
+    );
     loggerJsonFormat.info(" ✅ Company Created Successfully [ JSON Format ] ", {
       context: "createCompany",
       companyId: company._id,

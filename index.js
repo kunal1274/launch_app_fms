@@ -12,6 +12,8 @@ import xss from "xss-clean";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
 import ExpressMongoSanitize from "express-mongo-sanitize";
+import session from "express-session";
+import passport from "passport";
 
 // Project FMS server related imports
 import userGroupRouter from "./routes/userGroupRoutes.js";
@@ -25,6 +27,12 @@ import { vendorRouter } from "./routes/vendor.routes.js";
 import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
 import logger from "./utility/logger.util.js";
 import { requestTimer } from "./middleware/requestTimer.js";
+import googleAuthRouter from "./routes/google-auth.routes.js";
+import otpAuthRouter from "./routes/otp-auth.routes.js";
+import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
+import userGlobalRouter from "./routes/userGlobal.routes.js";
+import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
+import userRoleRouter from "./role_based_access_control_service/routes/userRole.routes.js";
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -35,6 +43,21 @@ console.log("This index.js file is working as expected");
 const AumMrigahApp = expressAumMrigah();
 
 AumMrigahApp.use(expressAumMrigah.json());
+
+AumMrigahApp.use(expressAumMrigah.urlencoded({ extended: true }));
+
+// Express session middleware
+AumMrigahApp.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your_secret_key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Initialize Passport and restore authentication state from session
+AumMrigahApp.use(passport.initialize());
+AumMrigahApp.use(passport.session());
 
 //// Security middleware
 AumMrigahApp.use(helmet()); // Secure HTTP headers
@@ -90,6 +113,7 @@ AumMrigahApp.get("/", (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
 });
 
+// Main Functional Modules
 AumMrigahApp.use("/fms/api/v0/users", userRouter);
 AumMrigahApp.use("/fms/api/v0/userGroups", userGroupRouter);
 AumMrigahApp.use("/fms/api/v0/customers", customerRouter);
@@ -99,11 +123,21 @@ AumMrigahApp.use("/fms/api/v0/companies", companyRouter);
 AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
 AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
 
+//Authentication
+AumMrigahApp.use("/auth", googleAuthRouter);
+AumMrigahApp.use("/api/auth", googleAlternativeApiAuthRouter);
+AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
+
+// Authorization
+AumMrigahApp.use("/fms/api/v0/user-globals", userGlobalRouter);
+AumMrigahApp.use("/fms/api/v0/permissions", permissionRouter);
+AumMrigahApp.use("/fms/api/v0/user-roles", userRoleRouter);
+
 AumMrigahApp.get("/env", (req, res) => {
   res.json({ allowedOrigins });
 });
 
-// Global error handler (optional but recommended)
+//Global error handler (optional but recommended)
 AumMrigahApp.use((err, req, res, next) => {
   logger.error("Global Error Handler", { error: err });
   res.status(500).send({

@@ -17,4 +17,14 @@ customerRouter.put("/:customerId", updateCustomer);
 customerRouter.delete("/:customerId", deleteCustomer);
 customerRouter.delete("/", deleteAllCustomers);
 
+// // We want both the action-level check for "READ_CUSTOMER"
+// // AND the data-level scoping for "CUSTOMER"
+// router.get(
+//   "/",
+//   authenticateUser,
+//   checkPermissions(["READ_CUSTOMER"]),
+//   applyDataScope("CUSTOMER"),
+//   getCustomers
+// );
+
 export { customerRouter };

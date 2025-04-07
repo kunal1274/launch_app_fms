@@ -42,10 +42,10 @@ const customerSchema = new Schema(
     registrationNum: {
       type: String,
       required: true,
-      minLength: [16, `The registration number should be with min. 16 chars`],
+      minLength: [15, `The registration number should be with min. 15 chars`],
       maxLength: [
-        16,
-        `The registration number cannot be greater than 16 chars.`,
+        15,
+        `The registration number cannot be greater than 15 chars.`,
       ],
     },
     panNum: {

@@ -193,9 +193,167 @@ const salesOrderSchema1C1I = new Schema(
       },
     },
 
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    shippingQty: [
+      {
+        shipmentId: {
+          type: String,
+          required: false,
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        shipmentRef: {
+          type: String,
+          default: false,
+        },
+        shipmentMode: {
+          type: String,
+          required: false,
+          enum: {
+            values: ["Air", "Road", "Sea"],
+            message:
+              "{VALUE} is not a supported shipment mode Air or Road or Sea.",
+          },
+          default: "Road",
+        },
+        closedForShipmentLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    deliveringQty: [
+      {
+        deliveryId: {
+          type: String,
+          required: false,
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        deliveryRef: {
+          type: String,
+          default: false,
+        },
+        deliveryMode: {
+          type: String,
+          required: false,
+          enum: {
+            values: ["Air", "Road", "Sea"],
+            message:
+              "{VALUE} is not a supported delivery mode Air or Road or Sea.",
+          },
+          default: "Road",
+        },
+        closedForDeliveryLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    invoicingQty: [
+      {
+        invoicingId: {
+          type: String,
+          required: false,
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        invoiceDate: {
+          type: Date,
+          default: Date.now,
+        },
+        externalDocDate: {
+          type: Date,
+          default: Date.now,
+        },
+        invoicingRef: {
+          type: String,
+          default: false,
+        },
+        paymentTerms: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["COD", "Net15", "Net30", "Advance"],
+            message:
+              "{VALUE} is not a valid payment Terms. Use among these only'COD','Net15','Net30','Advance'.",
+          },
+          default: "Net30",
+        },
+
+        dueDate: {
+          type: Date,
+          default: Date.now,
+          // This will be computed as invoiceDate + 30 days if not provided.
+        },
+        closedForInvoicingLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
     // Change paidAmt from an array of numbers to an array of objects for richer metadata
     paidAmt: [
       {
+        paymentId: {
+          type: String,
+          required: false,
+        },
         amount: {
           type: Number,
           required: true,
@@ -226,6 +384,17 @@ const salesOrderSchema1C1I = new Schema(
             message: "{VALUE} is not a supported payment mode.",
           },
           default: "Cash",
+        },
+
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
         },
       },
     ],
@@ -363,6 +532,51 @@ salesOrderSchema1C1I.methods.updateSettlementStatus = function () {
   }
 };
 
+// ======================
+//  ID GENERATOR HELPERS
+// ======================
+async function generateShipmentId() {
+  const counter = await SalesOrderCounterModel.findByIdAndUpdate(
+    { _id: "shipmentNumber" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  const seqNumber = counter.seq.toString().padStart(6, "0");
+  return `2025-26-SHP-${seqNumber}`;
+}
+
+async function generateDeliveryId() {
+  const counter = await SalesOrderCounterModel.findByIdAndUpdate(
+    { _id: "deliveryNumber" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  const seqNumber = counter.seq.toString().padStart(6, "0");
+  return `2025-26-DLV-${seqNumber}`;
+}
+
+async function generateInvoicingId() {
+  const counter = await SalesOrderCounterModel.findByIdAndUpdate(
+    { _id: "partialInvoicingNumber" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  const seqNumber = counter.seq.toString().padStart(6, "0");
+  // Using INVX to differentiate from the main "invoiceNum"
+  return `2025-26-INVX-${seqNumber}`;
+}
+
+async function generatePaymentId() {
+  const counter = await SalesOrderCounterModel.findByIdAndUpdate(
+    { _id: "paymentNumber" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  const seqNumber = counter.seq.toString().padStart(6, "0");
+  // Using INVX to differentiate from the main "invoiceNum"
+  return `2025-26-PAYV-${seqNumber}`;
+}
+
 // Pre-save hook to generate order number
 salesOrderSchema1C1I.pre("save", async function (next) {
   const doc = this;
@@ -472,6 +686,43 @@ salesOrderSchema1C1I.pre("save", async function (next) {
 
     const seqNumber = dbResponse.seq.toString().padStart(6, "0");
     doc.orderNum = `SO_${seqNumber}`;
+
+    // ================================
+    // Check for newly added sub-docs
+    // ================================
+    // shippingQty
+    if (doc.isModified("shippingQty") && doc.shippingQty) {
+      for (const shipping of doc.shippingQty) {
+        if (!shipping.shipmentId) {
+          shipping.shipmentId = await generateShipmentId();
+        }
+      }
+    }
+    // deliveringQty
+    if (doc.isModified("deliveringQty") && doc.deliveringQty) {
+      for (const delivery of doc.deliveringQty) {
+        if (!delivery.deliveryId) {
+          delivery.deliveryId = await generateDeliveryId();
+        }
+      }
+    }
+    // invoicingQty
+    if (doc.isModified("invoicingQty") && doc.invoicingQty) {
+      for (const inv of doc.invoicingQty) {
+        if (!inv.invoicingId) {
+          inv.invoicingId = await generateInvoicingId();
+        }
+      }
+    }
+
+    // paidAmt
+    if (doc.isModified("paidAmt") && doc.paidAmt) {
+      for (const paym of doc.paidAmt) {
+        if (!paym.paymentId) {
+          paym.paymentId = await generatePaymentId();
+        }
+      }
+    }
 
     next();
   } catch (error) {
@@ -614,6 +865,118 @@ salesOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
       // Set status back to Draft
       update.status = "Draft";
     }
+
+    // -------------- NEW LOGIC --------------
+    // If user is pushing a new subdocument in shippingQty, deliveringQty, or invoicingQty
+    // we generate an ID for each newly added subdocument if it doesn't have one.
+    if (update.shippingQty) {
+      // The user might be using $push or $set. We need to handle carefully:
+      // If it's $push: { shippingQty: { <newObj> } } or $push: { shippingQty: { $each: [] } }
+      // If it's $set: { shippingQty: [...] } (the entire array is replaced)
+      // We'll handle it generically by fetching the final array from the DB doc after the update merges,
+      // then assigning IDs if missing.
+      // The simplest approach: run the update, then in post hook we do the final assignment.
+      // But Mongoose doesn't do post('findOneAndUpdate') the same way as pre('save').
+      // So we do it in pre, but we can't see the final array yet. We'll do a small workaround:
+
+      // We'll parse the new elements from update. If it's $push => we see update.$push?.shippingQty
+      // If it's $set => we see update.$set?.shippingQty or update.shippingQty
+      // For brevity, let's just handle the typical $push scenario:
+
+      if (update.$push && update.$push.shippingQty) {
+        const newShp = update.$push.shippingQty;
+        // If it's $each array
+        if (newShp.$each) {
+          for (const s of newShp.$each) {
+            if (!s.shipmentId) {
+              s.shipmentId = await generateShipmentId();
+            }
+          }
+        } else {
+          // single item
+          if (!newShp.shipmentId) {
+            newShp.shipmentId = await generateShipmentId();
+          }
+        }
+      } else if (Array.isArray(update.shippingQty)) {
+        // entire array replaced
+        for (const s of update.shippingQty) {
+          if (!s.shipmentId) {
+            s.shipmentId = await generateShipmentId();
+          }
+        }
+      }
+    }
+
+    if (update.deliveringQty) {
+      if (update.$push && update.$push.deliveringQty) {
+        const newDlv = update.$push.deliveringQty;
+        if (newDlv.$each) {
+          for (const d of newDlv.$each) {
+            if (!d.deliveryId) {
+              d.deliveryId = await generateDeliveryId();
+            }
+          }
+        } else {
+          if (!newDlv.deliveryId) {
+            newDlv.deliveryId = await generateDeliveryId();
+          }
+        }
+      } else if (Array.isArray(update.deliveringQty)) {
+        for (const d of update.deliveringQty) {
+          if (!d.deliveryId) {
+            d.deliveryId = await generateDeliveryId();
+          }
+        }
+      }
+    }
+
+    if (update.invoicingQty) {
+      if (update.$push && update.$push.invoicingQty) {
+        const newInv = update.$push.invoicingQty;
+        if (newInv.$each) {
+          for (const i of newInv.$each) {
+            if (!i.invoicingId) {
+              i.invoicingId = await generateInvoicingId();
+            }
+          }
+        } else {
+          if (!newInv.invoicingId) {
+            newInv.invoicingId = await generateInvoicingId();
+          }
+        }
+      } else if (Array.isArray(update.invoicingQty)) {
+        for (const i of update.invoicingQty) {
+          if (!i.invoicingId) {
+            i.invoicingId = await generateInvoicingId();
+          }
+        }
+      }
+    }
+
+    if (update.paidAmt) {
+      if (update.$push && update.$push.paidAmt) {
+        const newPay = update.$push.paidAmt;
+        if (newPay.$each) {
+          for (const p of newPay.$each) {
+            if (!p.paymentId) {
+              p.paymentId = await generatePaymentId();
+            }
+          }
+        } else {
+          if (!newPay.paymentId) {
+            newPay.paymentId = await generatePaymentId();
+          }
+        }
+      } else if (Array.isArray(update.paidAmt)) {
+        for (const p of update.paidAmt) {
+          if (!p.paymentId) {
+            p.paymentId = await generatePaymentId();
+          }
+        }
+      }
+    }
+    // ---------------------------------------
 
     next();
   } catch (error) {

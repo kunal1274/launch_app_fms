@@ -504,6 +504,16 @@ const purchaseOrderSchema1C1I = new Schema(
       default: "PAYMENT_PENDING",
     },
     archived: { type: Boolean, default: false }, // New field
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: "Companies",
+    },
     createdBy: {
       type: String,
       required: true,
@@ -518,6 +528,7 @@ const purchaseOrderSchema1C1I = new Schema(
       required: true,
       default: true,
     },
+
     // New field for file uploads
     files: [
       {

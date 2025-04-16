@@ -165,6 +165,12 @@ const CompanySchema = new Schema(
       type: Boolean,
       default: true,
     },
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
     files: [
       {
         fileName: { type: String, required: true }, // Name of the file

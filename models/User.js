@@ -15,6 +15,13 @@ const UserSchema = new Schema(
     },
     name: { type: String, default: "" },
     // ...add more fields as needed...
+    archived: { type: Boolean, default: false }, // New field
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
   },
   { timestamps: true }
 );

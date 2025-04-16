@@ -518,6 +518,16 @@ const salesOrderSchema1C1I = new Schema(
       default: "PAYMENT_PENDING",
     },
     archived: { type: Boolean, default: false }, // New field
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: "Companies",
+    },
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
     createdBy: {
       type: String,
       required: true,

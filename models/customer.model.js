@@ -133,6 +133,7 @@ const customerSchema = new Schema(
       required: true,
       default: false,
     },
+    archived: { type: Boolean, default: false }, // New field
     bankDetails: [
       {
         code: {

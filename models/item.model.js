@@ -59,6 +59,17 @@ const itemSchema = new Schema(
       required: true,
       default: false,
     },
+    archived: { type: Boolean, default: false }, // New field
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: "Companies",
+    },
     // New field for file uploads
     files: [
       {

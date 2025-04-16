@@ -70,6 +70,13 @@ const UserGlobalSchema = new Schema(
       of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
       default: {},
     },
+    archived: { type: Boolean, default: false }, // New field
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
   },
   { timestamps: true }
 );

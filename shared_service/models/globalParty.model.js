@@ -24,6 +24,7 @@ const globalPartySchema = new Schema(
           "Employee",
           "Worker",
           "Contractor",
+          "Company",
           "ContactPerson",
           "Individual",
           "Organization",

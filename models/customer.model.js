@@ -28,6 +28,7 @@ const customerSchema = new Schema(
           "Distributor",
           "Retailer",
           "Wholesaler",
+          "Others",
         ],
         message:
           "{VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",

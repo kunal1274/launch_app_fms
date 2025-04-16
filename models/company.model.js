@@ -91,6 +91,25 @@ const CompanySchema = new Schema(
       required: true,
       trim: true,
     },
+    businessType: {
+      type: String,
+      required: true,
+      enum: {
+        values: [
+          "Individual",
+          "Manufacturing",
+          "ServiceProvider",
+          "Trading",
+          "Distributor",
+          "Retailer",
+          "Wholesaler",
+          "Others",
+        ],
+        message:
+          "{VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
+      },
+      default: "Trading",
+    },
     primaryGSTAddress: {
       type: String,
       required: true,

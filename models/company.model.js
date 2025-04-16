@@ -240,4 +240,4 @@ CompanySchema.pre("save", function (next) {
 // CompanySchema.index({ email: 1 });
 
 export const CompanyModel =
-  mongoose.models.Company || model("Company", CompanySchema);
+  mongoose.models.Companies || model("Companies", CompanySchema);

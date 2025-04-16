@@ -190,6 +190,20 @@ const customerSchema = new Schema(
         uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
       },
     ],
+    /**
+     * NEW: an array referencing 'Group' docs that have been attached to this Customer.
+     */
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "GlobalGroups", // from group.model.js
+      },
+    ],
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: "Companies",
+    },
+
     extras: {
       type: Map,
       of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.

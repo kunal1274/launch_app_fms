@@ -4,6 +4,7 @@ import { CustomerCounterModel } from "../models/counter.model.js";
 import ce from "../utility/ce.utils.js";
 import cl from "../utility/cl.utils.js";
 import { GlobalPartyModel } from "../shared_service/models/globalParty.model.js";
+import { GlobalGroupModel } from "../shared_service/models/globalGroup.model.js";
 
 // Helper function for error logging
 const logError = (context, error) => {
@@ -319,6 +320,113 @@ export const deleteAllCustomers = async (req, res) => {
       status: "failure",
       message: "Error while deleting all customers or resetting the sequence.",
       error: error.message,
+    });
+  }
+};
+
+/**
+ * Attach a specified group to a specific customer
+ */
+export const attachGroupToCustomer = async (req, res) => {
+  try {
+    // 1) Read input from the request
+    const { customerId, groupId } = req.body;
+
+    if (!customerId || !groupId) {
+      return res.status(400).json({
+        status: "failure",
+        message: "Both 'customerId' and 'groupId' are required.",
+      });
+    }
+
+    // 2) Find the group doc
+    const groupDoc = await GlobalGroupModel.findById(groupId);
+    if (!groupDoc) {
+      return res.status(404).json({
+        status: "failure",
+        message: `Group with ID ${groupId} not found.`,
+      });
+    }
+
+    // 3) Find the customer doc
+    const customerDoc = await CustomerModel.findById(customerId);
+    if (!customerDoc) {
+      return res.status(404).json({
+        status: "failure",
+        message: `Customer with ID ${customerId} not found.`,
+      });
+    }
+
+    // 4) Check if group is released for "Customer" module
+    if (!groupDoc.releaseModules.includes("Customer")) {
+      return res.status(400).json({
+        status: "failure",
+        message: `Group ${groupDoc.code} is NOT released for 'Customer' module.`,
+      });
+    }
+
+    // 5) Check if group is released to the same company (if you store "company" on the customer).
+    //    We'll assume the 'company' field in Customer is a single ObjectId.
+    //    We also assume groupDoc.releaseCompanies is an array of Company _ids that can use this group.
+
+    let isCompanyAllowed = false;
+    const customerCompanyId = customerDoc.company?.toString();
+    if (!customerCompanyId) {
+      // If your business logic says that the Customer must always have a company,
+      // handle the case where it's missing:
+      return res.status(400).json({
+        status: "failure",
+        message: `Customer ${customerId} does not have a company assigned.`,
+      });
+    }
+
+    // If groupDoc.releaseCompanies includes this company ID, we allow it:
+    // (You might also have logic for "ALL" companies if you stored a special token.)
+    for (const c of groupDoc.releaseCompanies) {
+      if (c.toString() === customerCompanyId) {
+        isCompanyAllowed = true;
+        break;
+      }
+    }
+
+    if (!isCompanyAllowed) {
+      return res.status(400).json({
+        status: "failure",
+        message: `Group ${groupDoc.code} is not released for the company of this Customer.`,
+      });
+    }
+
+    // 6) Attach the group to the customer's "groups" array if not already present
+    if (!customerDoc.groups) {
+      customerDoc.groups = [];
+    }
+
+    const alreadyAttached = customerDoc.groups.some(
+      (g) => g.toString() === groupDoc._id.toString()
+    );
+    if (alreadyAttached) {
+      return res.status(200).json({
+        status: "success",
+        message: `Group ${groupDoc.code} is already attached to Customer ${customerId}.`,
+        data: customerDoc,
+      });
+    }
+
+    customerDoc.groups.push(groupDoc._id);
+    await customerDoc.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Group ${groupDoc.code} attached to Customer ${customerDoc.code} successfully.`,
+      data: customerDoc,
+    });
+  } catch (error) {
+    console.error("Error in attachGroupToCustomer:", error);
+
+    return res.status(500).json({
+      status: "failure",
+      message: "An unexpected error occurred while attaching the group.",
+      error: error.message || error,
     });
   }
 };

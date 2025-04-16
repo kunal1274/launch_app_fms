@@ -12,6 +12,7 @@ import {
   getFormattedLocalDateTime,
   getLocalTimeString,
 } from "../utility/getLocalTime.js";
+import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
 
 // // Twilio configuration
 // const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -181,7 +182,7 @@ export const sendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
   const { phoneNumber, email, otp } = req.body;
-  console.log("line 279 verifyOtpController.js ", req.body);
+  console.log("line 185 verifyOtpController.js ", req.body);
 
   if ((!phoneNumber && !email) || !otp) {
     return res
@@ -190,25 +191,36 @@ export const verifyOtp = async (req, res) => {
   }
   try {
     let query = { otp };
-    if (phoneNumber) query.phoneNumber = phoneNumber;
-    if (email) query.email = email.toLowerCase().trim();
+    if (phoneNumber) query.phoneNumber = phoneNumber || null;
+    if (email) query.email = email.toLowerCase().trim() || null;
 
-    const existingGlobalUser = await UserGlobalModel.findOne({
-      email: email.toLowerCase().trim(),
-    });
+    // 1) Try to find existing user by email or phone
+    let existingGlobalUser;
+    if (email) {
+      existingGlobalUser = await UserGlobalModel.findOne({
+        email: email.toLowerCase().trim(),
+      });
+    } else if (phoneNumber) {
+      existingGlobalUser = await UserGlobalModel.findOne({ phoneNumber });
+    }
 
-    console.log("line 428", query);
+    console.log("line 201", query);
 
     const otpRecord = await UserOtpModel.findOne(query);
-    const otpRecord1 = UserOtpModel.findOne(query);
+    // const otpRecord1 = UserOtpModel.findOne(query);
     // logger.info("line 428 otp record ", {
     //   otpRecordVerification: otpRecord._id,
     // });
-    console.log("line 431", otpRecord, otpRecord1.email);
+    console.log(
+      "line 209",
+      otpRecord,
+      otpRecord?.phoneNumber,
+      otpRecord?.email
+    );
     if (!otpRecord) {
       return res.status(400).json({ msg: "🤕 Invalid or expired OTP" });
     }
-    console.log("line 438 record expire", otpRecord.expiresAt < Date.now());
+    console.log("line 217 record expire", otpRecord.expiresAt < Date.now());
     // Check expiration
     if (otpRecord.expiresAt < Date.now()) {
       await UserOtpModel.deleteOne({ _id: otpRecord._id });
@@ -228,17 +240,41 @@ export const verifyOtp = async (req, res) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
-    console.log("line 354 in user otp controller and token is ", token);
+    console.log("line 237 in user otp controller and token is ", token);
+
+    // console.log(
+    //   "line 239",
+    //   existingGlobalUser,
+    //   existingGlobalUser?.globalPartyId
+    // );
+
+    if (existingGlobalUser && !existingGlobalUser.globalPartyId) {
+      const partyIdForExistingRecord = await createGlobalPartyId(
+        "User",
+        null,
+        email ? email : phoneNumber
+      );
+      existingGlobalUser.globalPartyId = partyIdForExistingRecord;
+      await existingGlobalUser.save();
+    }
 
     if (!existingGlobalUser) {
+      const partyIdNew = await createGlobalPartyId(
+        "User",
+        null,
+        email ? email : phoneNumber
+      );
+
       await UserGlobalModel.create({
         email,
         phoneNumber,
         method: email ? "email" : "phone",
         signInMethod: "otp",
+        globalPartyId: partyIdNew,
       });
     }
-    console.log("line 463 record before deletion", otpRecord?._id);
+
+    console.log("line 269 record before deletion", otpRecord?._id);
 
     // OTP is valid; delete it and respond
     await UserOtpModel.deleteOne({ _id: otpRecord._id });

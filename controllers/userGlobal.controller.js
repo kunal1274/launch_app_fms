@@ -1,13 +1,23 @@
 // controllers/userGlobal.controller.js
 import { UserGlobalModel } from "../models/userGlobal.model.js";
+import { GlobalPartyModel } from "../shared_service/models/globalParty.model.js";
+import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
 
 /**
  * Create a user
  */
+
 export const createUserGlobal = async (req, res) => {
   try {
-    const { email, password, phoneNumber, name, method, signInMethod } =
-      req.body;
+    const {
+      email,
+      password,
+      phoneNumber,
+      name,
+      method,
+      signInMethod,
+      globalPartyId,
+    } = req.body;
 
     // Basic validations, adapt as needed
     if (!email && !phoneNumber) {
@@ -17,6 +27,11 @@ export const createUserGlobal = async (req, res) => {
     }
 
     // Additional checks, e.g. password, etc.
+    const partyId = await createGlobalPartyId(
+      "User",
+      globalPartyId,
+      email ? email : phoneNumber
+    );
 
     const user = new UserGlobalModel({
       email,
@@ -25,6 +40,7 @@ export const createUserGlobal = async (req, res) => {
       name,
       method,
       signInMethod,
+      globalPartyId: partyId,
     });
 
     await user.save();

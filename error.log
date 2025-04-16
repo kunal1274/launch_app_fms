@@ -32,3 +32,12 @@
 {"error":{"code":11000,"errorLabelSet":{},"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: fms-cloud-local-dev-db.userglobals index: phoneNumber_1 dup key: { phoneNumber: \"\" }","index":0,"keyPattern":{"phoneNumber":1},"keyValue":{"phoneNumber":""}},"index":0,"keyPattern":{"phoneNumber":1},"keyValue":{"phoneNumber":""}},"level":"error","message":"Error in verifyOtp"}
 {"error":{"code":11000,"errorLabelSet":{},"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: fms-cloud-local-dev-db.userglobals index: phoneNumber_1 dup key: { phoneNumber: \"\" }","index":0,"keyPattern":{"phoneNumber":1},"keyValue":{"phoneNumber":""}},"index":0,"keyPattern":{"phoneNumber":1},"keyValue":{"phoneNumber":""}},"level":"error","message":"Error in verifyOtp"}
 {"error":{"code":11000,"errorLabelSet":{},"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: fms-cloud-local-dev-db.userglobals index: phoneNumber_1 dup key: { phoneNumber: \"\" }","index":0,"keyPattern":{"phoneNumber":1},"keyValue":{"phoneNumber":""}},"index":0,"keyPattern":{"phoneNumber":1},"keyValue":{"phoneNumber":""}},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{},"level":"error","message":"Error in verifyOtp"}

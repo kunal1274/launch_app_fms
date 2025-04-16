@@ -3,6 +3,7 @@ import { VendorModel } from "../models/vendor.model.js";
 import { VendorCounterModel } from "../models/counter.model.js";
 import ce from "../utility/ce.utils.js";
 import cl from "../utility/cl.utils.js";
+import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
 
 // Helper function for error logging
 const logError = (context, error) => {
@@ -23,6 +24,13 @@ export const createVendor = async (req, res) => {
         message: "Vendor name and contact num are required.",
       });
     }
+
+    const partyId = await createGlobalPartyId(
+      "Vendor",
+      vendorBody.globalPartyId,
+      vendorBody.name
+    );
+    vendorBody.globalPartyId = partyId;
 
     const dbResponse = await VendorModel.create(vendorBody);
 
@@ -47,6 +55,13 @@ export const createVendor = async (req, res) => {
     });
   } catch (error) {
     //ce(`The error during vendor creation : ${error}`);
+    if (error.message && error.message.startsWith("GlobalParty with ID")) {
+      // That means our helper threw a "GlobalParty not found..." error
+      return res.status(404).json({
+        status: "failure",
+        message: error.message,
+      });
+    }
 
     // Database Validation Error
     if (error instanceof mongoose.Error.ValidationError) {

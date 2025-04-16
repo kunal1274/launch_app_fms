@@ -15,6 +15,12 @@ const UserGlobalSchema = new Schema(
       sparse: true,
     },
     password: { type: String, required: false, default: "" },
+    globalPartyId: {
+      type: Schema.Types.ObjectId,
+      ref: "GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      required: false,
+      unique: true, //ensures only 1 user doc can point to the same globalParty
+    },
     phoneNumber: {
       type: String,
       required: function () {
@@ -51,6 +57,19 @@ const UserGlobalSchema = new Schema(
         ref: "UserRole",
       },
     ],
+    files: [
+      {
+        fileName: { type: String, required: true }, // Name of the file
+        fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
+        fileUrl: { type: String, required: true }, // URL/path of the uploaded file
+        uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+      },
+    ],
+    extras: {
+      type: Map,
+      of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
+      default: {},
+    },
   },
   { timestamps: true }
 );

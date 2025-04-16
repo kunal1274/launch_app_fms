@@ -1,0 +1,18 @@
+import mongoose, { model, Schema } from "mongoose";
+
+// Define Schema
+const globalPartyCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const GlobalPartyCounterModel =
+  mongoose.models.GlobalPartyCounters ||
+  model("GlobalPartyCounters", globalPartyCounterSchema);

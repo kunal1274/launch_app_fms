@@ -146,6 +146,19 @@ const CompanySchema = new Schema(
       type: Boolean,
       default: true,
     },
+    files: [
+      {
+        fileName: { type: String, required: true }, // Name of the file
+        fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
+        fileUrl: { type: String, required: true }, // URL/path of the uploaded file
+        uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+      },
+    ],
+    extras: {
+      type: Map,
+      of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
+      default: {},
+    },
   },
   {
     timestamps: true,

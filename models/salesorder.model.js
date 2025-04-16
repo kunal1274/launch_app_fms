@@ -21,6 +21,31 @@ const STATUS_TRANSITIONS = {
   ],
 };
 
+// Suppose you have a function getDaysFromPaymentTerm that returns the day offset:
+function getDaysFromPaymentTerm(paymentTerm) {
+  switch (paymentTerm) {
+    case "Net7D":
+      return 7;
+    case "Net15D":
+      return 15;
+    case "Net30D":
+      return 30;
+    case "Net45D":
+      return 45;
+    case "Net60D":
+      return 60;
+    case "Net90D":
+      return 90;
+    case "COD":
+      return 0;
+    case "Advance":
+      // Possibly 0 or handle differently if “advance” is a special case
+      return 0;
+    default:
+      return 0;
+  }
+}
+
 // Sales Order Schema
 const salesOrderSchema1C1I = new Schema(
   {
@@ -192,6 +217,26 @@ const salesOrderSchema1C1I = new Schema(
         return Math.round(v * 100) / 100;
       },
     },
+    paymentTerms: {
+      type: String,
+      required: true,
+      enum: {
+        values: [
+          "COD",
+          "Net30D",
+          "Net7D",
+          "Net15D",
+          "Net45D",
+          "Net60D",
+          "Net90D",
+          "Advance",
+        ],
+        message:
+          "{VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+      },
+      default: "Net30D",
+      // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
+    },
 
     // Change shippingQty from an array of numbers to an array of objects for richer metadata
     shippingQty: [
@@ -199,6 +244,11 @@ const salesOrderSchema1C1I = new Schema(
         shipmentId: {
           type: String,
           required: false,
+        },
+        extShipmentId: {
+          type: String,
+          required: true,
+          default: "NA",
         },
         qty: {
           type: Number,
@@ -248,6 +298,11 @@ const salesOrderSchema1C1I = new Schema(
           type: String,
           required: false,
         },
+        extDeliveryId: {
+          type: String,
+          required: true,
+          default: "NA",
+        },
         qty: {
           type: Number,
           required: true,
@@ -296,6 +351,11 @@ const salesOrderSchema1C1I = new Schema(
           type: String,
           required: false,
         },
+        extInvoiceId: {
+          type: String,
+          required: true,
+          default: "NA",
+        },
         qty: {
           type: Number,
           required: true,
@@ -318,11 +378,21 @@ const salesOrderSchema1C1I = new Schema(
           type: String,
           required: true,
           enum: {
-            values: ["COD", "Net15", "Net30", "Advance"],
+            values: [
+              "COD",
+              "Net30D",
+              "Net7D",
+              "Net15D",
+              "Net45D",
+              "Net60D",
+              "Net90D",
+              "Advance",
+            ],
             message:
-              "{VALUE} is not a valid payment Terms. Use among these only'COD','Net15','Net30','Advance'.",
+              "{VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
           },
-          default: "Net30",
+          default: "Net30D",
+          // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
         },
 
         dueDate: {
@@ -471,6 +541,11 @@ const salesOrderSchema1C1I = new Schema(
         uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
       },
     ],
+    extras: {
+      type: Map,
+      of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
+      default: {},
+    },
   },
   {
     timestamps: true,
@@ -721,6 +796,30 @@ salesOrderSchema1C1I.pre("save", async function (next) {
         if (!paym.paymentId) {
           paym.paymentId = await generatePaymentId();
         }
+      }
+    }
+
+    if (doc.isModified("invoiceDate") || doc.isModified("paymentTerms")) {
+      // For example, set the dueDate from paymentTerms
+      const daysOffset = getDaysFromPaymentTerm(doc.paymentTerms);
+      const invoiceDt = doc.invoiceDate || new Date();
+      const newDueDate = new Date(
+        invoiceDt.getTime() + daysOffset * 24 * 60 * 60 * 1000
+      );
+
+      doc.dueDate = newDueDate;
+    }
+
+    if (doc.isModified("invoicingQty") && doc.invoicingQty) {
+      for (const invItem of doc.invoicingQty) {
+        // only recalc if invoiceDate or paymentTerms is new/modified
+        // but `isModified` is not directly available for subfields
+        // in a simple array doc. So you might just do it unconditionally:
+        const daysOffset = getDaysFromPaymentTerm(invItem.paymentTerms);
+        const invDate = invItem.invoiceDate || new Date();
+        invItem.dueDate = new Date(
+          invDate.getTime() + daysOffset * 24 * 60 * 60 * 1000
+        );
       }
     }
 

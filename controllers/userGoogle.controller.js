@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { UserGoogleModel } from "../models/userGoogle.model.js";
 import { UserGlobalModel } from "../models/userGlobal.model.js";
+import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
 
 dotenv.config();
 
@@ -32,7 +33,8 @@ export const googleAuthCallback = (req, res) => {
   res.redirect(redirectUrl);
 };
 
-export const googleAuthCallback1 = (req, res) => {
+// outdated version recorded on 15th Apr 2025 by kunal bangalore kengeri
+export const googleAuthCallback_V1 = (req, res) => {
   // Successful authentication – you can redirect to your dashboard or send a JSON response.
   console.log("Successful google login is done for user", req.user);
   res.redirect(`${process.env.FRONTEND_URL}/auth/google/callback`); // Change this route as needed.
@@ -49,8 +51,15 @@ export const googleAuthFailure = (req, res) => {
  */
 export const createGoogleUser = async (req, res) => {
   try {
-    const { googleId, displayName, firstName, lastName, email, image } =
-      req.body;
+    const {
+      googleId,
+      displayName,
+      firstName,
+      lastName,
+      email,
+      image,
+      globalPartyId,
+    } = req.body;
 
     if (!googleId || !email || !displayName) {
       return res
@@ -69,6 +78,13 @@ export const createGoogleUser = async (req, res) => {
     });
     const savedGoogleUser = await newGoogleUser.save();
 
+    // Additional checks, e.g. password, etc.
+    const partyId = await createGlobalPartyId(
+      "User",
+      globalPartyId,
+      displayName
+    );
+
     // 2) Also create a record in UserGlobal
     //    We can do a minimal record: we only know their email, so we set method & signInMethod as requested
     const newGlobalUser = new UserGlobalModel({
@@ -77,6 +93,7 @@ export const createGoogleUser = async (req, res) => {
       name: displayName, // or combine firstName + lastName
       method: "email", // from your requirement
       signInMethod: "gmail", // from your requirement
+      globalPartyId: partyId,
     });
     const savedGlobalUser = await newGlobalUser.save();
 

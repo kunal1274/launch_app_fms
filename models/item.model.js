@@ -68,6 +68,11 @@ const itemSchema = new Schema(
         uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
       },
     ],
+    extras: {
+      type: Map,
+      of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
+      default: {},
+    },
   },
   {
     timestamps: true,

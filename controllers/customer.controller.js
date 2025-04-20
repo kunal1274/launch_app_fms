@@ -97,7 +97,7 @@ export const createCustomer = async (req, res) => {
     if (!name || !contactNum) {
       return res.status(422).send({
         status: "failure",
-        message: "Customer name and contactNum are required.",
+        message: "⚠️ Customer name and contactNum are required.",
       });
     }
 
@@ -125,7 +125,7 @@ export const createCustomer = async (req, res) => {
         // But usually you'd want to fail if the globalPartyId doesn't exist
         return res.status(404).json({
           status: "failure",
-          message: `GlobalParty ${globalPartyId} not found. (Cannot create Customer referencing missing party.)`,
+          message: `⚠️ GlobalParty ${globalPartyId} not found. (Cannot create Customer referencing missing party.)`,
         });
       }
 
@@ -150,40 +150,40 @@ export const createCustomer = async (req, res) => {
     // 7) Return success
     return res.status(201).send({
       status: "Success",
-      message: `Customer created successfully with ID: ${newCustomer._id}.`,
+      message: `✅ Customer created successfully with ID: ${newCustomer._id}.`,
       data: newCustomer,
     });
   } catch (error) {
     // 8) Error Handling
     if (error instanceof mongoose.Error.ValidationError) {
-      logError("Customer Creation - Validation Error", error);
+      logError("❌ Customer Creation - Validation Error", error);
       return res.status(422).send({
         status: "failure",
-        message: "Validation error during customer creation.",
+        message: "❌ Validation error during customer creation.",
         error: error.message || error,
       });
     }
     // Duplicate key (contactNum or email or globalPartyId)
     if (error.code === 11000) {
-      logError("Customer Creation - Duplicate Error", error);
+      logError("❌ Customer Creation - Duplicate Error", error);
       return res.status(409).send({
         status: "failure",
         message:
-          "A customer with that contactNum or email or globalParty already exists.",
+          "❌ A customer with that contactNum or email or globalParty already exists.",
       });
     }
     // Network or unknown
     if (error.message && error.message.includes("network error")) {
-      logError("Customer Creation - Network Error", error);
+      logError("❌ Customer Creation - Network Error", error);
       return res.status(503).send({
         status: "failure",
-        message: "Service temporarily unavailable. Please try again later.",
+        message: "❌ Service temporarily unavailable. Please try again later.",
       });
     }
-    logError("Customer Creation - Unknown Error", error);
+    logError("❌ Customer Creation - Unknown Error", error);
     return res.status(500).send({
       status: "failure",
-      message: "An unexpected error occurred. Please try again.",
+      message: "❌ An unexpected error occurred. Please try again.",
       error: error.message || error,
     });
   }
@@ -194,14 +194,14 @@ export const getCustomers = async (req, res) => {
     const dbResponse = await CustomerModel.find({});
     return res.status(200).send({
       status: "success",
-      message: " All the customers has been fetched successfully",
+      message: "✅ All the customers has been fetched successfully",
       count: dbResponse.length,
       data: dbResponse,
     });
   } catch (error) {
     return res.status(400).send({
       status: "failure",
-      message: " There is an error while trying to fetch all the custoemrs",
+      message: " ❌ There is an error while trying to fetch all the customers",
       error: error,
     });
   }
@@ -214,19 +214,19 @@ export const getCustomer = async (req, res) => {
     if (!dbResponse) {
       return res.status(404).send({
         status: "failure",
-        message: `The customer ${customerId} has been deleted or does not exist `,
+        message: `❌ The customer ${customerId} has been deleted or does not exist `,
       });
     }
     return res.status(200).send({
       status: "success",
-      message: `The customer record ${customerId} has been fetched successfully.`,
+      message: `✅ The customer record ${customerId} has been fetched successfully.`,
       data: dbResponse,
     });
   } catch (error) {
-    ce(`Error fetching customer with ID ${customerId}:`, error);
+    ce(`❌ Error fetching customer with ID ${customerId}:`, error);
     return res.status(500).send({
       status: "failure",
-      message: `The error has been caught while fetching the customer record `,
+      message: `❌ The error has been caught while fetching the customer record `,
       error: error.message || error,
     });
   }
@@ -240,7 +240,7 @@ export const updateCustomer = async (request, response) => {
     if (!customerExists) {
       return res.status(404).send({
         status: "failure",
-        message: `The customer ${customerId} has been deleted or does not exist `,
+        message: `⚠️ The customer ${customerId} has been deleted or does not exist `,
       });
     }
 
@@ -250,13 +250,13 @@ export const updateCustomer = async (request, response) => {
     );
     return response.status(200).send({
       status: "success",
-      message: `The customer ${customerId} has been updated successfully.`,
+      message: `✅ The customer ${customerId} has been updated successfully.`,
       data: dbResponse,
     });
   } catch (error) {
     return response.status(400).send({
       status: "failure",
-      message: `There is an error while updating the customer record ${customerId}`,
+      message: `❌ There is an error while updating the customer record ${customerId}`,
       error: error,
     });
   }
@@ -269,19 +269,19 @@ export const deleteCustomer = async (req, res) => {
     if (!dbResponse) {
       return res.status(404).send({
         status: "failure",
-        message: `No customer found with id ${customerId}`,
+        message: `⚠️ No customer found with id ${customerId}`,
       });
     }
 
     return res.status(200).send({
       status: "success",
-      message: `The customer ${customerId} has been deleted successfully`,
+      message: `✅ The customer ${customerId} has been deleted successfully`,
       data: dbResponse,
     });
   } catch (error) {
     return res.status(400).send({
       status: "failure",
-      message: `There has been error while deleting the customer id ${customerId}`,
+      message: `❌ There has been error while deleting the customer id ${customerId}`,
       error: error,
     });
   }
@@ -292,7 +292,7 @@ export const deleteAllCustomers = async (req, res) => {
   try {
     // Delete all customers
     const deleteResponse = await CustomerModel.deleteMany({});
-    console.log(`Deleted ${deleteResponse.deletedCount} customers.`);
+    console.log(`ℹ️ Deleted ${deleteResponse.deletedCount} customers.`);
 
     // Reset the counter for customer code
 
@@ -305,7 +305,7 @@ export const deleteAllCustomers = async (req, res) => {
     return res.status(200).send({
       status: "success",
       message:
-        "All customers have been deleted, and the sequence has been reset to 1.",
+        "✅ All customers have been deleted, and the sequence has been reset to 1.",
       data: {
         deletedCount: deleteResponse.deletedCount,
         counter: resetCounter,
@@ -313,12 +313,13 @@ export const deleteAllCustomers = async (req, res) => {
     });
   } catch (error) {
     console.error(
-      "Error while deleting all customers and resetting sequence:",
+      "❌ Error while deleting all customers and resetting sequence:",
       error
     );
     return res.status(500).send({
       status: "failure",
-      message: "Error while deleting all customers or resetting the sequence.",
+      message:
+        "❌ Error while deleting all customers or resetting the sequence.",
       error: error.message,
     });
   }
@@ -335,7 +336,7 @@ export const attachGroupToCustomer = async (req, res) => {
     if (!customerId || !groupId) {
       return res.status(400).json({
         status: "failure",
-        message: "Both 'customerId' and 'groupId' are required.",
+        message: "⚠️ Both 'customerId' and 'groupId' are required.",
       });
     }
 
@@ -344,7 +345,7 @@ export const attachGroupToCustomer = async (req, res) => {
     if (!groupDoc) {
       return res.status(404).json({
         status: "failure",
-        message: `Group with ID ${groupId} not found.`,
+        message: `⚠️ Group with ID ${groupId} not found.`,
       });
     }
 
@@ -353,7 +354,7 @@ export const attachGroupToCustomer = async (req, res) => {
     if (!customerDoc) {
       return res.status(404).json({
         status: "failure",
-        message: `Customer with ID ${customerId} not found.`,
+        message: `⚠️ Customer with ID ${customerId} not found.`,
       });
     }
 
@@ -361,7 +362,7 @@ export const attachGroupToCustomer = async (req, res) => {
     if (!groupDoc.releaseModules.includes("Customer")) {
       return res.status(400).json({
         status: "failure",
-        message: `Group ${groupDoc.code} is NOT released for 'Customer' module.`,
+        message: `⚠️ Group ${groupDoc.code} is NOT released for 'Customer' module.`,
       });
     }
 
@@ -376,7 +377,7 @@ export const attachGroupToCustomer = async (req, res) => {
       // handle the case where it's missing:
       return res.status(400).json({
         status: "failure",
-        message: `Customer ${customerId} does not have a company assigned.`,
+        message: `⚠️ Customer ${customerId} does not have a company assigned.`,
       });
     }
 
@@ -392,7 +393,7 @@ export const attachGroupToCustomer = async (req, res) => {
     if (!isCompanyAllowed) {
       return res.status(400).json({
         status: "failure",
-        message: `Group ${groupDoc.code} is not released for the company of this Customer.`,
+        message: `⚠️ Group ${groupDoc.code} is not released for the company of this Customer.`,
       });
     }
 
@@ -407,7 +408,7 @@ export const attachGroupToCustomer = async (req, res) => {
     if (alreadyAttached) {
       return res.status(200).json({
         status: "success",
-        message: `Group ${groupDoc.code} is already attached to Customer ${customerId}.`,
+        message: `ℹ️ Group ${groupDoc.code} is already attached to Customer ${customerId}.`,
         data: customerDoc,
       });
     }
@@ -417,15 +418,15 @@ export const attachGroupToCustomer = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      message: `Group ${groupDoc.code} attached to Customer ${customerDoc.code} successfully.`,
+      message: `✅ Group ${groupDoc.code} attached to Customer ${customerDoc.code} successfully.`,
       data: customerDoc,
     });
   } catch (error) {
-    console.error("Error in attachGroupToCustomer:", error);
+    console.error("❌ Error in attachGroupToCustomer:", error);
 
     return res.status(500).json({
       status: "failure",
-      message: "An unexpected error occurred while attaching the group.",
+      message: "❌ An unexpected error occurred while attaching the group.",
       error: error.message || error,
     });
   }

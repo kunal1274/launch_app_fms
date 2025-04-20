@@ -60,7 +60,7 @@ const purchaseOrderSchema1C1I = new Schema(
       enum: {
         values: ["Purchase", "Return"],
         message:
-          "{VALUE} is not a valid order type. Use case-sensitive value among these only 'Purchase','Return'.",
+          "⚠️ {VALUE} is not a valid order type. Use case-sensitive value among these only 'Purchase','Return'.",
       },
       default: "Purchase",
     },
@@ -129,7 +129,7 @@ const purchaseOrderSchema1C1I = new Schema(
       enum: {
         values: ["INR", "USD", "EUR", "GBP"],
         message:
-          "{VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
       },
       default: "INR",
     },
@@ -146,8 +146,8 @@ const purchaseOrderSchema1C1I = new Schema(
       type: Number,
       required: true,
       default: 0.0,
-      min: [0, "Discount cannot be negative"],
-      max: [100, "Discount cannot exceed 100%"],
+      min: [0, "⚠️ Discount cannot be negative"],
+      max: [100, "⚠️ Discount cannot exceed 100%"],
       set: function (v) {
         return Math.round(v * 100) / 100;
       },
@@ -156,8 +156,8 @@ const purchaseOrderSchema1C1I = new Schema(
       type: Number,
       required: true,
       default: 0.0,
-      min: [0, "Tax cannot be negative"],
-      max: [100, "Tax cannot exceed 100%"],
+      min: [0, "⚠️ Tax cannot be negative"],
+      max: [100, "⚠️ Tax cannot exceed 100%"],
       set: function (v) {
         return Math.round(v * 100) / 100;
       },
@@ -166,8 +166,8 @@ const purchaseOrderSchema1C1I = new Schema(
       type: Number,
       required: true,
       default: 0.0,
-      min: [0, "Withholding Tax cannot be negative"],
-      max: [100, "Withholding Tax cannot exceed 100%"],
+      min: [0, "⚠️ Withholding Tax cannot be negative"],
+      max: [100, "⚠️ Withholding Tax cannot exceed 100%"],
       set: function (v) {
         return Math.round(v * 100) / 100;
       },
@@ -232,7 +232,7 @@ const purchaseOrderSchema1C1I = new Schema(
           "Advance",
         ],
         message:
-          "{VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+          "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
       },
       default: "Net30D",
       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
@@ -270,7 +270,7 @@ const purchaseOrderSchema1C1I = new Schema(
           enum: {
             values: ["Air", "Road", "Sea"],
             message:
-              "{VALUE} is not a supported shipment mode Air or Road or Sea.",
+              "⚠️ {VALUE} is not a supported shipment mode Air or Road or Sea.",
           },
           default: "Road",
         },
@@ -285,7 +285,7 @@ const purchaseOrderSchema1C1I = new Schema(
           enum: {
             values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
             message:
-              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
           },
           default: "Draft",
         },
@@ -323,7 +323,7 @@ const purchaseOrderSchema1C1I = new Schema(
           enum: {
             values: ["Air", "Road", "Sea"],
             message:
-              "{VALUE} is not a supported delivery mode Air or Road or Sea.",
+              "⚠️ {VALUE} is not a supported delivery mode Air or Road or Sea.",
           },
           default: "Road",
         },
@@ -338,7 +338,7 @@ const purchaseOrderSchema1C1I = new Schema(
           enum: {
             values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
             message:
-              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
           },
           default: "Draft",
         },
@@ -389,7 +389,7 @@ const purchaseOrderSchema1C1I = new Schema(
               "Advance",
             ],
             message:
-              "{VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+              "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
           },
           default: "Net30D",
           // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
@@ -411,7 +411,7 @@ const purchaseOrderSchema1C1I = new Schema(
           enum: {
             values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
             message:
-              "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
           },
           default: "Draft",
         },
@@ -448,7 +448,7 @@ const purchaseOrderSchema1C1I = new Schema(
               "Crypto",
               "Barter",
             ],
-            message: "{VALUE} is not a supported payment mode.",
+            message: "⚠️ {VALUE} is not a supported payment mode.",
           },
           default: "Cash",
         },
@@ -483,7 +483,7 @@ const purchaseOrderSchema1C1I = new Schema(
           "AnyMode",
         ],
         message:
-          "{VALUE} is not a valid status . Use among these only'Draft','Cancelled','Confirmed','Shipped'.'Delivered','Invoiced','AdminMode','AnyMode'.",
+          "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Confirmed','Shipped'.'Delivered','Invoiced','AdminMode','AnyMode'.",
       },
       default: "Draft",
     },
@@ -499,7 +499,7 @@ const purchaseOrderSchema1C1I = new Schema(
           "PAYMENT_FULL_CARRY_FORWARD_ADVANCE", // payment current plus existing advance exceeds the net AR
         ],
         message:
-          "{VALUE} is not a valid status .Use  Case-sensitive among these only'PAYMENT_PENDING','PAYMENT_PARTIAL','PAYMENT_FULL','PAYMENT_FAILED'.",
+          "⚠️ {VALUE} is not a valid status .Use  Case-sensitive among these only'PAYMENT_PENDING','PAYMENT_PARTIAL','PAYMENT_FULL','PAYMENT_FAILED'.",
       },
       default: "PAYMENT_PENDING",
     },
@@ -622,18 +622,18 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
         .select("address currency");
 
       if (!vendor) {
-        throw new Error(`Vendor with ID ${doc.vendor} not found.`);
+        throw new Error(`❌ Vendor with ID ${doc.vendor} not found.`);
       }
 
       if (!vendor.address) {
         throw new Error(
-          `Vendor with ID ${doc.vendor} does not have an address.`
+          `❌ Vendor with ID ${doc.vendor} does not have an address.`
         );
       }
 
       if (!vendor.currency) {
         throw new Error(
-          `Vendor with ID ${doc.vendor} does not have a currency set.`
+          `❌ Vendor with ID ${doc.vendor} does not have a currency set.`
         );
       }
 
@@ -705,10 +705,10 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
       { new: true, upsert: true }
     );
 
-    console.log("Counter increment result", dbResponse);
+    console.log("ℹ️ Counter increment result", dbResponse);
 
     if (!dbResponse || dbResponse.seq === undefined) {
-      throw new Error("Failed to generate purchase order number");
+      throw new Error("❌ Failed to generate purchase order number");
     }
 
     const seqNumber = dbResponse.seq.toString().padStart(6, "0");
@@ -766,7 +766,7 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
 
     next();
   } catch (error) {
-    console.log("Error caught during PO presave", error.stack);
+    console.log("❌ Error caught during PO presave", error.stack);
     next(error);
   }
 });
@@ -802,7 +802,7 @@ purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
         .model("Vendors")
         .findById(update.vendor);
       if (!vendorExists) {
-        throw new Error(`Vendor with ID ${update.vendor} does not exist.`);
+        throw new Error(`❌ Vendor with ID ${update.vendor} does not exist.`);
       }
     }
 
@@ -810,7 +810,7 @@ purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
     if (update.item) {
       const itemExists = await mongoose.model("Items").findById(update.item);
       if (!itemExists) {
-        throw new Error(`Item with ID ${update.item} does not exist.`);
+        throw new Error(`❌ Item with ID ${update.item} does not exist.`);
       }
     }
 

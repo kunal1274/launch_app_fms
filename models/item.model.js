@@ -10,12 +10,12 @@ const itemSchema = new Schema(
     },
     itemNum: {
       type: String,
-      required: [true, "Item Number is mandatory and it should be unique"],
+      required: [true, "⚠️ Item Number is mandatory and it should be unique"],
       unique: true,
       validate: {
         validator: (v) => /^[A-Za-z0-9_-]+$/.test(v),
         message:
-          "Item Number can only contain alphanumeric characters, dashes, or underscores.",
+          "⚠️ Item Number can only contain alphanumeric characters, dashes, or underscores.",
       },
     },
     name: {
@@ -31,7 +31,7 @@ const itemSchema = new Schema(
       required: true,
       enum: {
         values: ["Goods", "Services"],
-        message: "{VALUE} is not a valid type. Use 'Goods' or 'Services'.",
+        message: "⚠️ {VALUE} is not a valid type. Use 'Goods' or 'Services'.",
       },
       default: "Goods",
     },
@@ -41,7 +41,7 @@ const itemSchema = new Schema(
       enum: {
         values: ["ea", "qty", "mt", "kgs", "lbs", "hr", "min"],
         message:
-          "{VALUE} is not a valid unit . Use among these only'ea','qty','mt','kgs'.'lbs',hr','min'.",
+          "⚠️ {VALUE} is not a valid unit . Use among these only'ea','qty','mt','kgs'.'lbs',hr','min'.",
       },
       default: "mt",
     },
@@ -109,7 +109,7 @@ itemSchema.pre("save", async function (next) {
 
     if (existingItem) {
       throw new Error(
-        `An item with this itemNum already exists: ${this.itemNum}`
+        `❌ An item with this itemNum already exists: ${this.itemNum}`
       );
     }
 
@@ -123,7 +123,7 @@ itemSchema.pre("save", async function (next) {
     console.log("Counter increment result:", dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("Failed to generate item code");
+      throw new Error("❌ Failed to generate item code");
     }
 
     // Generate item code
@@ -132,11 +132,11 @@ itemSchema.pre("save", async function (next) {
 
     next();
   } catch (error) {
-    console.error("Error caught during item save:", error.stack);
+    console.error("❌ Error caught during item save:", error.stack);
 
     next(error);
   } finally {
-    console.log("Finally item counter closed");
+    console.log("ℹ️ Finally item counter closed");
   }
 });
 

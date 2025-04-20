@@ -28,7 +28,7 @@ const vendorSchema = new Schema(
           "Wholesaler",
         ],
         message:
-          "{VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
+          "⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
       },
       default: "Trading",
     },
@@ -38,24 +38,24 @@ const vendorSchema = new Schema(
     },
     contactNum: {
       type: String,
-      required: [true, "Contact number is required."],
+      required: [true, "⚠️ Contact number is required."],
       unique: true,
       minlength: [
         10,
-        "The phone number should be exactly 10 digits without country code.",
+        "⚠️ The phone number should be exactly 10 digits without country code.",
       ],
-      maxlength: [10, "The phone number should be exactly 10 digits."],
+      maxlength: [10, "⚠️ The phone number should be exactly 10 digits."],
       validate: {
         validator: function (v) {
           return /^\d{10}$/.test(v); // Only allows exactly 10 digits
         },
         message:
-          "Contact number must be a 10-digit number without any letters or special characters.",
+          "⚠️ Contact number must be a 10-digit number without any letters or special characters.",
       },
     },
     email: {
       type: String,
-      required: [false, "Email is not mandatory but recommended."],
+      required: [false, "⚠️ Email is not mandatory but recommended."],
       unique: true,
       validate: {
         validator: function (v) {
@@ -63,7 +63,8 @@ const vendorSchema = new Schema(
           return !v || emailRegex.test(v);
           // "!v ||" allows empty if 'required: false'
         },
-        message: "Email must be a valid email format (e.g. user@example.com).",
+        message:
+          "⚠️ Email must be a valid email format (e.g. user@example.com).",
       },
       default: "",
     },
@@ -73,7 +74,7 @@ const vendorSchema = new Schema(
       enum: {
         values: ["INR", "USD", "EUR", "GBP"],
         message:
-          "{VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
       },
       default: "INR",
     },
@@ -92,7 +93,7 @@ const vendorSchema = new Schema(
           "Advance",
         ],
         message:
-          "{VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+          "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
       },
       default: "Net30D",
       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
@@ -106,18 +107,21 @@ const vendorSchema = new Schema(
     registrationNum: {
       type: String,
       required: false, // made it false to align if not required or if some business hs no registration num
-      minLength: [15, `The registration number should be with min. 15 chars`],
+      minLength: [
+        15,
+        `⚠️ The registration number should be with min. 15 chars`,
+      ],
       maxLength: [
         15,
-        `The registration number cannot be greater than 15 chars.`,
+        `⚠️ The registration number cannot be greater than 15 chars.`,
       ],
       default: "",
     },
     panNum: {
       type: String,
       required: false, // rt now kept it false
-      minLength: [10, `The pan number should be with min. 10 chars`],
-      maxLength: [10, `The pan number cannot be greater than 10 chars.`],
+      minLength: [10, `⚠️ The pan number should be with min. 10 chars`],
+      maxLength: [10, `⚠️ The pan number cannot be greater than 10 chars.`],
       default: "",
     },
     address: {
@@ -154,7 +158,7 @@ const vendorSchema = new Schema(
           enum: {
             values: ["Cash", "Bank", "UPI", "Crypto", "Barter"],
             message:
-              "{VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
+              "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
           },
           default: "Bank",
         },
@@ -162,13 +166,13 @@ const vendorSchema = new Schema(
           type: String,
           required: [
             true,
-            "Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
+            "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
           ],
           unique: true,
           validate: {
             validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
             message:
-              "Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
+              "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
           },
         },
         name: {
@@ -223,7 +227,7 @@ vendorSchema.pre("save", async function (next) {
       contactNum: this.contactNum,
     }); //.session(session);
     if (existingVendor) {
-      throw new Error(`Duplicate contact number: ${this.contactNum}`);
+      throw new Error(`❌ Duplicate contact number: ${this.contactNum}`);
     }
 
     // Increment counter within the transaction
@@ -234,10 +238,10 @@ vendorSchema.pre("save", async function (next) {
       //{ new: true, upsert: true, session }
     );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log("ℹ️ Counter increment result:", dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("Failed to generate vendor code");
+      throw new Error("❌ Failed to generate vendor code");
     }
 
     // Generate vendor code
@@ -246,7 +250,7 @@ vendorSchema.pre("save", async function (next) {
 
     next();
   } catch (error) {
-    console.error("Error caught during transaction:", error.stack);
+    console.error("❌ Error caught during transaction:", error.stack);
 
     // Decrement the counter in case of failure
     try {
@@ -259,12 +263,12 @@ vendorSchema.pre("save", async function (next) {
         );
       }
     } catch (decrementError) {
-      console.error("Error during counter decrement:", decrementError.stack);
+      console.error("❌ Error during counter decrement:", decrementError.stack);
     }
 
     next(error);
   } finally {
-    console.log("Finally vendor counter closed");
+    console.log("ℹ️ Finally vendor counter closed");
   }
 });
 

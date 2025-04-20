@@ -96,7 +96,7 @@ export const createCompany = async (req, res) => {
       logStackError("❌ Company Creation - Validation Error", error);
       return res.status(422).send({
         status: "failure",
-        message: "Validation error during customer creation.",
+        message: "❌ Validation error during customer creation.",
         error: error.message,
       });
     }
@@ -149,26 +149,26 @@ export const getAllCompanies = async (req, res) => {
       EX: 60 * 5, // expire in 5 minutes
     });
 
-    logger.info("👍✅ Fetched All Companies", {
+    logger.info("✅ Fetched All Companies", {
       context: "getAllCompanies",
       count: companies.length,
     });
-    loggerJsonFormat.info(" 👍✅ Fetched All Companies", {
+    loggerJsonFormat.info(" ✅ Fetched All Companies", {
       context: "getAllCompanies",
       count: companies.length,
     });
     //winstonLogger.info(`Retrieved ${companies.length} companies.`);
     return res.status(200).json({
       status: "success",
-      message: "👍✅ Companies retrieved successfully.",
+      message: "✅ Companies retrieved successfully.",
       count: companies.length,
       data: companies,
     });
   } catch (error) {
-    logStackError("Get All Companies - 😓❌ Fetch Error ", error);
+    logStackError("Get All Companies - ❌ Fetch Error ", error);
     return res.status(500).json({
       status: "failure",
-      message: "😓❌ Internal Server Error while fetching the Companies",
+      message: "❌ Internal Server Error while fetching the Companies",
       error: error.message,
     });
   }
@@ -184,20 +184,20 @@ export const getCompanyById = async (req, res) => {
     if (!company) {
       return res.status(404).json({
         status: "failure",
-        message: "Company not found.",
+        message: "⚠️ Company not found.",
       });
     }
-    winstonLogger.info(`Retrieved company: ${company._id}`);
+    winstonLogger.info(`✅ Retrieved company: ${company._id}`);
     return res.status(200).json({
       status: "success",
-      message: "Company retrieved successfully.",
+      message: "✅ Company retrieved successfully.",
       data: company,
     });
   } catch (error) {
-    logError("Get Company By ID", error);
+    logError("❌ Get Company By ID", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "❌ Internal Server Error",
       error: error.message,
     });
   }
@@ -223,30 +223,30 @@ export const updateCompanyById = async (req, res) => {
     if (!company) {
       return res.status(404).json({
         status: "failure",
-        message: "Company not found.",
+        message: "⚠️ Company not found.",
       });
     }
-    winstonLogger.info(`Updated company: ${company._id}`);
+    winstonLogger.info(`ℹ️ Updated company: ${company._id}`);
 
     await redisClient.del("/fms/api/v0/companies");
 
     return res.status(200).json({
       status: "success",
-      message: "Company updated successfully.",
+      message: "✅ Company updated successfully.",
       data: company,
     });
   } catch (error) {
-    logError("Update Company By ID", error);
+    logError("❌ Update Company By ID", error);
     if (error.name === "ValidationError") {
       return res.status(422).json({
         status: "failure",
-        message: "Validation error during company update.",
+        message: "❌ Validation error during company update.",
         error: error.message,
       });
     }
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "❌ Internal Server Error",
       error: error.message,
     });
   }
@@ -265,19 +265,19 @@ export const deleteCompanyById = async (req, res) => {
     if (!company) {
       return res.status(404).json({
         status: "failure",
-        message: "Company not found.",
+        message: "⚠️ Company not found.",
       });
     }
-    winstonLogger.info(`Deleted company: ${company._id}`);
+    winstonLogger.info(`ℹ️ Deleted company: ${company._id}`);
     return res.status(200).json({
       status: "success",
-      message: "Company deleted successfully.",
+      message: "✅ Company deleted successfully.",
     });
   } catch (error) {
-    logError("Delete Company By ID", error);
+    logError("❌ Delete Company By ID", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "❌ Internal Server Error",
       error: error.message,
     });
   }
@@ -302,20 +302,20 @@ export const archiveCompanyById = async (req, res) => {
     if (!company) {
       return res.status(404).json({
         status: "failure",
-        message: "Company not found.",
+        message: "⚠️ Company not found.",
       });
     }
-    winstonLogger.info(`Archived company: ${company._id}`);
+    winstonLogger.info(`ℹ️ Archived company: ${company._id}`);
     return res.status(200).json({
       status: "success",
-      message: "Company archived successfully.",
+      message: "✅ Company archived successfully.",
       data: company,
     });
   } catch (error) {
-    logError("Archive Company", error);
+    logError("❌ Archive Company", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "❌ Internal Server Error",
       error: error.message,
     });
   }
@@ -340,20 +340,20 @@ export const unarchiveCompanyById = async (req, res) => {
     if (!company) {
       return res.status(404).json({
         status: "failure",
-        message: "Company not found.",
+        message: "⚠️ Company not found.",
       });
     }
-    winstonLogger.info(`Unarchived company: ${company._id}`);
+    winstonLogger.info(`ℹ️ Unarchived company: ${company._id}`);
     return res.status(200).json({
       status: "success",
-      message: "Company unarchived successfully.",
+      message: "✅ Company unarchived successfully.",
       data: company,
     });
   } catch (error) {
-    logError("Unarchive Company", error);
+    logError("❌ Unarchive Company", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "❌ Internal Server Error",
       error: error.message,
     });
   }
@@ -365,17 +365,17 @@ export const unarchiveCompanyById = async (req, res) => {
 export const getArchivedCompanies = async (req, res) => {
   try {
     const companies = await CompanyModel.find({ archived: true });
-    winstonLogger.info(`Retrieved ${companies.length} archived companies.`);
+    winstonLogger.info(`ℹ️ Retrieved ${companies.length} archived companies.`);
     return res.status(200).json({
       status: "success",
-      message: "Archived companies retrieved successfully.",
+      message: "✅ Archived companies retrieved successfully.",
       data: companies,
     });
   } catch (error) {
-    logError("Get Archived Companies", error);
+    logError("❌ Get Archived Companies", error);
     return res.status(500).json({
       status: "failure",
-      message: "Internal Server Error",
+      message: "❌ Internal Server Error",
       error: error.message,
     });
   }

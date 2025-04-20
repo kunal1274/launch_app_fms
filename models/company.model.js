@@ -82,7 +82,7 @@ const CompanySchema = new Schema(
       validate: {
         validator: (v) => /^[A-Za-z0-9_-]+$/.test(v),
         message:
-          "Company Code can only contain alphanumeric characters, dashes, or underscores.",
+          "⚠️ Company Code can only contain alphanumeric characters, dashes, or underscores.",
       },
       // You can enforce uppercase if needed by using a pre-save hook.
     },
@@ -106,7 +106,7 @@ const CompanySchema = new Schema(
           "Others",
         ],
         message:
-          "{VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
+          "⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
       },
       default: "Trading",
     },

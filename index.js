@@ -33,6 +33,8 @@ import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
 import userGlobalRouter from "./routes/userGlobal.routes.js";
 import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
 import userRoleRouter from "./role_based_access_control_service/routes/userRole.routes.js";
+import salesOrderRoutes from "./sales_mgt_service/routes/salesOrder.routes.js";
+import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -123,6 +125,12 @@ AumMrigahApp.use("/fms/api/v0/companies", companyRouter);
 AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
 AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
 
+// Sales Management Service
+AumMrigahApp.use("/fms/api/v0/sales-orders", salesOrderRoutes);
+
+// Chatgpt ai service
+AumMrigahApp.use("/fms/api/v0/ai", aiRoutes);
+
 //Authentication
 AumMrigahApp.use("/auth", googleAuthRouter);
 AumMrigahApp.use("/api/auth", googleAlternativeApiAuthRouter);
@@ -170,3 +178,13 @@ const startServer = async () => {
 };
 
 startServer();
+
+process.on("uncaughtException", (err) => {
+  console.error("🛑 Uncaught Exception:", err.message);
+  console.error(err.stack);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("🛑 Unhandled Rejection at:", promise);
+  console.error("Reason:", reason);
+});

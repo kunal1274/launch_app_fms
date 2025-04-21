@@ -1,8 +1,8 @@
 import mongoose, { Schema, model } from "mongoose";
-import { SalesOrderCounterModel } from "./counter.model.js";
+import { SalesOrderCounterModel } from "./bbCounter.model.js";
 
 // Define allowed status transitions
-export const STATUS_TRANSITIONS1 = {
+export const STATUS_TRANSITIONS = {
   Draft: ["Approved", "Rejected", "Cancelled", "AdminMode", "AnyMode"],
   Rejected: ["Draft", "Cancelled", "AdminMode", "AnyMode"],
   Approved: ["Draft", "Confirmed", "Cancelled", "AdminMode", "AnyMode"],
@@ -66,15 +66,6 @@ export const STATUS_TRANSITIONS1 = {
   ],
 };
 
-export const STATUS_TRANSITIONS = {
-  Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
-  Confirmed: ["Draft", "Cancelled", "Invoiced", "AdminMode", "AnyMode"],
-  Invoiced: ["AdminMode", "AnyMode"],
-  Cancelled: ["AdminMode", "AnyMode"],
-  AdminMode: ["Draft", "AnyMode"],
-  AnyMode: ["Draft", "Confirmed", "Invoiced", "Cancelled", "AdminMode"],
-};
-
 // Suppose you have a function getDaysFromPaymentTerm that returns the day offset:
 export function getDaysFromPaymentTerm(paymentTerm) {
   switch (paymentTerm) {
@@ -119,7 +110,6 @@ const salesOrderSchema1C1I = new Schema(
       default: "Sales",
     },
     invoiceNum: {
-      // this is used in case of single so single invoicing with single item
       type: String,
       required: false,
       //unique: true,
@@ -303,238 +293,235 @@ const salesOrderSchema1C1I = new Schema(
       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
     },
 
-    // // Change shippingQty from an array of numbers to an array of objects for richer metadata
-    // shippingQty: [
-    //   {
-    //     // 1. Mongoose will auto‑generate this for you
-    //     _id: { type: Schema.Types.ObjectId, auto: true },
-    //     shipmentId: {
-    //       type: String,
-    //       required: false,
-    //     },
-    //     extShipmentId: {
-    //       type: String,
-    //       required: false,
-    //       default: "NA",
-    //     },
-    //     qty: {
-    //       type: Number,
-    //       required: true,
-    //       default: 0.0,
-    //       set: (v) => Math.round(v * 100) / 100,
-    //     },
-    //     date: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     shipmentRef: {
-    //       type: String,
-    //       default: false,
-    //     },
-    //     // NEW: link to one or more deliveries by their sub‑doc _id
-    //     relatedSalesOrders: [
-    //       {
-    //         salesOrderRef: {
-    //           type: Schema.Types.ObjectId,
-    //           required: true,
-    //         },
-    //         qty: {
-    //           type: Number,
-    //           required: true,
-    //           set: (v) => Math.round(v * 100) / 100,
-    //         },
-    //       },
-    //     ],
-    //     shipmentMode: {
-    //       type: String,
-    //       required: false,
-    //       enum: {
-    //         values: ["Air", "Road", "Sea"],
-    //         message:
-    //           "⚠️ {VALUE} is not a supported shipment mode Air or Road or Sea.",
-    //       },
-    //       default: "Road",
-    //     },
-    //     closedForShipmentLater: {
-    //       type: Boolean,
-    //       required: true,
-    //       default: false,
-    //     },
-    //     status: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
-    //       },
-    //       default: "Draft",
-    //     },
-    //   },
-    // ],
-    // // Change shippingQty from an array of numbers to an array of objects for richer metadata
-    // deliveringQty: [
-    //   {
-    //     // 1. Mongoose will auto‑generate this for you
-    //     _id: { type: Schema.Types.ObjectId, auto: true },
-    //     deliveryId: {
-    //       type: String,
-    //       required: false,
-    //     },
-    //     extDeliveryId: {
-    //       type: String,
-    //       required: false,
-    //       default: "NA",
-    //     },
-
-    //     qty: {
-    //       type: Number,
-    //       required: true,
-    //       default: 0.0,
-    //       set: (v) => Math.round(v * 100) / 100,
-    //     },
-    //     date: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     deliveryRef: {
-    //       type: String,
-    //       default: false,
-    //     },
-    //     // NEW: link to one or more shipments by their sub‑doc _id
-    //     relatedShipments: [
-    //       {
-    //         // store exactly the ObjectId of shippingQty._id
-    //         shipmentRef: {
-    //           type: Schema.Types.ObjectId,
-    //           required: true,
-    //           // you can manually check in code: so.shippingQty.id(shipmentRef)
-    //         },
-    //         qty: {
-    //           type: Number,
-    //           required: true,
-    //           set: (v) => Math.round(v * 100) / 100,
-    //         },
-    //       },
-    //     ],
-
-    //     deliveryMode: {
-    //       type: String,
-    //       required: false,
-    //       enum: {
-    //         values: ["Air", "Road", "Sea"],
-    //         message:
-    //           "⚠️ {VALUE} is not a supported delivery mode Air or Road or Sea.",
-    //       },
-    //       default: "Road",
-    //     },
-    //     closedForDeliveryLater: {
-    //       type: Boolean,
-    //       required: true,
-    //       default: false,
-    //     },
-    //     status: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
-    //       },
-    //       default: "Draft",
-    //     },
-    //   },
-    // ],
     // Change shippingQty from an array of numbers to an array of objects for richer metadata
-    // invoicingQty: [
-    //   // will be used only in case if we have multiple partial invoices or multiple so merging to single invoice
-    //   {
-    //     invoiceNum: {
-    //       type: String,
-    //       required: false,
-    //     },
-    //     extInvoiceNum: {
-    //       /// if any external invoice Num as reference to be used.
-    //       type: String,
-    //       required: false,
-    //       default: "NA",
-    //     },
-    //     qty: {
-    //       type: Number,
-    //       required: true,
-    //       default: 0.0,
-    //       set: (v) => Math.round(v * 100) / 100,
-    //     },
-    //     invoiceDate: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     externalDocDate: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     invoiceRef: {
-    //       type: String,
-    //       default: false,
-    //     },
-    //     // NEW: link to one or more deliveries by their sub‑doc _id
-    //     relatedSO: [
-    //       // single SO invoicing and consolidate SO invoicng
-    //       {
-    //         soRef: {
-    //           type: Schema.Types.ObjectId,
-    //           required: true,
-    //         },
-    //         qty: {
-    //           type: Number,
-    //           required: true,
-    //           set: (v) => Math.round(v * 100) / 100,
-    //         },
-    //       },
-    //     ],
-    //     paymentTerms: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: [
-    //           "COD",
-    //           "Net30D",
-    //           "Net7D",
-    //           "Net15D",
-    //           "Net45D",
-    //           "Net60D",
-    //           "Net90D",
-    //           "Advance",
-    //         ],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
-    //       },
-    //       default: "Net30D",
-    //       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
-    //     },
+    shippingQty: [
+      {
+        // 1. Mongoose will auto‑generate this for you
+        _id: { type: Schema.Types.ObjectId, auto: true },
+        shipmentId: {
+          type: String,
+          required: false,
+        },
+        extShipmentId: {
+          type: String,
+          required: false,
+          default: "NA",
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        shipmentRef: {
+          type: String,
+          default: false,
+        },
+        // NEW: link to one or more deliveries by their sub‑doc _id
+        relatedSalesOrders: [
+          {
+            salesOrderRef: {
+              type: Schema.Types.ObjectId,
+              required: true,
+            },
+            qty: {
+              type: Number,
+              required: true,
+              set: (v) => Math.round(v * 100) / 100,
+            },
+          },
+        ],
+        shipmentMode: {
+          type: String,
+          required: false,
+          enum: {
+            values: ["Air", "Road", "Sea"],
+            message:
+              "⚠️ {VALUE} is not a supported shipment mode Air or Road or Sea.",
+          },
+          default: "Road",
+        },
+        closedForShipmentLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    deliveringQty: [
+      {
+        // 1. Mongoose will auto‑generate this for you
+        _id: { type: Schema.Types.ObjectId, auto: true },
+        deliveryId: {
+          type: String,
+          required: false,
+        },
+        extDeliveryId: {
+          type: String,
+          required: false,
+          default: "NA",
+        },
 
-    //     dueDate: {
-    //       type: Date,
-    //       default: Date.now,
-    //       // This will be computed as invoiceDate + 30 days if not provided.
-    //     },
-    //     closedForInvoicingLater: {
-    //       type: Boolean,
-    //       required: true,
-    //       default: false,
-    //     },
-    //     status: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
-    //       },
-    //       default: "Draft",
-    //     },
-    //   },
-    // ],
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        deliveryRef: {
+          type: String,
+          default: false,
+        },
+        // NEW: link to one or more shipments by their sub‑doc _id
+        relatedShipments: [
+          {
+            // store exactly the ObjectId of shippingQty._id
+            shipmentRef: {
+              type: Schema.Types.ObjectId,
+              required: true,
+              // you can manually check in code: so.shippingQty.id(shipmentRef)
+            },
+            qty: {
+              type: Number,
+              required: true,
+              set: (v) => Math.round(v * 100) / 100,
+            },
+          },
+        ],
+
+        deliveryMode: {
+          type: String,
+          required: false,
+          enum: {
+            values: ["Air", "Road", "Sea"],
+            message:
+              "⚠️ {VALUE} is not a supported delivery mode Air or Road or Sea.",
+          },
+          default: "Road",
+        },
+        closedForDeliveryLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    invoicingQty: [
+      {
+        invoicingId: {
+          type: String,
+          required: false,
+        },
+        extInvoiceId: {
+          type: String,
+          required: false,
+          default: "NA",
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        invoiceDate: {
+          type: Date,
+          default: Date.now,
+        },
+        externalDocDate: {
+          type: Date,
+          default: Date.now,
+        },
+        invoicingRef: {
+          type: String,
+          default: false,
+        },
+        // NEW: link to one or more deliveries by their sub‑doc _id
+        relatedDeliveries: [
+          {
+            deliveryRef: {
+              type: Schema.Types.ObjectId,
+              required: true,
+            },
+            qty: {
+              type: Number,
+              required: true,
+              set: (v) => Math.round(v * 100) / 100,
+            },
+          },
+        ],
+        paymentTerms: {
+          type: String,
+          required: true,
+          enum: {
+            values: [
+              "COD",
+              "Net30D",
+              "Net7D",
+              "Net15D",
+              "Net45D",
+              "Net60D",
+              "Net90D",
+              "Advance",
+            ],
+            message:
+              "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+          },
+          default: "Net30D",
+          // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
+        },
+
+        dueDate: {
+          type: Date,
+          default: Date.now,
+          // This will be computed as invoiceDate + 30 days if not provided.
+        },
+        closedForInvoicingLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
     // Change paidAmt from an array of numbers to an array of objects for richer metadata
     paidAmt: [
       {
@@ -605,71 +592,78 @@ const salesOrderSchema1C1I = new Schema(
       enum: {
         values: [
           "Draft",
+          "Approved",
+          "Rejected",
           "Confirmed",
+          "PartiallyShipped",
+          "Shipped", // Outbound Transit
+          "PartiallyDelivered",
+          "Delivered",
+          "PartiallyInvoiced",
           "Invoiced",
           "Cancelled",
           "AdminMode",
           "AnyMode",
         ],
         message:
-          "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Confirmed','Invoiced','AdminMode','AnyMode'.",
+          "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Approved','Cancelled','Confirmed','PartiallyShipped','Shipped','PartiallyDelivered','Delivered','PartiallyInvoiced','Invoiced','AdminMode','AnyMode'.",
       },
       default: "Draft",
     },
-    // shipmentStatus: {
-    //   type: String,
-    //   required: true,
-    //   enum: {
-    //     values: [
-    //       "NotInitiated", // if no shipments are created at all
-    //       "InProcess", // if any of the shipment id are in draft mode
-    //       "PartiallyCompleted", // == Partially Shipped. if any of the shipment is posted and is partially out of the so ordered qty
-    //       "Completed", // == Shipped. if one or multiple shipments are posted and they are totally posted equalling to ordered qty
-    //       "Cancelled", // if one or multiple shipments are one or all cancelled. None should be in any other status
-    //       "AdminMode", // if one or more shipments are one or all AdminMode. None should be in any other status
-    //       "AnyMode", // if one or more shipments are one or all AnyMode. None should be in any other status
-    //     ],
-    //     message:
-    //       "⚠️ {VALUE} is not a valid status . Use among these only'NotInitiated','InProcess','Cancelled','PartiallyCompleted','Completed','AdminMode','AnyMode'.",
-    //   },
-    //   default: "NotInitiated",
-    // },
-    // deliveryStatus: {
-    //   type: String,
-    //   required: true,
-    //   enum: {
-    //     values: [
-    //       "NotInitiated", // if no shipments are created at all
-    //       "InProcess", // if any of the shipment id are in draft mode
-    //       "PartiallyCompleted", // == Partially Delivered. if any of the shipment is posted and is partially out of the so ordered qty
-    //       "Completed", // == Delivered. if one or multiple shipments are posted and they are totally posted equalling to ordered qty
-    //       "Cancelled", // if one or multiple shipments are one or all cancelled. None should be in any other status
-    //       "AdminMode", // if one or more shipments are one or all AdminMode. None should be in any other status
-    //       "AnyMode", // if one or more shipments are one or all AnyMode. None should be in any other status
-    //     ],
-    //     message:
-    //       "⚠️ {VALUE} is not a valid status . Use among these only'NotInitiated','InProcess','Cancelled','PartiallyCompleted','Completed','AdminMode','AnyMode'.",
-    //   },
-    //   default: "NotInitiated",
-    // },
-    // invoiceStatus: {
-    //   type: String,
-    //   required: true,
-    //   enum: {
-    //     values: [
-    //       "NotInitiated", // if no shipments are created at all
-    //       "InProcess", // if any of the shipment id are in draft mode
-    //       "PartiallyCompleted", // == Partially Invoiced. if any of the shipment is posted and is partially out of the so ordered qty
-    //       "Completed", // == Invoiced. if one or multiple shipments are posted and they are totally posted equalling to ordered qty
-    //       "Cancelled", // if one or multiple shipments are one or all cancelled. None should be in any other status
-    //       "AdminMode", // if one or more shipments are one or all AdminMode. None should be in any other status
-    //       "AnyMode", // if one or more shipments are one or all AnyMode. None should be in any other status
-    //     ],
-    //     message:
-    //       "⚠️ {VALUE} is not a valid status . Use among these only'NotInitiated','InProcess','Cancelled','PartiallyCompleted','Completed','AdminMode','AnyMode'.",
-    //   },
-    //   default: "NotInitiated",
-    // },
+    shipmentStatus: {
+      type: String,
+      required: true,
+      enum: {
+        values: [
+          "NotInitiated", // if no shipments are created at all
+          "InProcess", // if any of the shipment id are in draft mode
+          "PartiallyCompleted", // == Partially Shipped. if any of the shipment is posted and is partially out of the so ordered qty
+          "Completed", // == Shipped. if one or multiple shipments are posted and they are totally posted equalling to ordered qty
+          "Cancelled", // if one or multiple shipments are one or all cancelled. None should be in any other status
+          "AdminMode", // if one or more shipments are one or all AdminMode. None should be in any other status
+          "AnyMode", // if one or more shipments are one or all AnyMode. None should be in any other status
+        ],
+        message:
+          "⚠️ {VALUE} is not a valid status . Use among these only'NotInitiated','InProcess','Cancelled','PartiallyCompleted','Completed','AdminMode','AnyMode'.",
+      },
+      default: "NotInitiated",
+    },
+    deliveryStatus: {
+      type: String,
+      required: true,
+      enum: {
+        values: [
+          "NotInitiated", // if no shipments are created at all
+          "InProcess", // if any of the shipment id are in draft mode
+          "PartiallyCompleted", // == Partially Delivered. if any of the shipment is posted and is partially out of the so ordered qty
+          "Completed", // == Delivered. if one or multiple shipments are posted and they are totally posted equalling to ordered qty
+          "Cancelled", // if one or multiple shipments are one or all cancelled. None should be in any other status
+          "AdminMode", // if one or more shipments are one or all AdminMode. None should be in any other status
+          "AnyMode", // if one or more shipments are one or all AnyMode. None should be in any other status
+        ],
+        message:
+          "⚠️ {VALUE} is not a valid status . Use among these only'NotInitiated','InProcess','Cancelled','PartiallyCompleted','Completed','AdminMode','AnyMode'.",
+      },
+      default: "NotInitiated",
+    },
+    invoiceStatus: {
+      type: String,
+      required: true,
+      enum: {
+        values: [
+          "NotInitiated", // if no shipments are created at all
+          "InProcess", // if any of the shipment id are in draft mode
+          "PartiallyCompleted", // == Partially Invoiced. if any of the shipment is posted and is partially out of the so ordered qty
+          "Completed", // == Invoiced. if one or multiple shipments are posted and they are totally posted equalling to ordered qty
+          "Cancelled", // if one or multiple shipments are one or all cancelled. None should be in any other status
+          "AdminMode", // if one or more shipments are one or all AdminMode. None should be in any other status
+          "AnyMode", // if one or more shipments are one or all AnyMode. None should be in any other status
+        ],
+        message:
+          "⚠️ {VALUE} is not a valid status . Use among these only'NotInitiated','InProcess','Cancelled','PartiallyCompleted','Completed','AdminMode','AnyMode'.",
+      },
+      default: "NotInitiated",
+    },
     settlementStatus: {
       type: String,
       required: true,
@@ -1042,18 +1036,18 @@ salesOrderSchema1C1I.pre("save", async function (next) {
       doc.dueDate = newDueDate;
     }
 
-    // if (doc.isModified("invoicingQty") && doc.invoicingQty) {
-    //   for (const invItem of doc.invoicingQty) {
-    //     // only recalc if invoiceDate or paymentTerms is new/modified
-    //     // but `isModified` is not directly available for subfields
-    //     // in a simple array doc. So you might just do it unconditionally:
-    //     const daysOffset = getDaysFromPaymentTerm(invItem.paymentTerms);
-    //     const invDate = invItem.invoiceDate || new Date();
-    //     invItem.dueDate = new Date(
-    //       invDate.getTime() + daysOffset * 24 * 60 * 60 * 1000
-    //     );
-    //   }
-    // }
+    if (doc.isModified("invoicingQty") && doc.invoicingQty) {
+      for (const invItem of doc.invoicingQty) {
+        // only recalc if invoiceDate or paymentTerms is new/modified
+        // but `isModified` is not directly available for subfields
+        // in a simple array doc. So you might just do it unconditionally:
+        const daysOffset = getDaysFromPaymentTerm(invItem.paymentTerms);
+        const invDate = invItem.invoiceDate || new Date();
+        invItem.dueDate = new Date(
+          invDate.getTime() + daysOffset * 24 * 60 * 60 * 1000
+        );
+      }
+    }
 
     next();
   } catch (error) {

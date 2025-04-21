@@ -12,7 +12,7 @@ import { logError } from "../utility/logError.utils.js";
  * @param {String} newStatus
  * @returns {Boolean}
  */
-const isValidStatusTransition = (currentStatus, newStatus) => {
+const isValidStatusTransition1 = (currentStatus, newStatus) => {
   const STATUS_TRANSITIONS = {
     Draft: ["Approved", "Rejected", "Cancelled", "AdminMode", "AnyMode"],
     Rejected: ["Draft", "Cancelled", "AdminMode", "AnyMode"],
@@ -78,6 +78,15 @@ const isValidStatusTransition = (currentStatus, newStatus) => {
   };
 
   return STATUS_TRANSITIONS[currentStatus]?.includes(newStatus);
+};
+
+export const isValidStatusTransition = {
+  Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
+  Confirmed: ["Draft", "Cancelled", "Invoiced", "AdminMode", "AnyMode"],
+  Invoiced: ["AdminMode", "AnyMode"],
+  Cancelled: ["AdminMode", "AnyMode"],
+  AdminMode: ["Draft", "AnyMode"],
+  AnyMode: ["Draft", "Confirmed", "Invoiced", "Cancelled", "AdminMode"],
 };
 
 // Helper function to generate an invoice number (same as your existing implementation)

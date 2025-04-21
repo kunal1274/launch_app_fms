@@ -1,7 +1,7 @@
 import express from "express";
-import * as ctl from "../controllers/salesOrder.controller.js";
-import queryParser from "../middleware/queryParser.js";
-import statusGuard from "../middleware/statusGuard.js";
+import * as ctl from "../controllers/bbSalesOrder.controller.js";
+import queryParser from "../middleware/bbQueryParser.js";
+import statusGuard from "../middleware/bbStatusGuard.js";
 
 const router = express.Router();
 
@@ -30,6 +30,9 @@ router.patch("/:id/actions/:actionName", ctl.triggerAction);
 
 /* ---------- ACTIONS with data (partial qty) ---------- */
 router.patch("/:id/actions/:actionName/data", ctl.triggerActionWithData);
+
+router.patch("/:id/movements/:col/:rid/post", ctl.postMovement);
+router.patch("/:id/movements/:col/:rid/cancel", ctl.cancelMovement);
 
 /* payments */
 router.post("/:id/payments", ctl.addPayment);

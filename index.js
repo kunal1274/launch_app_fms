@@ -33,7 +33,7 @@ import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
 import userGlobalRouter from "./routes/userGlobal.routes.js";
 import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
 import userRoleRouter from "./role_based_access_control_service/routes/userRole.routes.js";
-import salesOrderRoutes from "./sales_mgt_service/routes/salesOrder.routes.js";
+import salesOrderRoutes from "./sales_mgt_service/routes/bbSalesOrder.routes.js";
 import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 
 // Environment variables

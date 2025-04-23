@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import { PurchaseOrderCounterModel } from "./counter.model.js";
 
 // Define allowed status transitions
-const STATUS_TRANSITIONS1 = {
+const STATUS_TRANSITIONS = {
   Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
   Confirmed: ["Shipped", "Cancelled", "AdminMode", "AnyMode"],
   Shipped: ["Delivered", "Cancelled", "AdminMode", "AnyMode"],
@@ -19,15 +19,6 @@ const STATUS_TRANSITIONS1 = {
     "Cancelled",
     "AdminMode",
   ],
-};
-
-export const STATUS_TRANSITIONS = {
-  Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
-  Confirmed: ["Draft", "Cancelled", "Invoiced", "AdminMode", "AnyMode"],
-  Invoiced: ["AdminMode", "AnyMode"],
-  Cancelled: ["AdminMode", "AnyMode"],
-  AdminMode: ["Draft", "AnyMode"],
-  AnyMode: ["Draft", "Confirmed", "Invoiced", "Cancelled", "AdminMode"],
 };
 
 // Suppose you have a function getDaysFromPaymentTerm that returns the day offset:
@@ -247,185 +238,185 @@ const purchaseOrderSchema1C1I = new Schema(
       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
     },
 
-    // // Change shippingQty from an array of numbers to an array of objects for richer metadata
-    // shippingQty: [
-    //   {
-    //     shipmentId: {
-    //       type: String,
-    //       required: false,
-    //     },
-    //     extShipmentId: {
-    //       type: String,
-    //       required: true,
-    //       default: "NA",
-    //     },
-    //     qty: {
-    //       type: Number,
-    //       required: true,
-    //       default: 0.0,
-    //       set: (v) => Math.round(v * 100) / 100,
-    //     },
-    //     date: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     shipmentRef: {
-    //       type: String,
-    //       default: false,
-    //     },
-    //     shipmentMode: {
-    //       type: String,
-    //       required: false,
-    //       enum: {
-    //         values: ["Air", "Road", "Sea"],
-    //         message:
-    //           "⚠️ {VALUE} is not a supported shipment mode Air or Road or Sea.",
-    //       },
-    //       default: "Road",
-    //     },
-    //     closedForShipmentLater: {
-    //       type: Boolean,
-    //       required: true,
-    //       default: false,
-    //     },
-    //     status: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
-    //       },
-    //       default: "Draft",
-    //     },
-    //   },
-    // ],
-    // // Change shippingQty from an array of numbers to an array of objects for richer metadata
-    // deliveringQty: [
-    //   {
-    //     deliveryId: {
-    //       type: String,
-    //       required: false,
-    //     },
-    //     extDeliveryId: {
-    //       type: String,
-    //       required: true,
-    //       default: "NA",
-    //     },
-    //     qty: {
-    //       type: Number,
-    //       required: true,
-    //       default: 0.0,
-    //       set: (v) => Math.round(v * 100) / 100,
-    //     },
-    //     date: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     deliveryRef: {
-    //       type: String,
-    //       default: false,
-    //     },
-    //     deliveryMode: {
-    //       type: String,
-    //       required: false,
-    //       enum: {
-    //         values: ["Air", "Road", "Sea"],
-    //         message:
-    //           "⚠️ {VALUE} is not a supported delivery mode Air or Road or Sea.",
-    //       },
-    //       default: "Road",
-    //     },
-    //     closedForDeliveryLater: {
-    //       type: Boolean,
-    //       required: true,
-    //       default: false,
-    //     },
-    //     status: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
-    //       },
-    //       default: "Draft",
-    //     },
-    //   },
-    // ],
-    // // Change shippingQty from an array of numbers to an array of objects for richer metadata
-    // invoicingQty: [
-    //   {
-    //     invoicingId: {
-    //       type: String,
-    //       required: false,
-    //     },
-    //     extInvoiceId: {
-    //       type: String,
-    //       required: true,
-    //       default: "NA",
-    //     },
-    //     qty: {
-    //       type: Number,
-    //       required: true,
-    //       default: 0.0,
-    //       set: (v) => Math.round(v * 100) / 100,
-    //     },
-    //     invoiceDate: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     externalDocDate: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //     invoicingRef: {
-    //       type: String,
-    //       default: false,
-    //     },
-    //     paymentTerms: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: [
-    //           "COD",
-    //           "Net30D",
-    //           "Net7D",
-    //           "Net15D",
-    //           "Net45D",
-    //           "Net60D",
-    //           "Net90D",
-    //           "Advance",
-    //         ],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
-    //       },
-    //       default: "Net30D",
-    //       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
-    //     },
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    shippingQty: [
+      {
+        shipmentId: {
+          type: String,
+          required: false,
+        },
+        extShipmentId: {
+          type: String,
+          required: true,
+          default: "NA",
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        shipmentRef: {
+          type: String,
+          default: false,
+        },
+        shipmentMode: {
+          type: String,
+          required: false,
+          enum: {
+            values: ["Air", "Road", "Sea"],
+            message:
+              "⚠️ {VALUE} is not a supported shipment mode Air or Road or Sea.",
+          },
+          default: "Road",
+        },
+        closedForShipmentLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    deliveringQty: [
+      {
+        deliveryId: {
+          type: String,
+          required: false,
+        },
+        extDeliveryId: {
+          type: String,
+          required: true,
+          default: "NA",
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        deliveryRef: {
+          type: String,
+          default: false,
+        },
+        deliveryMode: {
+          type: String,
+          required: false,
+          enum: {
+            values: ["Air", "Road", "Sea"],
+            message:
+              "⚠️ {VALUE} is not a supported delivery mode Air or Road or Sea.",
+          },
+          default: "Road",
+        },
+        closedForDeliveryLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
+    // Change shippingQty from an array of numbers to an array of objects for richer metadata
+    invoicingQty: [
+      {
+        invoicingId: {
+          type: String,
+          required: false,
+        },
+        extInvoiceId: {
+          type: String,
+          required: true,
+          default: "NA",
+        },
+        qty: {
+          type: Number,
+          required: true,
+          default: 0.0,
+          set: (v) => Math.round(v * 100) / 100,
+        },
+        invoiceDate: {
+          type: Date,
+          default: Date.now,
+        },
+        externalDocDate: {
+          type: Date,
+          default: Date.now,
+        },
+        invoicingRef: {
+          type: String,
+          default: false,
+        },
+        paymentTerms: {
+          type: String,
+          required: true,
+          enum: {
+            values: [
+              "COD",
+              "Net30D",
+              "Net7D",
+              "Net15D",
+              "Net45D",
+              "Net60D",
+              "Net90D",
+              "Advance",
+            ],
+            message:
+              "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+          },
+          default: "Net30D",
+          // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
+        },
 
-    //     dueDate: {
-    //       type: Date,
-    //       default: Date.now,
-    //       // This will be computed as invoiceDate + 30 days if not provided.
-    //     },
-    //     closedForInvoicingLater: {
-    //       type: Boolean,
-    //       required: true,
-    //       default: false,
-    //     },
-    //     status: {
-    //       type: String,
-    //       required: true,
-    //       enum: {
-    //         values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
-    //         message:
-    //           "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
-    //       },
-    //       default: "Draft",
-    //     },
-    //   },
-    // ],
+        dueDate: {
+          type: Date,
+          default: Date.now,
+          // This will be computed as invoiceDate + 30 days if not provided.
+        },
+        closedForInvoicingLater: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
+        status: {
+          type: String,
+          required: true,
+          enum: {
+            values: ["Draft", "Posted", "Cancelled", "AdminMode", "AnyMode"],
+            message:
+              "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Posted','AdminMode','AnyMode'.",
+          },
+          default: "Draft",
+        },
+      },
+    ],
 
     // Change paidAmt from an array of numbers to an array of objects for richer metadata
     paidAmt: [
@@ -727,29 +718,29 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
     // Check for newly added sub-docs
     // ================================
     // shippingQty
-    // if (doc.isModified("shippingQty") && doc.shippingQty) {
-    //   for (const shipping of doc.shippingQty) {
-    //     if (!shipping.shipmentId) {
-    //       shipping.shipmentId = await generateShipmentId();
-    //     }
-    //   }
-    // }
-    // // deliveringQty
-    // if (doc.isModified("deliveringQty") && doc.deliveringQty) {
-    //   for (const delivery of doc.deliveringQty) {
-    //     if (!delivery.deliveryId) {
-    //       delivery.deliveryId = await generateDeliveryId();
-    //     }
-    //   }
-    // }
-    // // invoicingQty
-    // if (doc.isModified("invoicingQty") && doc.invoicingQty) {
-    //   for (const inv of doc.invoicingQty) {
-    //     if (!inv.invoicingId) {
-    //       inv.invoicingId = await generateInvoicingId();
-    //     }
-    //   }
-    // }
+    if (doc.isModified("shippingQty") && doc.shippingQty) {
+      for (const shipping of doc.shippingQty) {
+        if (!shipping.shipmentId) {
+          shipping.shipmentId = await generateShipmentId();
+        }
+      }
+    }
+    // deliveringQty
+    if (doc.isModified("deliveringQty") && doc.deliveringQty) {
+      for (const delivery of doc.deliveringQty) {
+        if (!delivery.deliveryId) {
+          delivery.deliveryId = await generateDeliveryId();
+        }
+      }
+    }
+    // invoicingQty
+    if (doc.isModified("invoicingQty") && doc.invoicingQty) {
+      for (const inv of doc.invoicingQty) {
+        if (!inv.invoicingId) {
+          inv.invoicingId = await generateInvoicingId();
+        }
+      }
+    }
 
     // paidAmt
     if (doc.isModified("paidAmt") && doc.paidAmt) {
@@ -760,18 +751,18 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
       }
     }
 
-    // if (doc.isModified("invoicingQty") && doc.invoicingQty) {
-    //   for (const invItem of doc.invoicingQty) {
-    //     // only recalc if invoiceDate or paymentTerms is new/modified
-    //     // but `isModified` is not directly available for subfields
-    //     // in a simple array doc. So you might just do it unconditionally:
-    //     const daysOffset = getDaysFromPaymentTerm(invItem.paymentTerms);
-    //     const invDate = invItem.invoiceDate || new Date();
-    //     invItem.dueDate = new Date(
-    //       invDate.getTime() + daysOffset * 24 * 60 * 60 * 1000
-    //     );
-    //   }
-    // }
+    if (doc.isModified("invoicingQty") && doc.invoicingQty) {
+      for (const invItem of doc.invoicingQty) {
+        // only recalc if invoiceDate or paymentTerms is new/modified
+        // but `isModified` is not directly available for subfields
+        // in a simple array doc. So you might just do it unconditionally:
+        const daysOffset = getDaysFromPaymentTerm(invItem.paymentTerms);
+        const invDate = invItem.invoiceDate || new Date();
+        invItem.dueDate = new Date(
+          invDate.getTime() + daysOffset * 24 * 60 * 60 * 1000
+        );
+      }
+    }
 
     next();
   } catch (error) {
@@ -918,90 +909,90 @@ purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
     // -------------- NEW LOGIC --------------
     // If user is pushing a new subdocument in shippingQty, deliveringQty, or invoicingQty
     // we generate an ID for each newly added subdocument if it doesn't have one.
-    // if (update.shippingQty) {
-    //   // The user might be using $push or $set. We need to handle carefully:
-    //   // If it's $push: { shippingQty: { <newObj> } } or $push: { shippingQty: { $each: [] } }
-    //   // If it's $set: { shippingQty: [...] } (the entire array is replaced)
-    //   // We'll handle it generically by fetching the final array from the DB doc after the update merges,
-    //   // then assigning IDs if missing.
-    //   // The simplest approach: run the update, then in post hook we do the final assignment.
-    //   // But Mongoose doesn't do post('findOneAndUpdate') the same way as pre('save').
-    //   // So we do it in pre, but we can't see the final array yet. We'll do a small workaround:
+    if (update.shippingQty) {
+      // The user might be using $push or $set. We need to handle carefully:
+      // If it's $push: { shippingQty: { <newObj> } } or $push: { shippingQty: { $each: [] } }
+      // If it's $set: { shippingQty: [...] } (the entire array is replaced)
+      // We'll handle it generically by fetching the final array from the DB doc after the update merges,
+      // then assigning IDs if missing.
+      // The simplest approach: run the update, then in post hook we do the final assignment.
+      // But Mongoose doesn't do post('findOneAndUpdate') the same way as pre('save').
+      // So we do it in pre, but we can't see the final array yet. We'll do a small workaround:
 
-    //   // We'll parse the new elements from update. If it's $push => we see update.$push?.shippingQty
-    //   // If it's $set => we see update.$set?.shippingQty or update.shippingQty
-    //   // For brevity, let's just handle the typical $push scenario:
+      // We'll parse the new elements from update. If it's $push => we see update.$push?.shippingQty
+      // If it's $set => we see update.$set?.shippingQty or update.shippingQty
+      // For brevity, let's just handle the typical $push scenario:
 
-    //   if (update.$push && update.$push.shippingQty) {
-    //     const newShp = update.$push.shippingQty;
-    //     // If it's $each array
-    //     if (newShp.$each) {
-    //       for (const s of newShp.$each) {
-    //         if (!s.shipmentId) {
-    //           s.shipmentId = await generateShipmentId();
-    //         }
-    //       }
-    //     } else {
-    //       // single item
-    //       if (!newShp.shipmentId) {
-    //         newShp.shipmentId = await generateShipmentId();
-    //       }
-    //     }
-    //   } else if (Array.isArray(update.shippingQty)) {
-    //     // entire array replaced
-    //     for (const s of update.shippingQty) {
-    //       if (!s.shipmentId) {
-    //         s.shipmentId = await generateShipmentId();
-    //       }
-    //     }
-    //   }
-    // }
+      if (update.$push && update.$push.shippingQty) {
+        const newShp = update.$push.shippingQty;
+        // If it's $each array
+        if (newShp.$each) {
+          for (const s of newShp.$each) {
+            if (!s.shipmentId) {
+              s.shipmentId = await generateShipmentId();
+            }
+          }
+        } else {
+          // single item
+          if (!newShp.shipmentId) {
+            newShp.shipmentId = await generateShipmentId();
+          }
+        }
+      } else if (Array.isArray(update.shippingQty)) {
+        // entire array replaced
+        for (const s of update.shippingQty) {
+          if (!s.shipmentId) {
+            s.shipmentId = await generateShipmentId();
+          }
+        }
+      }
+    }
 
-    // if (update.deliveringQty) {
-    //   if (update.$push && update.$push.deliveringQty) {
-    //     const newDlv = update.$push.deliveringQty;
-    //     if (newDlv.$each) {
-    //       for (const d of newDlv.$each) {
-    //         if (!d.deliveryId) {
-    //           d.deliveryId = await generateDeliveryId();
-    //         }
-    //       }
-    //     } else {
-    //       if (!newDlv.deliveryId) {
-    //         newDlv.deliveryId = await generateDeliveryId();
-    //       }
-    //     }
-    //   } else if (Array.isArray(update.deliveringQty)) {
-    //     for (const d of update.deliveringQty) {
-    //       if (!d.deliveryId) {
-    //         d.deliveryId = await generateDeliveryId();
-    //       }
-    //     }
-    //   }
-    // }
+    if (update.deliveringQty) {
+      if (update.$push && update.$push.deliveringQty) {
+        const newDlv = update.$push.deliveringQty;
+        if (newDlv.$each) {
+          for (const d of newDlv.$each) {
+            if (!d.deliveryId) {
+              d.deliveryId = await generateDeliveryId();
+            }
+          }
+        } else {
+          if (!newDlv.deliveryId) {
+            newDlv.deliveryId = await generateDeliveryId();
+          }
+        }
+      } else if (Array.isArray(update.deliveringQty)) {
+        for (const d of update.deliveringQty) {
+          if (!d.deliveryId) {
+            d.deliveryId = await generateDeliveryId();
+          }
+        }
+      }
+    }
 
-    // if (update.invoicingQty) {
-    //   if (update.$push && update.$push.invoicingQty) {
-    //     const newInv = update.$push.invoicingQty;
-    //     if (newInv.$each) {
-    //       for (const i of newInv.$each) {
-    //         if (!i.invoicingId) {
-    //           i.invoicingId = await generateInvoicingId();
-    //         }
-    //       }
-    //     } else {
-    //       if (!newInv.invoicingId) {
-    //         newInv.invoicingId = await generateInvoicingId();
-    //       }
-    //     }
-    //   } else if (Array.isArray(update.invoicingQty)) {
-    //     for (const i of update.invoicingQty) {
-    //       if (!i.invoicingId) {
-    //         i.invoicingId = await generateInvoicingId();
-    //       }
-    //     }
-    //   }
-    // }
+    if (update.invoicingQty) {
+      if (update.$push && update.$push.invoicingQty) {
+        const newInv = update.$push.invoicingQty;
+        if (newInv.$each) {
+          for (const i of newInv.$each) {
+            if (!i.invoicingId) {
+              i.invoicingId = await generateInvoicingId();
+            }
+          }
+        } else {
+          if (!newInv.invoicingId) {
+            newInv.invoicingId = await generateInvoicingId();
+          }
+        }
+      } else if (Array.isArray(update.invoicingQty)) {
+        for (const i of update.invoicingQty) {
+          if (!i.invoicingId) {
+            i.invoicingId = await generateInvoicingId();
+          }
+        }
+      }
+    }
 
     if (update.paidAmt) {
       if (update.$push && update.$push.paidAmt) {

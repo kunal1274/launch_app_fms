@@ -33,8 +33,9 @@ import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
 import userGlobalRouter from "./routes/userGlobal.routes.js";
 import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
 import userRoleRouter from "./role_based_access_control_service/routes/userRole.routes.js";
-import salesOrderRoutes from "./sales_mgt_service/routes/bbSalesOrder.routes.js";
+import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrder.routes.js";
 import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
+import siteRoutes from "./bb1_inventory_management_service/routes/bb1site.routes.js";
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -127,6 +128,9 @@ AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
 
 // Sales Management Service
 AumMrigahApp.use("/fms/api/v0/sales-orders", salesOrderRoutes);
+
+// Inventory Management Service
+AumMrigahApp.use("/fms/api/v0/sites", siteRoutes);
 
 // Chatgpt ai service
 AumMrigahApp.use("/fms/api/v0/ai", aiRoutes);

@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { PurchaseOrderCounterModel } from "./counter.model.js";
+import { PurchaseOrderCounterModel } from "./bb3Counter.model.js";
 
 // Define allowed status transitions
 const STATUS_TRANSITIONS = {

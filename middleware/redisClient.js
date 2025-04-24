@@ -37,14 +37,14 @@ redisClient.on("error", (err) => {
   console.error("Redis Client Error:", err);
 });
 
-// // Connect right away
-// (async () => {
-//   try {
-//     await redisClient.connect();
-//     console.log(`Connected to Redis on ${REDIS_HOST}:${REDIS_PORT}`);
-//   } catch (err) {
-//     console.error("Could not connect to Redis:", err);
-//   }
-// })();
+// Connect right away
+(async () => {
+  try {
+    await redisClient.connect();
+    console.log(`Connected to Redis on ${REDIS_HOST}:${REDIS_PORT}`);
+  } catch (err) {
+    console.error("Could not connect to Redis:", err);
+  }
+})();
 
 export default redisClient;

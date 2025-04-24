@@ -1,18 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config(); // Loads .env into process.env
 
-import createDebug from "debug";
-// pick any namespace convention you like:
-const dbgServer = createDebug("fms:server");
-const dbgDB = createDebug("fms:db");
-const dbgMW = createDebug("fms:mw");
-const dbgSecurity = createDebug("fms:security");
-const dbgRoutes = createDebug("fms:routes"); // initial
-const dbgRoutesBB1 = createDebug("fms:routes-bb1");
-const dbgRoutesBB2 = createDebug("fms:routes-bb2");
-const dbgRoutesBB3 = createDebug("fms:routes-bb3");
-const dbgEmail = createDebug("fms:email");
-const dbgException = createDebug("fms:exception");
+// import createDebug from "debug";
+// // pick any namespace convention you like:
+// const dbgServer = createDebug("fms:server");
+// const dbgDB = createDebug("fms:db");
+// const dbgSecurity = createDebug("fms:security");
+// const dbgRoutes = createDebug("fms:routes");
+// const dbgEmail = createDebug("fms:email");
+// const dbgException = createDebug("fms:exception");
 
 // In-built Node JS Modules Import
 import expressAumMrigah from "express";
@@ -29,9 +25,9 @@ import session from "express-session";
 import passport from "passport";
 
 // Project FMS server related imports
-import connectToDb from "./database/mongoDb.js";
 import userGroupRouter from "./routes/userGroupRoutes.js";
 import userRouter from "./routes/userRoutes.js";
+import connectToDb from "./database/mongoDb.js";
 import { companyRouter } from "./routes/company.routes.js";
 import { customerRouter } from "./routes/customer.routes.js";
 import { itemRouter } from "./routes/item.routes.js";
@@ -46,26 +42,24 @@ import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
 import userGlobalRouter from "./routes/userGlobal.routes.js";
 import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
 import userRoleRouter from "./role_based_access_control_service/routes/userRole.routes.js";
-import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrder.routes.js";
+// import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrder.routes.js";
 import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 import siteRoutes from "./bb1_inventory_management_service/routes/bb1.site.routes.js";
 
-// // Environment variables
+// Environment variables
 const PORT = process.env.PORT || 3000;
 
-// console.log("This index.js file is working as expected");
-dbgServer("Index.js loaded, ENV port=%s", process.env.PORT);
+console.log("This index.js file is working as expected");
+// dbgServer("Index.js loaded, ENV port=%s", process.env.PORT);
 
-// // Middleware
+// Middleware
 const AumMrigahApp = expressAumMrigah();
 
 AumMrigahApp.use(expressAumMrigah.json());
-dbgServer("json() enabled for secure headers");
 
 AumMrigahApp.use(expressAumMrigah.urlencoded({ extended: true }));
-dbgServer("urlencoding enabled for secure headers");
 
-// // Express session middleware
+// Express session middleware
 AumMrigahApp.use(
   session({
     secret: process.env.SESSION_SECRET || "your_secret_key",
@@ -73,25 +67,17 @@ AumMrigahApp.use(
     saveUninitialized: false,
   })
 );
-dbgServer("session enabled for secure headers");
 
 // Initialize Passport and restore authentication state from session
 AumMrigahApp.use(passport.initialize());
-dbgServer("passport initialized ");
 AumMrigahApp.use(passport.session());
-dbgServer("passport session initialized ");
 
 //// Security middleware
 AumMrigahApp.use(helmet()); // Secure HTTP headers
-dbgSecurity("Helmet enabled for secure headers");
 AumMrigahApp.use(xss()); // Prevent XSS
-dbgSecurity("xss enabled for secure headers");
 AumMrigahApp.disable("x-powered-by"); // Hide the X-Powered-By header
-dbgSecurity("x-powered-by enabled for secure headers");
 AumMrigahApp.use(ExpressMongoSanitize());
-dbgSecurity("Mongo Sanitize enabled for secure headers");
 AumMrigahApp.use(hpp());
-dbgSecurity("hpp enabled for secure headers");
 
 // Rate Limiter
 const limiter = rateLimit({
@@ -101,7 +87,6 @@ const limiter = rateLimit({
 });
 //AumMrigahApp.use("/fms/api", limiter); // specific to router
 AumMrigahApp.use(limiter); // to everything
-dbgServer("limiter initialized ");
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((ele) => {
@@ -109,8 +94,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     })
   : [];
 
-// console.log("Allowed Origins", process.env.ALLOWED_ORIGINS);
-dbgServer("Allowed Origins: %O", allowedOrigins);
+console.log("Allowed Origins", process.env.ALLOWED_ORIGINS);
+//dbgServer("Allowed Origins: %O", allowedOrigins);
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -126,10 +111,8 @@ const corsOptions = {
 };
 
 AumMrigahApp.use(cors(corsOptions));
-dbgServer("cors control initialized ");
 
 AumMrigahApp.use(requestTimer); // 💥 log for all routes
-dbgMW("middleware requqest timer initialized ");
 
 // we are using after the request processed through json and cors
 // Define a stream for morgan to use Winston
@@ -138,69 +121,46 @@ const stream = {
 };
 
 AumMrigahApp.use(morgan("combined", { stream }));
-dbgServer("morgan logging initialized ");
 
 // Routes
-dbgRoutes("Mounting default router on /");
 AumMrigahApp.get("/", (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
 });
 
-// // Main Functional Modules
-dbgRoutes("Mounting userRouter router on /fms/api/v0/users");
+// Main Functional Modules
 AumMrigahApp.use("/fms/api/v0/users", userRouter);
-dbgRoutes("Mounting userGroupRouter router on /fms/api/v0/userGroups");
 AumMrigahApp.use("/fms/api/v0/userGroups", userGroupRouter);
-dbgRoutes("Mounting customerRouter router on /fms/api/v0/customers");
 AumMrigahApp.use("/fms/api/v0/customers", customerRouter);
-dbgRoutes("Mounting vendorRouter router on /fms/api/v0/vendors");
 AumMrigahApp.use("/fms/api/v0/vendors", vendorRouter);
-dbgRoutes("Mounting itemRouter router on /fms/api/v0/items");
 AumMrigahApp.use("/fms/api/v0/items", itemRouter);
-dbgRoutes("Mounting companyRouter router on /fms/api/v0/companies");
 AumMrigahApp.use("/fms/api/v0/companies", companyRouter);
-dbgRoutes("Mounting salesOrderRouter router on /fms/api/v0/salesorders");
 AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
-dbgRoutes("Mounting purchaseOrderRouter router on /fms/api/v0/purchaseorders");
 AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
 
-// Sales Management Service -bb3
-dbgRoutesBB3(
-  "Mounting sale order Routes-BB3 router on /bb/api/v3/sales-orders"
-);
-AumMrigahApp.use("/bb/api/v3/sales-orders", salesOrderRoutes);
+// Sales Management Service
+// AumMrigahApp.use("/fms/api/v0/sales-orders", salesOrderRoutes);
 
-// // Inventory Management Service -bb1
-dbgRoutesBB1("Mounting siteRoutes-BB1 router on /bb/api/v1/sites");
-AumMrigahApp.use("/bb/api/v1/sites", siteRoutes);
+// Inventory Management Service
+// AumMrigahApp.use("/fms/api/v0/sites", siteRoutes);
 
-// // Chatgpt ai service - bb3
-dbgRoutesBB3("Mounting aiRoutes-BB3 router on /bb/api/v3/ai");
-AumMrigahApp.use("/bb/api/v3/ai", aiRoutes);
+// Chatgpt ai service
+AumMrigahApp.use("/fms/api/v0/ai", aiRoutes);
 
 //Authentication
-dbgRoutes(
-  "Mounting Google Authentication routers router on /auth and /api/auth and /fms/api/v0/otp-auth"
-);
 AumMrigahApp.use("/auth", googleAuthRouter);
 AumMrigahApp.use("/api/auth", googleAlternativeApiAuthRouter);
 AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
 
 // Authorization
-dbgRoutes(
-  "Mounting Authorization router on /fms/api/v0/user-globals or permissions or user-roles"
-);
 AumMrigahApp.use("/fms/api/v0/user-globals", userGlobalRouter);
 AumMrigahApp.use("/fms/api/v0/permissions", permissionRouter);
 AumMrigahApp.use("/fms/api/v0/user-roles", userRoleRouter);
 
-dbgRoutes("Mounting env router on /env");
 AumMrigahApp.get("/env", (req, res) => {
   res.json({ allowedOrigins });
 });
 
 //Global error handler (optional but recommended)
-dbgRoutes("Mounting global error handler on ");
 AumMrigahApp.use((err, req, res, next) => {
   logger.error("Global Error Handler", { error: err });
   res.status(500).send({
@@ -210,7 +170,6 @@ AumMrigahApp.use((err, req, res, next) => {
 });
 
 // final route
-dbgRoutes("Mounting final route  on /* not found rout");
 AumMrigahApp.use((req, res) => {
   res
     .status(400)
@@ -221,18 +180,18 @@ AumMrigahApp.use((req, res) => {
 
 const startServer = async () => {
   try {
-    dbgDB("🔹Connecting to MongoDB at", process.env.ATLAS_URI);
+    //dbgDB("Connecting to MongoDB at", process.env.ATLAS_URI);
     await connectToDb();
-    dbgDB("✅ MongoDB connection established");
+    //dbgDB("✅ MongoDB connection established");
     AumMrigahApp.listen(PORT, () => {
       console.log(
         `The Node Launch FMS backend server 1.0.0 has been now running at ${PORT} with the cloud Mongo db`
       );
-      dbgServer("🚀 Server listening on port ", PORT);
+      // dbgServer("🚀 Server listening on port ", PORT);
     });
   } catch (error) {
     console.error(`Server is unable to start due to some error : ${error}`);
-    dbgDB("❌ DB connection failed: ", error);
+    //dbgDB("❌ DB connection failed: ", error);
     process.exit(1);
   }
 };

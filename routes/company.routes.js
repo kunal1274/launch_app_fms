@@ -22,7 +22,7 @@ const companyRouter = express.Router();
 
 companyRouter.post("/", createCompany);
 companyRouter.get("/archived", getArchivedCompanies); // Must be defined before :companyId route
-//companyRouter.get("/", cacheMiddleware, getAllCompanies); // ADDED
+// companyRouter.get("/", cacheMiddleware, getAllCompanies); // ADDED
 companyRouter.get("/", getAllCompanies); // ADDED
 companyRouter.get("/:companyId", getCompanyById);
 companyRouter.put("/:companyId", updateCompanyById);

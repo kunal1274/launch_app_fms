@@ -141,9 +141,9 @@ export const getAllCompanies = async (req, res) => {
   try {
     const companies = await CompanyModel.find();
 
-    // ADDED
-    // 2) store it in Redis for subsequent requests
-    // use the same key used in the cacheMiddleware
+    // // ADDED
+    // // 2) store it in Redis for subsequent requests
+    // // use the same key used in the cacheMiddleware
     // const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies"
     // await redisClient.set(cacheKey, JSON.stringify(companies), {
     //   EX: 60 * 5, // expire in 5 minutes

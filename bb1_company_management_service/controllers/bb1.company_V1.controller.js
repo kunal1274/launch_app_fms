@@ -10,8 +10,7 @@ import logger, {
   loggerJsonFormat,
 } from "../../bb1_shared_management_service/utility/bb1.logger.util.js";
 
-// // redis related things will be commented for while
-// const CACHE_KEY = (req) => `${req.method}:${req.originalUrl}`;
+const CACHE_KEY = (req) => `${req.method}:${req.originalUrl}`;
 
 /**
  * POST /companies
@@ -85,8 +84,7 @@ export const createCompany = async (req, res) => {
       changes: { newData: company },
     });
 
-    // // redis
-    // await redisClient.del("/companies");
+    await redisClient.del("/companies");
 
     logger.info("✅ Company created", { companyId: company._id });
     loggerJsonFormat.info("✅ Company created", { companyId: company._id });
@@ -132,23 +130,22 @@ export const createCompany = async (req, res) => {
  * GET /companies
  */
 export const getAllCompanies = async (req, res) => {
-  // redis
-  // const key = CACHE_KEY(req);
+  const key = CACHE_KEY(req);
   try {
-    // const cached = await redisClient.get(key);
-    // if (cached) {
-    //   const data = JSON.parse(cached);
-    //   return res.status(200).json({
-    //     status: "success",
-    //     message: "✅ Companies retrieved (cache).",
-    //     count: data.length,
-    //     data,
-    //     cached: true,
-    //   });
-    // }
+    const cached = await redisClient.get(key);
+    if (cached) {
+      const data = JSON.parse(cached);
+      return res.status(200).json({
+        status: "success",
+        message: "✅ Companies retrieved (cache).",
+        count: data.length,
+        data,
+        cached: true,
+      });
+    }
 
     const companies = await CompanyModel.find();
-    // await redisClient.set(key, JSON.stringify(companies), { EX: 300 });
+    await redisClient.set(key, JSON.stringify(companies), { EX: 300 });
     return res.status(200).json({
       status: "success",
       message: "✅ Companies retrieved.",
@@ -242,8 +239,8 @@ export const updateCompanyById = async (req, res) => {
       recordId: company._id,
       changes: { newData: company },
     });
-    // redis
-    // await redisClient.del("/companies");
+
+    await redisClient.del("/companies");
 
     return res.status(200).json({
       status: "success",
@@ -302,8 +299,7 @@ export const deleteCompanyById = async (req, res) => {
       changes: { oldData: company },
     });
 
-    // // redis
-    // await redisClient.del("/companies");
+    await redisClient.del("/companies");
 
     return res.status(200).json({
       status: "success",
@@ -352,7 +348,7 @@ export const archiveCompanyById = async (req, res) => {
       changes: { newData: company },
     });
 
-    // await redisClient.del("/companies");
+    await redisClient.del("/companies");
 
     return res.status(200).json({
       status: "success",
@@ -401,8 +397,8 @@ export const unarchiveCompanyById = async (req, res) => {
       recordId: company._id,
       changes: { newData: company },
     });
-    // // redis
-    //     await redisClient.del("/companies");
+
+    await redisClient.del("/companies");
 
     return res.status(200).json({
       status: "success",

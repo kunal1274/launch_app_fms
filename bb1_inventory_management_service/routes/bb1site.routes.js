@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as ctl from "../controllers/bb1site.controller.js";
+import * as ctl from "../controllers/bb1.site.controller.js";
 
 const r = Router();
 r.param("id", ctl.loadById);

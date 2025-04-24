@@ -73,6 +73,40 @@ const customerSchema = new Schema(
       },
       default: "",
     },
+    contactPersonName: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    contactPersonPhone: {
+      type: String,
+      required: [false, "Contact number is required."],
+      unique: true,
+
+      validate: {
+        validator: function (v) {
+          return !v || /^\d{10}$/.test(v); // Only allows exactly 10 digits
+        },
+        message:
+          "⚠️ Contact number must be a 10-digit number without any letters or special characters.",
+      },
+      default: "",
+    },
+    contactPersonEmail: {
+      type: String,
+      required: [false, "👍 Email is not mandatory but recommended."],
+      unique: true,
+      validate: {
+        validator: function (v) {
+          // Simple pattern: "something@something.something"
+          return !v || emailRegex.test(v);
+          // "!v ||" allows empty if 'required: false'
+        },
+        message:
+          "⚠️ Email must be a valid email format (e.g. user@example.com).",
+      },
+      default: "",
+    },
     currency: {
       type: String,
       required: true,
@@ -280,6 +314,24 @@ customerSchema.pre("save", async function (next) {
   } finally {
     console.log("ℹ️ Finally customer counter closed");
   }
+});
+
+customerSchema.pre("validate", function (next) {
+  if (
+    this.contactPersonName &&
+    !this.contactPersonPhone &&
+    !this.contactPersonEmail
+  ) {
+    this.invalidate(
+      "contactPersonPhone",
+      "⚠️ Either phone or email is required if contact person name is provided."
+    );
+    this.invalidate(
+      "contactPersonEmail",
+      "⚠️ Either phone or email is required if contact person name is provided."
+    );
+  }
+  next();
 });
 
 export const CustomerModel =

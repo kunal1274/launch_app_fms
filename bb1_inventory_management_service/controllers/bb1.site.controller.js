@@ -1,12 +1,13 @@
 import createError from "http-errors";
-import { SiteModel } from "../models/bb1site.model.js";
+import { SiteModel } from "../models/bb1.site.model.js";
 
 export const list = async (req, res, next) => {
   try {
     const rows = await SiteModel.find({ archived: false }).sort({
       createdAt: -1,
     });
-    res.json({ data: rows });
+    console.log("rows", rows);
+    res.status(200).json({ siteData: rows });
   } catch (e) {
     next(e);
   }

@@ -11,7 +11,7 @@ import {
   unarchiveCompanyById,
   getArchivedCompanies,
 } from "../controllers/company.controller.js";
-import { cacheMiddleware } from "../middleware/cacheMiddleware.js";
+// import { cacheMiddleware } from "../middleware/cacheMiddleware.js";
 
 const companyRouter = express.Router();
 
@@ -22,7 +22,8 @@ const companyRouter = express.Router();
 
 companyRouter.post("/", createCompany);
 companyRouter.get("/archived", getArchivedCompanies); // Must be defined before :companyId route
-companyRouter.get("/", cacheMiddleware, getAllCompanies); // ADDED
+//companyRouter.get("/", cacheMiddleware, getAllCompanies); // ADDED
+companyRouter.get("/", getAllCompanies); // ADDED
 companyRouter.get("/:companyId", getCompanyById);
 companyRouter.put("/:companyId", updateCompanyById);
 companyRouter.delete("/:companyId", deleteCompanyById);

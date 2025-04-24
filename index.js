@@ -71,7 +71,7 @@ AumMrigahApp.use(hpp());
 
 // Rate Limiter
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 60 * 60 * 1000,
   max: 100,
   message: "Too many requests from this IP. Please try again later.",
 });

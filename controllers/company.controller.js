@@ -2,7 +2,7 @@
 
 //import { CompanyModel } from "../../models/1_0_0/company.1_0_0.model.js";
 import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
+// import redisClient from "../middleware/redisClient.js";
 import { CompanyModel } from "../models/company.model.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
 import logger, {
@@ -60,7 +60,7 @@ export const createCompany = async (req, res) => {
     });
 
     // Invalidate the "all companies" cache key
-    await redisClient.del("/fms/api/v0/companies");
+    // await redisClient.del("/fms/api/v0/companies");
 
     logger.info(
       "✅ Company Created Successfully and logged 🧾 in Audit Logs ",
@@ -144,10 +144,10 @@ export const getAllCompanies = async (req, res) => {
     // ADDED
     // 2) store it in Redis for subsequent requests
     // use the same key used in the cacheMiddleware
-    const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies"
-    await redisClient.set(cacheKey, JSON.stringify(companies), {
-      EX: 60 * 5, // expire in 5 minutes
-    });
+    // const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies"
+    // await redisClient.set(cacheKey, JSON.stringify(companies), {
+    //   EX: 60 * 5, // expire in 5 minutes
+    // });
 
     logger.info("✅ Fetched All Companies", {
       context: "getAllCompanies",
@@ -228,7 +228,7 @@ export const updateCompanyById = async (req, res) => {
     }
     winstonLogger.info(`ℹ️ Updated company: ${company._id}`);
 
-    await redisClient.del("/fms/api/v0/companies");
+    // await redisClient.del("/fms/api/v0/companies");
 
     return res.status(200).json({
       status: "success",
@@ -260,7 +260,7 @@ export const deleteCompanyById = async (req, res) => {
     const { companyId } = req.params;
     const company = await CompanyModel.findByIdAndDelete(companyId);
 
-    await redisClient.del("/fms/api/v0/companies");
+    // await redisClient.del("/fms/api/v0/companies");
 
     if (!company) {
       return res.status(404).json({

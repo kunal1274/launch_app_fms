@@ -103,6 +103,7 @@ const CompanySchema = new Schema(
       enum: {
         values: [
           "Individual",
+          "Community",
           "Manufacturing",
           "ServiceProvider",
           "Trading",

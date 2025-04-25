@@ -1,4 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
+import { dbgModels } from "../../index.js";
 
 // Define Schema
 const globalPartyCounterSchema = new Schema({
@@ -16,3 +17,5 @@ const globalPartyCounterSchema = new Schema({
 export const GlobalPartyCounterModel =
   mongoose.models.GlobalPartyCounters ||
   model("GlobalPartyCounters", globalPartyCounterSchema);
+
+// dbgModels("global party counters mounted ", GlobalPartyCounterModel);

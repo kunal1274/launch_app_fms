@@ -1,5 +1,6 @@
 // redisClient.js
 import { createClient } from "redis";
+import { dbgRedis } from "../index.js";
 
 const {
   REDIS_HOST,
@@ -37,6 +38,7 @@ redisClient.on("error", (err) => {
   console.error("Redis Client Error:", err);
 });
 
+// dbgRedis("redis will be mounted ", redisClient);
 // Connect right away
 (async () => {
   try {
@@ -46,5 +48,7 @@ redisClient.on("error", (err) => {
     console.error("Could not connect to Redis:", err);
   }
 })();
+
+// dbgRedis("redis mounting complete ", redisClient);
 
 export default redisClient;

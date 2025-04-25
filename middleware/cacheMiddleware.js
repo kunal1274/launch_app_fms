@@ -1,4 +1,5 @@
 // cacheMiddleware.js
+import { dbgRedis } from "../index.js";
 import redisClient from "./redisClient.js";
 
 /**
@@ -11,7 +12,7 @@ export async function cacheMiddleware(req, res, next) {
     if (req.method !== "GET") {
       return next();
     }
-
+    dbgRedis("cache middleware mounting");
     const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies?archived=false"
     const cachedData = await redisClient.get(cacheKey);
 

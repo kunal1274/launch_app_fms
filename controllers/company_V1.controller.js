@@ -2,8 +2,7 @@
 
 //import { CompanyModel } from "../../models/1_0_0/company.1_0_0.model.js";
 import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import { dbgRedis } from "../index.js";
-import redisClient from "../middleware/redisClient.js";
+// import redisClient from "../middleware/redisClient.js";
 import { CompanyModel } from "../models/company.model.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
 import logger, {
@@ -61,7 +60,7 @@ export const createCompany = async (req, res) => {
     });
 
     // Invalidate the "all companies" cache key
-    await redisClient.del("/fms/api/v0/companies");
+    // await redisClient.del("/fms/api/v0/companies");
 
     logger.info(
       "✅ Company Created Successfully and logged 🧾 in Audit Logs ",
@@ -142,15 +141,13 @@ export const getAllCompanies = async (req, res) => {
   try {
     const companies = await CompanyModel.find();
 
-    // ADDED
-    // 2) store it in Redis for subsequent requests
-    // use the same key used in the cacheMiddleware
-    const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies"
-    await redisClient.set(cacheKey, JSON.stringify(companies), {
-      EX: 60 * 5, // expire in 5 minutes
-    });
-
-    dbgRedis("redis mounting complete ", redisClient);
+    // // ADDED
+    // // 2) store it in Redis for subsequent requests
+    // // use the same key used in the cacheMiddleware
+    // const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies"
+    // await redisClient.set(cacheKey, JSON.stringify(companies), {
+    //   EX: 60 * 5, // expire in 5 minutes
+    // });
 
     logger.info("✅ Fetched All Companies", {
       context: "getAllCompanies",

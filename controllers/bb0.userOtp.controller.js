@@ -7,11 +7,13 @@ console.log("EMAIL_USER:", !!process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", !!process.env.EMAIL_PASS);
 
 import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken";
-import { winstonLogger } from "../utility/logError.utils.js";
-import { UserGlobalModel } from "../models/userGlobal.model.js";
 import { UserOtpModel } from "../models/userOtp.model.js";
-import generateOtp from "../utility/generateOtp.utils.js";
+import generateOtp from "../utility/generateOtp.utils.js"; // Assumes you have an OTP generator function
+import { winstonLogger } from "../utility/logError.utils.js";
+// import { UserGoogleModel } from "../models/userGoogle.model.js";
+import jwt from "jsonwebtoken";
+import { UserGlobalModel } from "../models/userGlobal.model.js";
+// import logger from "../utility/logger.util.js";
 import {
   getFormattedLocalDateTime,
   getLocalTimeString,
@@ -81,6 +83,14 @@ const transporter = nodemailer.createTransport({
   logger: true,
 });
 
+// this runs once, on module load:
+transporter
+  .verify()
+  .then(() => console.log("✅ SMTP verified OK"))
+  .catch((err) => {
+    console.error("❌ SMTP verify failed:", err.message);
+    console.error(err.stack);
+  });
 // const transporter = nodemailer.createTransport({
 //   host: "smtp.gmail.com",
 //   port: 465,
@@ -94,18 +104,18 @@ const transporter = nodemailer.createTransport({
 // });
 
 // // right after `createTransport(...)`
-transporter
-  .verify()
-  .then(() => {
-    dbgEmail("✅ SMTP connection OK");
-  })
-  .catch((err) => {
-    dbgEmail("❌ SMTP connection failed:", {
-      message: err.message,
-      stack: err.stack,
-    });
-    // Optionally throw or process.exit here
-  });
+// transporter
+//   .verify()
+//   .then(() => {
+//     dbgEmail("✅ SMTP connection OK");
+//   })
+//   .catch((err) => {
+//     dbgEmail("❌ SMTP connection failed:", {
+//       message: err.message,
+//       stack: err.stack,
+//     });
+//     // Optionally throw or process.exit here
+//   });
 
 /**
  * sendOtp - Controller to generate and send an OTP via WhatsApp, SMS, or email.
@@ -116,7 +126,7 @@ transporter
  *  - otpLength (optional, defaults to 6).
  */
 
-// dbgEmail("Nodemailer transport created with", transporter);
+dbgEmail("Nodemailer transport created with", transporter);
 
 export const sendOtp = async (req, res) => {
   const { phoneNumber, email, method, otpType, otpLength } = req.body;
@@ -245,8 +255,22 @@ export const sendOtp = async (req, res) => {
         .json({ msg: "❌ Invalid method or missing phone number/email" });
     }
   } catch (err) {
-    winstonLogger.error("Error in sendOtp", { error: err });
-    return res.status(500).json({ msg: "❌ Server Error", error: err });
+    // winstonLogger.error("Error in sendOtp", { error: err });
+    // return res.status(500).json({ msg: "❌ Server Error", error: err });
+    // 1) Print it to console so you see it immediately in Render’s logs:
+    console.error("❌ [sendOtp] Error sending OTP:", err.message);
+    console.error(err.stack);
+
+    // 2) Log its message + stack explicitly:
+    winstonLogger.error(`❌ [sendOtp] ${err.message}`, {
+      stack: err.stack,
+    });
+
+    // 3) Return the message (not the whole err object) to the client:
+    return res.status(500).json({
+      msg: "❌ Server Error",
+      error: err.message,
+    });
   }
 };
 
@@ -377,104 +401,104 @@ export const verifyOtp = async (req, res) => {
  * Typically you'd check if an existing record with the same email/phone exists
  * and update it rather than creating multiples. But here's the simplest approach.
  */
-// export const createOtp = async (req, res) => {
-//   try {
-//     const { phoneNumber, email, otp, method, otpType } = req.body;
+export const createOtp = async (req, res) => {
+  try {
+    const { phoneNumber, email, otp, method, otpType } = req.body;
 
-//     if (!otp || !method || !otpType) {
-//       return res.status(400).json({
-//         message: "otp, method, and otpType are required fields",
-//       });
-//     }
+    if (!otp || !method || !otpType) {
+      return res.status(400).json({
+        message: "otp, method, and otpType are required fields",
+      });
+    }
 
-//     // Create a new OTP record
-//     const newOtp = new UserOtpModel({
-//       phoneNumber,
-//       email,
-//       otp,
-//       method,
-//       otpType,
-//       // expiresAt is automatically set by default
-//     });
+    // Create a new OTP record
+    const newOtp = new UserOtpModel({
+      phoneNumber,
+      email,
+      otp,
+      method,
+      otpType,
+      // expiresAt is automatically set by default
+    });
 
-//     const savedOtp = await newOtp.save();
-//     return res.status(201).json(savedOtp);
-//   } catch (error) {
-//     console.error("Error creating OTP:", error);
-//     return res.status(500).json({ message: "Failed to create OTP record" });
-//   }
-// };
+    const savedOtp = await newOtp.save();
+    return res.status(201).json(savedOtp);
+  } catch (error) {
+    console.error("Error creating OTP:", error);
+    return res.status(500).json({ message: "Failed to create OTP record" });
+  }
+};
 
 /**
  * Get all OTP records
  */
-// export const getAllOtps = async (req, res) => {
-//   try {
-//     const otps = await UserOtpModel.find();
-//     return res.json(otps);
-//   } catch (error) {
-//     console.error("Error fetching OTPs:", error);
-//     return res.status(500).json({ message: "Failed to fetch OTP records" });
-//   }
-// };
+export const getAllOtps = async (req, res) => {
+  try {
+    const otps = await UserOtpModel.find();
+    return res.json(otps);
+  } catch (error) {
+    console.error("Error fetching OTPs:", error);
+    return res.status(500).json({ message: "Failed to fetch OTP records" });
+  }
+};
 
 /**
  * Get a single OTP record by ID
  */
-// export const getOtpById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const otpRecord = await UserOtpModel.findById(id);
-//     if (!otpRecord) {
-//       return res.status(404).json({ message: "OTP record not found" });
-//     }
-//     return res.json(otpRecord);
-//   } catch (error) {
-//     console.error("Error fetching OTP by ID:", error);
-//     return res.status(500).json({ message: "Failed to fetch OTP record" });
-//   }
-// };
+export const getOtpById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const otpRecord = await UserOtpModel.findById(id);
+    if (!otpRecord) {
+      return res.status(404).json({ message: "OTP record not found" });
+    }
+    return res.json(otpRecord);
+  } catch (error) {
+    console.error("Error fetching OTP by ID:", error);
+    return res.status(500).json({ message: "Failed to fetch OTP record" });
+  }
+};
 
 /**
  * Update an OTP record by ID
  */
-// export const updateOtp = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { phoneNumber, email, otp, method, otpType, expiresAt } = req.body;
+export const updateOtp = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { phoneNumber, email, otp, method, otpType, expiresAt } = req.body;
 
-//     const updatedOtp = await UserOtpModel.findByIdAndUpdate(
-//       id,
-//       { phoneNumber, email, otp, method, otpType, expiresAt },
-//       { new: true }
-//     );
+    const updatedOtp = await UserOtpModel.findByIdAndUpdate(
+      id,
+      { phoneNumber, email, otp, method, otpType, expiresAt },
+      { new: true }
+    );
 
-//     if (!updatedOtp) {
-//       return res.status(404).json({ message: "OTP record not found" });
-//     }
+    if (!updatedOtp) {
+      return res.status(404).json({ message: "OTP record not found" });
+    }
 
-//     return res.json(updatedOtp);
-//   } catch (error) {
-//     console.error("Error updating OTP:", error);
-//     return res.status(500).json({ message: "Failed to update OTP record" });
-//   }
-// };
+    return res.json(updatedOtp);
+  } catch (error) {
+    console.error("Error updating OTP:", error);
+    return res.status(500).json({ message: "Failed to update OTP record" });
+  }
+};
 
 /**
  * Delete an OTP record by ID
  */
-// export const deleteOtp = async (req, res) => {
-//   try {
-//     const { id } = req.params;
+export const deleteOtp = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//     const deletedOtp = await UserOtpModel.findByIdAndDelete(id);
-//     if (!deletedOtp) {
-//       return res.status(404).json({ message: "OTP record not found" });
-//     }
+    const deletedOtp = await UserOtpModel.findByIdAndDelete(id);
+    if (!deletedOtp) {
+      return res.status(404).json({ message: "OTP record not found" });
+    }
 
-//     return res.json({ message: "OTP record deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting OTP:", error);
-//     return res.status(500).json({ message: "Failed to delete OTP record" });
-//   }
-// };
+    return res.json({ message: "OTP record deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting OTP:", error);
+    return res.status(500).json({ message: "Failed to delete OTP record" });
+  }
+};

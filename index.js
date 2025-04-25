@@ -3,16 +3,19 @@ dotenv.config(); // Loads .env into process.env
 
 import createDebug from "debug";
 // pick any namespace convention you like:
-const dbgServer = createDebug("fms:server");
-const dbgDB = createDebug("fms:db");
-const dbgMW = createDebug("fms:mw");
-const dbgSecurity = createDebug("fms:security");
-const dbgRoutes = createDebug("fms:routes"); // initial
-const dbgRoutesBB1 = createDebug("fms:routes-bb1");
-const dbgRoutesBB2 = createDebug("fms:routes-bb2");
-const dbgRoutesBB3 = createDebug("fms:routes-bb3");
-const dbgEmail = createDebug("fms:email");
-const dbgException = createDebug("fms:exception");
+export const dbgServer = createDebug("fms:server");
+export const dbgDB = createDebug("fms:db");
+export const dbgMW = createDebug("fms:mw");
+export const dbgSecurity = createDebug("fms:security");
+export const dbgRoutes = createDebug("fms:routes"); // initial
+export const dbgRoutesBB1 = createDebug("fms:routes-bb1");
+export const dbgRoutesBB2 = createDebug("fms:routes-bb2");
+export const dbgRoutesBB3 = createDebug("fms:routes-bb3");
+export const dbgEmail = createDebug("fms:email");
+export const dbgRedis = createDebug("fms:redis");
+export const dbgModels = createDebug("fms:models");
+export const dbgControllers = createDebug("fms:controllers");
+export const dbgException = createDebug("fms:exception");
 
 // In-built Node JS Modules Import
 import expressAumMrigah from "express";
@@ -41,7 +44,7 @@ import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
 import logger from "./utility/logger.util.js";
 import { requestTimer } from "./middleware/requestTimer.js";
 import googleAuthRouter from "./routes/google-auth.routes.js";
-import otpAuthRouter from "./routes/otp-auth.routes.js";
+// import otpAuthRouter from "./routes/otp-auth.routes.js";
 import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
 import userGlobalRouter from "./routes/userGlobal.routes.js";
 import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
@@ -49,6 +52,14 @@ import userRoleRouter from "./role_based_access_control_service/routes/userRole.
 import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrder.routes.js";
 import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 import siteRoutes from "./bb1_inventory_management_service/routes/bb1.site.routes.js";
+import { sendOtp } from "./controllers/userOtp.controller.js";
+import { verifyOtp } from "./controllers/userOtp.controller.js";
+import { authenticateJWT } from "./middleware/authJwtHandler.js";
+import { UserGlobalModel } from "./models/userGlobal.model.js";
+import {
+  getFormattedLocalDateTime,
+  getLocalTimeString,
+} from "./utility/getLocalTime.js";
 
 // // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -146,6 +157,26 @@ AumMrigahApp.get("/", (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
 });
 
+AumMrigahApp.post("/fms/api/v0/otp-auth/send-otp", sendOtp);
+AumMrigahApp.post("/fms/api/v0/otp-auth/verify-otp", verifyOtp);
+// Validate token route
+AumMrigahApp.post(
+  "/fms/api/v0/otp-auth/me",
+  authenticateJWT,
+  async (req, res) => {
+    // If token is valid, req.user is set by the authenticateJWT middleware
+    // Return user info or a success message
+    const existingUserGlobal = await UserGlobalModel.findOne({
+      email: req?.user?.email,
+    });
+    res.status(200).json({
+      msg: `✅ Token is valid recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
+      user: req.user,
+      userGlobal: existingUserGlobal,
+    });
+  }
+);
+
 // // Main Functional Modules
 dbgRoutes("Mounting userRouter router on /fms/api/v0/users");
 AumMrigahApp.use("/fms/api/v0/users", userRouter);
@@ -184,7 +215,7 @@ dbgRoutes(
 );
 AumMrigahApp.use("/auth", googleAuthRouter);
 AumMrigahApp.use("/api/auth", googleAlternativeApiAuthRouter);
-AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
+// AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
 
 // Authorization
 dbgRoutes(

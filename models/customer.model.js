@@ -61,7 +61,7 @@ const customerSchema = new Schema(
     email: {
       type: String,
       required: [false, "👍 Email is not mandatory but recommended."],
-      unique: true,
+      //unique: true,
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"

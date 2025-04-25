@@ -39,7 +39,7 @@ const vendorSchema = new Schema(
     contactNum: {
       type: String,
       required: [true, "⚠️ Contact number is required."],
-      unique: true,
+      // unique: true,
       minlength: [
         10,
         "⚠️ The phone number should be exactly 10 digits without country code.",
@@ -56,7 +56,6 @@ const vendorSchema = new Schema(
     email: {
       type: String,
       required: [false, "⚠️ Email is not mandatory but recommended."],
-      unique: true,
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"
@@ -76,7 +75,6 @@ const vendorSchema = new Schema(
     contactPersonPhone: {
       type: String,
       required: [false, "Contact number is required."],
-      unique: true,
 
       validate: {
         validator: function (v) {
@@ -90,7 +88,6 @@ const vendorSchema = new Schema(
     contactPersonEmail: {
       type: String,
       required: [false, "👍 Email is not mandatory but recommended."],
-      unique: true,
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"
@@ -189,7 +186,7 @@ const vendorSchema = new Schema(
         code: {
           type: String,
           required: false,
-          unique: true,
+          // unique: true,
         },
         type: {
           type: String,
@@ -207,12 +204,16 @@ const vendorSchema = new Schema(
             true,
             "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
           ],
-          unique: true,
+          // unique: true,
           validate: {
             validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
             message:
               "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
           },
+        },
+        upi: {
+          type: String,
+          required: false,
         },
         name: {
           type: String,
@@ -230,6 +231,10 @@ const vendorSchema = new Schema(
           type: Boolean,
           required: true,
           default: false,
+        },
+        qrDetails: {
+          type: String,
+          default: "",
         },
       },
     ],
@@ -333,6 +338,47 @@ vendorSchema.pre(/^find/, function (next) {
   this.populate("globalPartyId", "code active");
   next();
 });
+
+// Then add:
+vendorSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      email: { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+vendorSchema.index(
+  { contactNum: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      contactNum: { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+vendorSchema.index(
+  { "bankDetails.bankNum": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "bankDetails.bankNum": { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+vendorSchema.index(
+  { "bankDetails.code": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "bankDetails.code": { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
 
 export const VendorModel =
   mongoose.models.Vendors || model("Vendors", vendorSchema);

@@ -5,51 +5,69 @@ import { dbgModels } from "../index.js";
  * Subschema for Bank Account Details.
  * This schema holds information for one bank account.
  */
-const BankDetailsSchema = new Schema(
+const bankDetailsSchema = new Schema(
   {
-    accountNumber: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    bankName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    bankAddress: {
+    code: {
       type: String,
       required: false,
-      trim: true,
+      // unique: true,
     },
-    ifscCode: {
+    type: {
       type: String,
       required: true,
-      trim: true,
+      enum: {
+        values: ["BankAndUpi", "Cash", "Bank", "UPI", "Crypto", "Barter"],
+        message:
+          "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
+      },
+      default: "Bank",
     },
-    swiftCode: {
+    bankNum: {
+      type: String,
+      required: [
+        true,
+        "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
+      ],
+      // unique: true,
+      validate: {
+        validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
+        message:
+          "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
+      },
+    },
+    upi: {
       type: String,
       required: false,
-      trim: true,
     },
-    upiDetails: {
+    name: {
+      type: String,
+      required: true,
+    },
+    ifsc: {
       type: String,
       required: false,
-      trim: true,
+    },
+    swift: {
+      type: String,
+      required: false,
+    },
+    active: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
     qrDetails: {
       type: String,
-      required: false,
-      trim: true,
+      default: "",
     },
   },
-  { _id: false }
+  { _id: true }
 ); // _id false to prevent a separate id for each subdocument
 
 /**
  * Subschema for Tax Information.
  */
-const TaxInfoSchema = new Schema(
+const taxInfoSchema = new Schema(
   {
     gstNumber: {
       type: String,
@@ -73,12 +91,12 @@ const TaxInfoSchema = new Schema(
 /**
  * Main Company Schema.
  */
-const CompanySchema = new Schema(
+const companySchema = new Schema(
   {
     companyCode: {
       type: String,
       required: true,
-      unique: true,
+      //unique: true,
       trim: true,
       validate: {
         validator: (v) => /^[A-Za-z0-9_-]+$/.test(v),
@@ -157,11 +175,11 @@ const CompanySchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
       trim: true,
       lowercase: true,
     },
-    contactNumber: {
+    contactNum: {
       type: String,
       required: false,
       trim: true,
@@ -171,8 +189,8 @@ const CompanySchema = new Schema(
       required: false,
       trim: true,
     },
-    bankDetails: [BankDetailsSchema], // Array of bank account details.
-    taxInfo: TaxInfoSchema, // Tax information subdocument.
+    bankDetails: [bankDetailsSchema], // Array of bank account details.
+    taxInfo: taxInfoSchema, // Tax information subdocument.
     // Additional fields if needed (like active flag, created/updated timestamps) can be added:
     archived: { type: Boolean, default: false }, // New field
     createdBy: {
@@ -233,7 +251,7 @@ const CompanySchema = new Schema(
  * Pre-save hook to normalize and validate fields.
  * For example, we ensure that email is lowercase and trim companyCode.
  */
-CompanySchema.pre("save", function (next) {
+companySchema.pre("save", function (next) {
   // Ensure email is lowercase (this is already done by the schema 'lowercase' option)
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
@@ -268,10 +286,51 @@ CompanySchema.pre("save", function (next) {
 // CompanySchema.index({ companyCode: 1 });
 // CompanySchema.index({ email: 1 });
 
-CompanySchema.pre(/^find/, function (next) {
+companySchema.pre(/^find/, function (next) {
   this.populate("globalPartyId", "code active");
   next();
 });
 
+// Then add:
+companySchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      email: { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+companySchema.index(
+  { contactNum: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      contactNum: { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+companySchema.index(
+  { "bankDetails.bankNum": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "bankDetails.bankNum": { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+companySchema.index(
+  { "bankDetails.code": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "bankDetails.code": { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
 export const CompanyModel =
-  mongoose.models.Companies || model("Companies", CompanySchema);
+  mongoose.models.Companies || model("Companies", companySchema);

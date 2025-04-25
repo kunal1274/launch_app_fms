@@ -44,7 +44,6 @@ const customerSchema = new Schema(
     contactNum: {
       type: String,
       required: [true, "Contact number is required."],
-      unique: true,
       minlength: [
         10,
         "⚠️ The phone number should be exactly 10 digits without country code.",
@@ -81,7 +80,6 @@ const customerSchema = new Schema(
     contactPersonPhone: {
       type: String,
       required: [false, "Contact number is required."],
-      unique: true,
 
       validate: {
         validator: function (v) {
@@ -95,7 +93,7 @@ const customerSchema = new Schema(
     contactPersonEmail: {
       type: String,
       required: [false, "👍 Email is not mandatory but recommended."],
-      unique: true,
+
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"
@@ -184,13 +182,12 @@ const customerSchema = new Schema(
         code: {
           type: String,
           required: false,
-          unique: true,
         },
         type: {
           type: String,
           required: true,
           enum: {
-            values: ["Cash", "Bank", "UPI", "Crypto", "Barter"],
+            values: ["BankAndUpi", "Cash", "Bank", "UPI", "Crypto", "Barter"],
             message:
               "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
           },
@@ -202,12 +199,15 @@ const customerSchema = new Schema(
             true,
             "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
           ],
-          unique: true,
           validate: {
             validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
             message:
               "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
           },
+        },
+        upi: {
+          type: String,
+          required: false,
         },
         name: {
           type: String,
@@ -225,6 +225,10 @@ const customerSchema = new Schema(
           type: Boolean,
           required: true,
           default: false,
+        },
+        qrDetails: {
+          type: String,
+          default: "",
         },
       },
     ],
@@ -343,6 +347,47 @@ customerSchema.pre("validate", function (next) {
   }
   next();
 });
+
+// Then add:
+customerSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      email: { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+customerSchema.index(
+  { contactNum: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      contactNum: { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+customerSchema.index(
+  { "bankDetails.bankNum": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "bankDetails.bankNum": { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
+
+customerSchema.index(
+  { "bankDetails.code": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "bankDetails.code": { $exists: true, $type: "string", $ne: "" },
+    },
+  }
+);
 
 export const CustomerModel =
   mongoose.models.Customers || model("Customers", customerSchema);

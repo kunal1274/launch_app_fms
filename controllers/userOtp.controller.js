@@ -377,104 +377,104 @@ export const verifyOtp = async (req, res) => {
  * Typically you'd check if an existing record with the same email/phone exists
  * and update it rather than creating multiples. But here's the simplest approach.
  */
-// export const createOtp = async (req, res) => {
-//   try {
-//     const { phoneNumber, email, otp, method, otpType } = req.body;
+export const createOtp = async (req, res) => {
+  try {
+    const { phoneNumber, email, otp, method, otpType } = req.body;
 
-//     if (!otp || !method || !otpType) {
-//       return res.status(400).json({
-//         message: "otp, method, and otpType are required fields",
-//       });
-//     }
+    if (!otp || !method || !otpType) {
+      return res.status(400).json({
+        message: "otp, method, and otpType are required fields",
+      });
+    }
 
-//     // Create a new OTP record
-//     const newOtp = new UserOtpModel({
-//       phoneNumber,
-//       email,
-//       otp,
-//       method,
-//       otpType,
-//       // expiresAt is automatically set by default
-//     });
+    // Create a new OTP record
+    const newOtp = new UserOtpModel({
+      phoneNumber,
+      email,
+      otp,
+      method,
+      otpType,
+      // expiresAt is automatically set by default
+    });
 
-//     const savedOtp = await newOtp.save();
-//     return res.status(201).json(savedOtp);
-//   } catch (error) {
-//     console.error("Error creating OTP:", error);
-//     return res.status(500).json({ message: "Failed to create OTP record" });
-//   }
-// };
+    const savedOtp = await newOtp.save();
+    return res.status(201).json(savedOtp);
+  } catch (error) {
+    console.error("Error creating OTP:", error);
+    return res.status(500).json({ message: "Failed to create OTP record" });
+  }
+};
 
 /**
  * Get all OTP records
  */
-// export const getAllOtps = async (req, res) => {
-//   try {
-//     const otps = await UserOtpModel.find();
-//     return res.json(otps);
-//   } catch (error) {
-//     console.error("Error fetching OTPs:", error);
-//     return res.status(500).json({ message: "Failed to fetch OTP records" });
-//   }
-// };
+export const getAllOtps = async (req, res) => {
+  try {
+    const otps = await UserOtpModel.find();
+    return res.json(otps);
+  } catch (error) {
+    console.error("Error fetching OTPs:", error);
+    return res.status(500).json({ message: "Failed to fetch OTP records" });
+  }
+};
 
 /**
  * Get a single OTP record by ID
  */
-// export const getOtpById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const otpRecord = await UserOtpModel.findById(id);
-//     if (!otpRecord) {
-//       return res.status(404).json({ message: "OTP record not found" });
-//     }
-//     return res.json(otpRecord);
-//   } catch (error) {
-//     console.error("Error fetching OTP by ID:", error);
-//     return res.status(500).json({ message: "Failed to fetch OTP record" });
-//   }
-// };
+export const getOtpById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const otpRecord = await UserOtpModel.findById(id);
+    if (!otpRecord) {
+      return res.status(404).json({ message: "OTP record not found" });
+    }
+    return res.json(otpRecord);
+  } catch (error) {
+    console.error("Error fetching OTP by ID:", error);
+    return res.status(500).json({ message: "Failed to fetch OTP record" });
+  }
+};
 
 /**
  * Update an OTP record by ID
  */
-// export const updateOtp = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { phoneNumber, email, otp, method, otpType, expiresAt } = req.body;
+export const updateOtp = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { phoneNumber, email, otp, method, otpType, expiresAt } = req.body;
 
-//     const updatedOtp = await UserOtpModel.findByIdAndUpdate(
-//       id,
-//       { phoneNumber, email, otp, method, otpType, expiresAt },
-//       { new: true }
-//     );
+    const updatedOtp = await UserOtpModel.findByIdAndUpdate(
+      id,
+      { phoneNumber, email, otp, method, otpType, expiresAt },
+      { new: true }
+    );
 
-//     if (!updatedOtp) {
-//       return res.status(404).json({ message: "OTP record not found" });
-//     }
+    if (!updatedOtp) {
+      return res.status(404).json({ message: "OTP record not found" });
+    }
 
-//     return res.json(updatedOtp);
-//   } catch (error) {
-//     console.error("Error updating OTP:", error);
-//     return res.status(500).json({ message: "Failed to update OTP record" });
-//   }
-// };
+    return res.json(updatedOtp);
+  } catch (error) {
+    console.error("Error updating OTP:", error);
+    return res.status(500).json({ message: "Failed to update OTP record" });
+  }
+};
 
 /**
  * Delete an OTP record by ID
  */
-// export const deleteOtp = async (req, res) => {
-//   try {
-//     const { id } = req.params;
+export const deleteOtp = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//     const deletedOtp = await UserOtpModel.findByIdAndDelete(id);
-//     if (!deletedOtp) {
-//       return res.status(404).json({ message: "OTP record not found" });
-//     }
+    const deletedOtp = await UserOtpModel.findByIdAndDelete(id);
+    if (!deletedOtp) {
+      return res.status(404).json({ message: "OTP record not found" });
+    }
 
-//     return res.json({ message: "OTP record deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting OTP:", error);
-//     return res.status(500).json({ message: "Failed to delete OTP record" });
-//   }
-// };
+    return res.json({ message: "OTP record deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting OTP:", error);
+    return res.status(500).json({ message: "Failed to delete OTP record" });
+  }
+};

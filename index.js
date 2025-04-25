@@ -44,7 +44,7 @@ import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
 import logger from "./utility/logger.util.js";
 import { requestTimer } from "./middleware/requestTimer.js";
 import googleAuthRouter from "./routes/google-auth.routes.js";
-// import otpAuthRouter from "./routes/otp-auth.routes.js";
+import otpAuthRouter from "./routes/otp-auth.routes.js";
 import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
 import userGlobalRouter from "./routes/userGlobal.routes.js";
 import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
@@ -157,25 +157,25 @@ AumMrigahApp.get("/", (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
 });
 
-AumMrigahApp.post("/fms/api/v0/otp-auth/send-otp", sendOtp);
-AumMrigahApp.post("/fms/api/v0/otp-auth/verify-otp", verifyOtp);
-// Validate token route
-AumMrigahApp.post(
-  "/fms/api/v0/otp-auth/me",
-  authenticateJWT,
-  async (req, res) => {
-    // If token is valid, req.user is set by the authenticateJWT middleware
-    // Return user info or a success message
-    const existingUserGlobal = await UserGlobalModel.findOne({
-      email: req?.user?.email,
-    });
-    res.status(200).json({
-      msg: `✅ Token is valid recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
-      user: req.user,
-      userGlobal: existingUserGlobal,
-    });
-  }
-);
+// AumMrigahApp.post("/fms/api/v0/otp-auth/send-otp", sendOtp);
+// AumMrigahApp.post("/fms/api/v0/otp-auth/verify-otp", verifyOtp);
+// // Validate token route
+// AumMrigahApp.post(
+//   "/fms/api/v0/otp-auth/me",
+//   authenticateJWT,
+//   async (req, res) => {
+//     // If token is valid, req.user is set by the authenticateJWT middleware
+//     // Return user info or a success message
+//     const existingUserGlobal = await UserGlobalModel.findOne({
+//       email: req?.user?.email,
+//     });
+//     res.status(200).json({
+//       msg: `✅ Token is valid recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
+//       user: req.user,
+//       userGlobal: existingUserGlobal,
+//     });
+//   }
+// );
 
 // // Main Functional Modules
 dbgRoutes("Mounting userRouter router on /fms/api/v0/users");
@@ -215,7 +215,7 @@ dbgRoutes(
 );
 AumMrigahApp.use("/auth", googleAuthRouter);
 AumMrigahApp.use("/api/auth", googleAlternativeApiAuthRouter);
-// AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
+AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
 
 // Authorization
 dbgRoutes(

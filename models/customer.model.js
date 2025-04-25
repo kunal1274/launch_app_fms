@@ -168,6 +168,11 @@ const customerSchema = new Schema(
       required: false,
       default: "",
     },
+    remarks: {
+      type: String,
+      required: false,
+      default: "",
+    },
     active: {
       type: Boolean,
       required: true,
@@ -314,6 +319,11 @@ customerSchema.pre("save", async function (next) {
   } finally {
     console.log("ℹ️ Finally customer counter closed");
   }
+});
+
+customerSchema.pre(/^find/, function (next) {
+  this.populate("globalPartyId", "code active");
+  next();
 });
 
 customerSchema.pre("validate", function (next) {

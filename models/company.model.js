@@ -87,6 +87,13 @@ const CompanySchema = new Schema(
       },
       // You can enforce uppercase if needed by using a pre-save hook.
     },
+    // auto generated
+    globalPartyId: {
+      type: Schema.Types.ObjectId,
+      ref: "GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      required: false,
+      unique: true, //ensures only 1 company doc can point to the same globalParty
+    },
     companyName: {
       type: String,
       required: true,
@@ -120,6 +127,11 @@ const CompanySchema = new Schema(
           "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
       },
       default: "INR",
+    },
+    remarks: {
+      type: String,
+      required: false,
+      default: "",
     },
     primaryGSTAddress: {
       type: String,
@@ -255,6 +267,11 @@ CompanySchema.pre("save", function (next) {
  */
 // CompanySchema.index({ companyCode: 1 });
 // CompanySchema.index({ email: 1 });
+
+CompanySchema.pre(/^find/, function (next) {
+  this.populate("globalPartyId", "code active");
+  next();
+});
 
 export const CompanyModel =
   mongoose.models.Companies || model("Companies", CompanySchema);

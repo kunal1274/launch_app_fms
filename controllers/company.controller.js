@@ -5,6 +5,7 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import { dbgRedis } from "../index.js";
 import redisClient from "../middleware/redisClient.js";
 import { CompanyModel } from "../models/company.model.js";
+import { GlobalPartyModel } from "../shared_service/models/globalParty.model.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
 import logger, {
   loggerJsonFormat,
@@ -16,7 +17,7 @@ import mongoose from "mongoose";
  * Create a new Company.
  * Required fields: companyCode, companyName, primaryGSTAddress, and email.
  */
-export const createCompany = async (req, res) => {
+export const createCompany_V1 = async (req, res) => {
   try {
     const companyData = req.body;
 
@@ -49,6 +50,173 @@ export const createCompany = async (req, res) => {
 
     // Create the company document
     const company = await CompanyModel.create(companyData);
+    // winstonLogger.info(`Company created successfully: ${company._id}`);
+
+    // **** AUDIT LOG: "CREATE" ****
+    await createAuditLog({
+      user: req.user?.username || "System",
+      module: "Company",
+      action: "CREATE",
+      recordId: company._id,
+      changes: { newData: company }, // full doc or partial
+    });
+
+    // Invalidate the "all companies" cache key
+    await redisClient.del("/fms/api/v0/companies");
+
+    logger.info(
+      "✅ Company Created Successfully and logged 🧾 in Audit Logs ",
+      {
+        context: "createCompany",
+        companyId: company._id,
+        timestamp: new Date().toISOString(),
+      }
+    );
+    loggerJsonFormat.info(" ✅ Company Created Successfully [ JSON Format ] ", {
+      context: "createCompany",
+      companyId: company._id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return res.status(201).json({
+      status: "success",
+      message: " ✅ Company created successfully.",
+      data: company,
+    });
+  } catch (error) {
+    // logError("Company Creation", error);
+    // if (error.name === "ValidationError") {
+    //   return res.status(422).json({
+    //     status: "failure",
+    //     message: "Validation error during company creation.",
+    //     error: error.message,
+    //   });
+    // }
+
+    // Handle specific error types
+    if (error instanceof mongoose.Error.ValidationError) {
+      logStackError("❌ Company Creation - Validation Error", error);
+      return res.status(422).send({
+        status: "failure",
+        message: "❌ Validation error during customer creation.",
+        error: error.message,
+      });
+    }
+
+    if (error.code === 11000) {
+      logStackError(" ❌ Company Creation - Duplicate Error", error);
+      return res.status(409).send({
+        status: "failure",
+        message: "A company with this code number or email id  already exists.",
+      });
+    }
+
+    if (error.message.includes("network error")) {
+      logStackError("❌ Company Creation - Network Error", error);
+      return res.status(503).send({
+        status: "failure",
+        message: "Service temporarily unavailable. Please try again later.",
+      });
+    }
+
+    // General Server Error
+    logStackError("❌ Company Creation - Unknown Error", error);
+    return res.status(500).send({
+      status: "failure",
+      message:
+        "An unexpected error occurred. Please try again. It could be internal server error which is unknown ",
+      error: error.message,
+    });
+
+    // return res.status(500).json({
+    //   status: "failure",
+    //   message: "Internal Server Error",
+    //   error: error.message,
+    // });
+  }
+};
+
+export const createCompany = async (req, res) => {
+  try {
+    //const companyData = req.body;
+    const {
+      companyCode,
+      companyName,
+      email,
+      primaryGSTAddress,
+      globalPartyId,
+      ...rest
+    } = req.body;
+
+    // Validate required fields
+    if (!companyCode || !companyName || !primaryGSTAddress || !email) {
+      logger.warn("Company Creation - ⚠️ Missing Required Fields", {
+        context: "createCompany",
+        body: { companyCode, companyName, email, primaryGSTAddress },
+      });
+
+      loggerJsonFormat.warn(
+        "Company Creation - ⚠️ Missing Required Fields [ JSON Format ] ",
+        {
+          context: "createCompany",
+          body: { companyCode, companyName, email, primaryGSTAddress },
+        }
+      );
+
+      return res.status(422).json({
+        status: "failure",
+        message:
+          "⚠️ Company code, company name, primary GST address, and email are required.",
+      });
+    }
+
+    // 2) Prepare a variable to hold the final partyId
+    let partyId = null;
+
+    // 3) If no globalPartyId was passed, we create a new GlobalParty doc with partyType=["Customer"].
+    if (!globalPartyId) {
+      const newParty = await GlobalPartyModel.create({
+        name: companyName, // or pass something else for .name
+        partyType: ["Company"], // force the array to have "Customer"
+      });
+      partyId = newParty._id;
+    } else {
+      // 4) If globalPartyId is provided, we find that doc
+      const existingParty = await GlobalPartyModel.findById(globalPartyId);
+      if (!existingParty) {
+        // Option A: Throw an error
+        // return res.status(404).send({
+        //   status: "failure",
+        //   message: `GlobalParty with ID ${globalPartyId} does not exist.`,
+        // });
+
+        // Option B: Or create a new GlobalParty doc with that _id (rarely recommended)
+        // But usually you'd want to fail if the globalPartyId doesn't exist
+        return res.status(404).json({
+          status: "failure",
+          message: `⚠️ GlobalParty ${globalPartyId} not found. (Cannot create Company referencing missing party.)`,
+        });
+      }
+
+      // 5) If found, ensure "Customer" is in the partyType array
+      if (!existingParty.partyType.includes("Company")) {
+        existingParty.partyType.push("Company");
+        await existingParty.save();
+      }
+
+      // We'll use the existingParty's _id
+      partyId = existingParty._id;
+    }
+
+    // Create the company document
+    const company = await CompanyModel.create({
+      companyCode,
+      companyName,
+      email,
+      primaryGSTAddress,
+      globalPartyId: partyId,
+      ...rest,
+    });
     // winstonLogger.info(`Company created successfully: ${company._id}`);
 
     // **** AUDIT LOG: "CREATE" ****

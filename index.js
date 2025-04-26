@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config(); // Loads .env into process.env
+import fs from "fs";
+import path from "path";
 
 import createDebug from "debug";
 // pick any namespace convention you like:
@@ -52,14 +54,30 @@ import userRoleRouter from "./role_based_access_control_service/routes/userRole.
 import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrder.routes.js";
 import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 import siteRoutes from "./bb1_inventory_management_service/routes/bb1.site.routes.js";
-import { sendOtp } from "./controllers/userOtp.controller.js";
-import { verifyOtp } from "./controllers/userOtp.controller.js";
-import { authenticateJWT } from "./middleware/authJwtHandler.js";
-import { UserGlobalModel } from "./models/userGlobal.model.js";
-import {
-  getFormattedLocalDateTime,
-  getLocalTimeString,
-} from "./utility/getLocalTime.js";
+import multer from "multer";
+import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
+// import { sendOtp } from "./controllers/userOtp.controller.js";
+// import { verifyOtp } from "./controllers/userOtp.controller.js";
+// import { authenticateJWT } from "./middleware/authJwtHandler.js";
+// import { UserGlobalModel } from "./models/userGlobal.model.js";
+// import {
+//   getFormattedLocalDateTime,
+//   getLocalTimeString,
+// } from "./utility/getLocalTime.js";
+
+// 1a) Create base "uploads" folder if missing
+// const UPLOAD_BASE = path.join(process.cwd(), "uploads");
+// if (!fs.existsSync(UPLOAD_BASE)) {
+//   fs.mkdirSync(UPLOAD_BASE);
+// }
+
+// // 1b) Create the "sales-orders" subfolder
+// const SO_UPLOAD_DIR = path.join(UPLOAD_BASE, "sales-orders");
+// if (!fs.existsSync(SO_UPLOAD_DIR)) {
+//   fs.mkdirSync(SO_UPLOAD_DIR);
+// }
+const UPLOAD_BASE = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOAD_BASE)) fs.mkdirSync(UPLOAD_BASE, { recursive: true });
 
 // // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -151,6 +169,9 @@ const stream = {
 AumMrigahApp.use(morgan("combined", { stream }));
 dbgServer("morgan logging initialized ");
 
+// Serve everything under /uploads from the local uploads/ folder:
+// AumMrigahApp.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Routes
 dbgRoutes("Mounting default router on /");
 AumMrigahApp.get("/", (req, res) => {
@@ -201,6 +222,15 @@ dbgRoutesBB3(
 );
 AumMrigahApp.use("/bb/api/v3/sales-orders", salesOrderRoutes);
 
+// AFTER your API prefix: serve the static files under the same /bb/api/v3/uploads path
+dbgRoutesBB3("Mounting static routs-BB3 router on /bb/api/v3/uploads");
+AumMrigahApp.use(
+  "/bb/api/v3/uploads",
+  expressAumMrigah.static(path.join(process.cwd(), "uploads"))
+);
+dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
+AumMrigahApp.use("/bb/api/v3/upload", genericUploadRouter);
+
 // // Inventory Management Service -bb1
 dbgRoutesBB1("Mounting siteRoutes-BB1 router on /bb/api/v1/sites");
 AumMrigahApp.use("/bb/api/v1/sites", siteRoutes);
@@ -228,6 +258,23 @@ AumMrigahApp.use("/fms/api/v0/user-roles", userRoleRouter);
 dbgRoutes("Mounting env router on /env");
 AumMrigahApp.get("/env", (req, res) => {
   res.json({ allowedOrigins });
+});
+
+// Error handler for Multer
+AumMrigahApp.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    let message = err.message;
+    if (err.code === "LIMIT_FILE_SIZE") {
+      message = "File too large (max 30 MB).";
+    } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      message = "Unexpected field: " + err.field;
+    }
+    return res
+      .status(400)
+      .json({ status: "failure in multer uploading index.js", message });
+  }
+  // non‐Multer errors:
+  next(err);
 });
 
 //Global error handler (optional but recommended)

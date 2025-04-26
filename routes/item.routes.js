@@ -8,7 +8,7 @@ import {
   uploadFilesAgainstItem,
 } from "../controllers/item.controller.js";
 import expressItem from "express";
-//   import { upload } from "../../middleware/1_0_0/uploadConfig.1_0_0.mw.js";
+import { upload } from "../middleware/uploadConfig.js";
 
 const itemRouter = expressItem.Router();
 
@@ -19,10 +19,10 @@ itemRouter.put("/:itemId", updateItem);
 itemRouter.delete("/:itemId", deleteItem);
 itemRouter.delete("/", deleteAllItems);
 // Upload files for an item
-//   itemRouter.post(
-//     "/:itemId/upload",
-//     upload.array("files", 10),
-//     uploadFilesAgainstItem
-//   );
+itemRouter.post(
+  "/:itemId/upload",
+  upload.array("files", 10),
+  uploadFilesAgainstItem
+);
 
 export { itemRouter };

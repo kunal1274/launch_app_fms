@@ -421,6 +421,79 @@ export const cancelMovement = async (req, res, next) => {
   });
 };
 
+/* POST /sales-orders/:id/upload  */
+export const uploadFiles1 = async (req, res, next) => {
+  try {
+    const soId = req.params.id;
+    const files = req.files;
+    if (!files?.length) return res.status(400).json({ message: "No files" });
+
+    const payload = files.map((f) => ({
+      fileName: f.originalname,
+      fileType: f.mimetype,
+      fileUrl: `/uploads/sales-orders/${f.filename}`,
+    }));
+
+    const so = await SalesOrderModel.findByIdAndUpdate(
+      soId,
+      { $push: { files: { $each: payload } } },
+      { new: true }
+    );
+    if (!so) return res.status(404).json({ message: "Sales order not found" });
+    res.json({ message: "Uploaded Files to SO", data: so.files });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const uploadFiles = async (req, res) => {
+  try {
+    const soId = req.params.id;
+    const files = req.files;
+
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({
+        status: "failure",
+        message: "❌ No files uploaded",
+      });
+    }
+
+    // Map multer file objects to your metadata shape
+    const uploaded = files.map((f) => ({
+      fileName: f.originalname,
+      fileType: f.mimetype,
+      fileUrl: `/uploads/sales-orders/${f.filename}`,
+      uploadedAt: new Date(),
+    }));
+
+    // Push into the sales order's files array
+    const so = await SalesOrderModel.findByIdAndUpdate(
+      soId,
+      { $push: { files: { $each: uploaded } } },
+      { new: true }
+    );
+
+    if (!so) {
+      return res.status(404).json({
+        status: "failure",
+        message: `❌ Sales order ${soId} not found`,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "✅ Files attached successfully",
+      data: so,
+    });
+  } catch (error) {
+    console.error("Error uploading files for SalesOrder:", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "❌ Internal server error",
+      error: error.message,
+    });
+  }
+};
 /* ---------- export ---------- */
 
 /*

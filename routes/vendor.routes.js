@@ -15,6 +15,6 @@ vendorRouter.get("/", getVendors);
 vendorRouter.get("/:vendorId", getVendor);
 vendorRouter.put("/:vendorId", updateVendor);
 vendorRouter.delete("/:vendorId", deleteVendor);
-vendorRouter.delete("/", deleteAllVendors);
+vendorRouter.delete("/bulk-delete", deleteAllVendors);
 
 export { vendorRouter };

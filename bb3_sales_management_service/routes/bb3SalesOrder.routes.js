@@ -2,6 +2,7 @@ import express from "express";
 import * as ctl from "../controllers/bb3SalesOrder.controller.js";
 import queryParser from "../middleware/bb3QueryParser.js";
 import statusGuard from "../middleware/bb3StatusGuard.js";
+import { upload } from "../../middleware/uploadConfig.js";
 
 const router = express.Router();
 
@@ -36,6 +37,8 @@ router.patch("/:id/movements/:col/:rid/cancel", ctl.cancelMovement);
 
 /* payments */
 router.post("/:id/payments", ctl.addPayment);
+
+router.post("/:id/upload", upload.array("files", 10), ctl.uploadFiles);
 
 // router.get("/export", queryParser, ctl.exportFile);
 

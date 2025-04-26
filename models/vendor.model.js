@@ -238,6 +238,12 @@ const vendorSchema = new Schema(
         },
       },
     ],
+    logoImage: {
+      type: String,
+      required: false,
+      trim: true,
+      // Typically a URL pointing to the company logo image.
+    },
     files: [
       {
         fileName: { type: String, required: true }, // Name of the file

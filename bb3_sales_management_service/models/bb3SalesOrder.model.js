@@ -66,6 +66,18 @@ export const STATUS_TRANSITIONS = {
   ],
 };
 
+// 3) File schema & model
+const fileSchema = new mongoose.Schema(
+  {
+    fileName: { type: String, required: true, unique: true },
+    originalName: { type: String, required: true },
+    fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
+    fileUrl: { type: String, required: true }, // URL/path of the uploaded file
+    uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+  },
+  { timestamps: true }
+);
+
 // Suppose you have a function getDaysFromPaymentTerm that returns the day offset:
 export function getDaysFromPaymentTerm(paymentTerm) {
   switch (paymentTerm) {
@@ -754,15 +766,17 @@ const salesOrderSchema1C1I = new Schema(
       required: true,
       default: true,
     },
-    // New field for file uploads
-    files: [
-      {
-        fileName: { type: String, required: true }, // Name of the file
-        fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
-        fileUrl: { type: String, required: true }, // URL/path of the uploaded file
-        uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
-      },
-    ],
+    // // New field for file uploads
+    // files: [
+    //   {
+    //     fileName: { type: String, required: true }, // Name of the file
+    //     fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
+    //     originalName: { type: String, required: true },
+    //     fileUrl: { type: String, required: true }, // URL/path of the uploaded file
+    //     uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+    //   },
+    // ],
+    files: [fileSchema],
     extras: {
       type: Map,
       of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
@@ -771,7 +785,6 @@ const salesOrderSchema1C1I = new Schema(
   },
   {
     timestamps: true,
-
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {

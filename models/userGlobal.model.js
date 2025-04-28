@@ -21,6 +21,10 @@ const UserGlobalSchema = new Schema(
       required: false,
       unique: true, //ensures only 1 user doc can point to the same globalParty
     },
+    defaultCompany: {
+      type: Schema.Types.ObjectId,
+      ref: "Companies",
+    },
     phoneNumber: {
       type: String,
       required: function () {

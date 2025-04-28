@@ -198,10 +198,10 @@ const vendorSchema = new Schema(
           },
           default: "Bank",
         },
-        bankNum: {
+        bankAccNum: {
           type: String,
           required: [
-            true,
+            false,
             "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
           ],
           // unique: true,
@@ -215,9 +215,13 @@ const vendorSchema = new Schema(
           type: String,
           required: false,
         },
-        name: {
+        bankName: {
           type: String,
-          required: true,
+          required: false,
+        },
+        accountHolderName: {
+          type: String,
+          required: false,
         },
         ifsc: {
           type: String,
@@ -242,14 +246,15 @@ const vendorSchema = new Schema(
       type: String,
       required: false,
       trim: true,
-      // Typically a URL pointing to the company logo image.
+      // Typically a URL pointing to the vendor logo image.
     },
     files: [
       {
         fileName: { type: String, required: true }, // Name of the file
+        fileOriginalName: { type: String, required: true },
         fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
         fileUrl: { type: String, required: true }, // URL/path of the uploaded file
-        uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+        fileUploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
       },
     ],
     extras: {

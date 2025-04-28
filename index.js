@@ -56,6 +56,9 @@ import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 import siteRoutes from "./bb1_inventory_management_service/routes/bb1.site.routes.js";
 import multer from "multer";
 import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
+import { uploadMulter } from "./middleware/uploadMulterConfig.js";
+import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
+import { fileRouter } from "./shared_service/routes/bb0.fileUpload.routes.js";
 // import { sendOtp } from "./controllers/userOtp.controller.js";
 // import { verifyOtp } from "./controllers/userOtp.controller.js";
 // import { authenticateJWT } from "./middleware/authJwtHandler.js";
@@ -76,8 +79,8 @@ import { genericUploadRouter } from "./shared_service/routes/genericUpload.route
 // if (!fs.existsSync(SO_UPLOAD_DIR)) {
 //   fs.mkdirSync(SO_UPLOAD_DIR);
 // }
-const UPLOAD_BASE = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(UPLOAD_BASE)) fs.mkdirSync(UPLOAD_BASE, { recursive: true });
+// const UPLOAD_BASE = path.join(process.cwd(), "uploads");
+// if (!fs.existsSync(UPLOAD_BASE)) fs.mkdirSync(UPLOAD_BASE, { recursive: true });
 
 // // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -87,6 +90,13 @@ dbgServer("Index.js loaded, ENV port=%s", process.env.PORT);
 
 // // Middleware
 const AumMrigahApp = expressAumMrigah();
+
+// AFTER your API prefix: serve the static files under the same /bb/api/v3/uploads path
+dbgRoutesBB3("Mounting static routs-BB3 router on /uploads");
+AumMrigahApp.use(
+  "/uploads",
+  expressAumMrigah.static(path.join(process.cwd(), "uploads"))
+);
 
 AumMrigahApp.use(expressAumMrigah.json());
 dbgServer("json() enabled for secure headers");
@@ -222,14 +232,97 @@ dbgRoutesBB3(
 );
 AumMrigahApp.use("/bb/api/v3/sales-orders", salesOrderRoutes);
 
-// AFTER your API prefix: serve the static files under the same /bb/api/v3/uploads path
-dbgRoutesBB3("Mounting static routs-BB3 router on /bb/api/v3/uploads");
-AumMrigahApp.use(
-  "/bb/api/v3/uploads",
-  expressAumMrigah.static(path.join(process.cwd(), "uploads"))
-);
-dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
-AumMrigahApp.use("/bb/api/v3/upload", genericUploadRouter);
+// dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
+// AumMrigahApp.use("/bb/api/v3/upload", genericUploadRouter);
+
+AumMrigahApp.use("/bb/api/v3/sales-orders", fileRouter);
+// 7a) Upload endpoint
+// AumMrigahApp.post(
+//   "/api/v0/sales-orders/:id/files-upload",
+//   uploadMulter.array("files"),
+//   async (req, res) => {
+//     const soId = req.params.id;
+//     // Build an array of metadata objects
+//     const metas = req.files.map((f) => ({
+//       fileName: f.filename,
+//       originalName: f.originalname,
+//       fileType: f.mimetype,
+//       fileUrl: `/uploads/${f.filename}`,
+//       uploadedAt: new Date(),
+//     }));
+//     console.log("metas", metas);
+//     // Push all at once using $each
+//     const updated = await SalesOrderModel.findByIdAndUpdate(
+//       soId,
+//       { $push: { files: { $each: metas } } },
+//       { new: true }
+//     ).select("files");
+//     console.log("updated", updated);
+//     return res.json(updated.files);
+//   }
+// );
+
+// // 7b) List files
+// AumMrigahApp.get("/api/v0/sales-orders/:id/files-upload", async (req, res) => {
+//   const so = await SalesOrderModel.findById(req.params.id).select("files");
+//   if (!so) return res.status(404).send("Sales order not found");
+//   res.json(so.files);
+// });
+
+// // 7c) Delete file
+
+// AumMrigahApp.delete(
+//   "/api/v0/sales-orders/:id/files-upload/:fileId",
+//   async (req, res) => {
+//     const { id: soId, fileId } = req.params;
+
+//     // Load the sales order document
+//     const so = await SalesOrderModel.findById(soId);
+//     if (!so) return res.status(404).send("Sales order not found");
+
+//     // Find the subdoc
+//     const fileDoc = so.files.id(fileId);
+//     if (!fileDoc) return res.status(404).send("File not found");
+
+//     // Remove the physical file
+//     fs.unlinkSync(path.join(process.cwd(), "uploads", fileDoc.fileName));
+
+//     // Remove subdoc from the array
+//     fileDoc.remove(); // MongooseDocumentArray#id().remove()
+//     await so.save(); // Persist the change
+
+//     return res.json(so.files);
+//   }
+// );
+
+// AumMrigahApp.delete(
+//   "/api/v1/sales-orders/:id/files-upload/:fileId",
+//   async (req, res) => {
+//     const { id: soId, fileId } = req.params;
+
+//     // 1) Fetch the sales order (so we know the filename to delete)
+//     const order = await SalesOrderModel.findById(soId).select("files");
+//     if (!order)
+//       return res.status(404).json({ message: "Sales order not found" });
+
+//     // 2) Find the file sub-doc in the array
+//     const fileEntry = order.files.find((f) => f._id.toString() === fileId);
+//     if (!fileEntry) return res.status(404).json({ message: "File not found" });
+
+//     // 3) Delete the physical file
+//     fs.unlinkSync(path.join(process.cwd(), "uploads", fileEntry.filename));
+
+//     // 4) Pull the sub-doc out of the array
+//     const updated = await SalesOrderModel.findByIdAndUpdate(
+//       soId,
+//       { $pull: { files: { _id: fileId } } },
+//       { new: true, select: "files" }
+//     );
+
+//     // 5) Return the new files array
+//     return res.json(updated.files);
+//   }
+// );
 
 // // Inventory Management Service -bb1
 dbgRoutesBB1("Mounting siteRoutes-BB1 router on /bb/api/v1/sites");

@@ -5,6 +5,9 @@ import { dbgModels } from "../index.js";
  * Subschema for Bank Account Details.
  * This schema holds information for one bank account.
  */
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const bankDetailsSchema = new Schema(
   {
     code: {
@@ -178,9 +181,17 @@ const companySchema = new Schema(
     },
     email: {
       type: String,
-      required: true,
-      // unique: true,
-      trim: true,
+      required: [false, "⚠️ Email is not mandatory but recommended."],
+      validate: {
+        validator: function (v) {
+          // Simple pattern: "something@something.something"
+          return !v || emailRegex.test(v);
+          // "!v ||" allows empty if 'required: false'
+        },
+        message:
+          "⚠️ Email must be a valid email format (e.g. user@example.com).",
+      },
+      default: "",
       lowercase: true,
     },
     contactNum: {

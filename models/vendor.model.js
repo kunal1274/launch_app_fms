@@ -1,6 +1,8 @@
 import mongoose, { model, Schema } from "mongoose";
 import { VendorCounterModel } from "./counter.model.js";
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const vendorSchema = new Schema(
   {
     code: {

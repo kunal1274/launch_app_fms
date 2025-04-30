@@ -92,7 +92,7 @@ const taxInfoSchema = new Schema(
       trim: true,
     },
   },
-  { _id: false }
+  { _id: true }
 );
 
 /**

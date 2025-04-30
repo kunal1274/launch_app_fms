@@ -59,6 +59,7 @@ import { genericUploadRouter } from "./shared_service/routes/genericUpload.route
 import { uploadMulter } from "./middleware/uploadMulterConfig.js";
 import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
 import { fileRouter } from "./shared_service/routes/bb0.fileUpload.routes.js";
+import { siteRouter } from "./routes/sites.routes.js";
 // import { sendOtp } from "./controllers/userOtp.controller.js";
 // import { verifyOtp } from "./controllers/userOtp.controller.js";
 // import { authenticateJWT } from "./middleware/authJwtHandler.js";
@@ -225,6 +226,8 @@ dbgRoutes("Mounting salesOrderRouter router on /fms/api/v0/salesorders");
 AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
 dbgRoutes("Mounting purchaseOrderRouter router on /fms/api/v0/purchaseorders");
 AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
+dbgRoutes("Mounting sites router on /fms/api/v0/sites");
+AumMrigahApp.use("/fms/api/v0/sites", siteRouter);
 
 // Sales Management Service -bb3
 dbgRoutesBB3(

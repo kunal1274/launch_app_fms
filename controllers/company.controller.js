@@ -14,6 +14,18 @@ import logger, {
 import mongoose from "mongoose";
 
 /**
+ * INVALIDATE CACHE HELPER
+ */
+const invalidateCompanyCache = async (key = "/fms/api/v0/companies") => {
+  try {
+    await redisClient.del(key);
+    logger.info(`Cache invalidated: ${key}`, { context: "invalidateCache" });
+  } catch (err) {
+    logStackError("❌ Cache invalidation failed", err);
+  }
+};
+
+/**
  * Create a new Company.
  * Required fields: companyCode, companyName, primaryGSTAddress, and email.
  */
@@ -54,7 +66,7 @@ export const createCompany_V1 = async (req, res) => {
 
     // **** AUDIT LOG: "CREATE" ****
     await createAuditLog({
-      user: req.user?.username || "System",
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
       module: "Company",
       action: "CREATE",
       recordId: company._id,
@@ -221,7 +233,7 @@ export const createCompany = async (req, res) => {
 
     // **** AUDIT LOG: "CREATE" ****
     await createAuditLog({
-      user: req.user?.username || "System",
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
       module: "Company",
       action: "CREATE",
       recordId: company._id,
@@ -547,6 +559,205 @@ export const getArchivedCompanies = async (req, res) => {
     return res.status(500).json({
       status: "failure",
       message: "❌ Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// ──────── BULK OPERATIONS (ADDED) ──────────────────────────────────────────
+
+/**
+ * Bulk Create Companies.
+ * Expects req.body = [{ companyCode, companyName, ... }, ...]
+ */
+export const bulkCreateCompanies = async (req, res) => {
+  const docs = req.body;
+  if (!Array.isArray(docs) || docs.length === 0) {
+    return res.status(400).json({
+      status: "failure",
+      message: "⚠️ Request body must be a non-empty array of company objects.",
+    });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    logger.info("💾 Bulk create: inserting companies", {
+      context: "bulkCreateCompanies",
+      count: docs.length,
+    });
+
+    // insertMany uses session for atomicity
+    const created = await CompanyModel.insertMany(docs, { session });
+
+    // Audit-log each creation
+    await Promise.all(
+      created.map((company) =>
+        createAuditLog({
+          user: req.user?.username || "67ec2fb004d3cc3237b58772",
+          module: "Company",
+          action: "BULK_CREATE",
+          recordId: company._id,
+          changes: { newData: company },
+        })
+      )
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // invalidate cache
+    await invalidateCompanyCache();
+
+    logger.info("✅ Bulk create successful", {
+      context: "bulkCreateCompanies",
+      createdCount: created.length,
+    });
+    return res.status(201).json({
+      status: "success",
+      message: `✅ ${created.length} companies created successfully.`,
+      data: created,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    logStackError("❌ Bulk create error", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "❌ Error during bulk company creation.",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Bulk Update Companies.
+ * Expects req.body = [{ id: "...", update: { ... } }, ...]
+ */
+export const bulkUpdateCompanies = async (req, res) => {
+  const updates = req.body;
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).json({
+      status: "failure",
+      message: "⚠️ Request body must be a non-empty array of {id, update}.",
+    });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    logger.info("🔄 Bulk update: processing companies", {
+      context: "bulkUpdateCompanies",
+      count: updates.length,
+    });
+
+    const results = [];
+    for (const { id, update } of updates) {
+      const updated = await CompanyModel.findByIdAndUpdate(
+        id,
+        { ...update, updatedBy: req.user?.username || "Unknown" },
+        { new: true, runValidators: true, session }
+      );
+      if (!updated) {
+        throw new Error(`Company not found: ${id}`);
+      }
+      // Audit log per update
+      await createAuditLog({
+        user: req.user?.username || "67ec2fb004d3cc3237b58772",
+        module: "Company",
+        action: "BULK_UPDATE",
+        recordId: updated._id,
+        changes: { newData: updated },
+      });
+      results.push(updated);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+    await invalidateCompanyCache();
+
+    logger.info("✅ Bulk update successful", {
+      context: "bulkUpdateCompanies",
+      updatedCount: results.length,
+    });
+    return res.status(200).json({
+      status: "success",
+      message: `✅ ${results.length} companies updated successfully.`,
+      data: results,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    logStackError("❌ Bulk update error", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "❌ Error during bulk company update.",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Bulk Delete Companies.
+ * Expects req.body = { ids: ["...", "...", ...] }
+ */
+export const bulkDeleteCompanies = async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({
+      status: "failure",
+      message: "⚠️ Request body must include a non-empty array of ids.",
+    });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    logger.info("🗑️ Bulk delete: removing companies", {
+      context: "bulkDeleteCompanies",
+      count: ids.length,
+    });
+
+    const { deletedCount } = await CompanyModel.deleteMany(
+      { _id: { $in: ids } },
+      { session }
+    );
+    if (deletedCount === 0) {
+      throw new Error("No companies deleted (ids may be invalid).");
+    }
+
+    // Audit-log each deletion
+    await Promise.all(
+      ids.map((id) =>
+        createAuditLog({
+          user: req.user?.username || "67ec2fb004d3cc3237b58772",
+          module: "Company",
+          action: "BULK_DELETE",
+          recordId: id,
+          changes: null,
+        })
+      )
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    await invalidateCompanyCache();
+
+    logger.info("✅ Bulk delete successful", {
+      context: "bulkDeleteCompanies",
+      deletedCount,
+    });
+    return res.status(200).json({
+      status: "success",
+      message: `✅ ${deletedCount} companies deleted successfully.`,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    logStackError("❌ Bulk delete error", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "❌ Error during bulk company deletion.",
       error: error.message,
     });
   }

@@ -148,3 +148,143 @@ const allocationCounterSchema = new Schema({
 export const AllocationCounterModel =
   mongoose.models.AllocationCounters ||
   model("AllocationCounters", allocationCounterSchema);
+
+const siteCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const SiteCounterModel =
+  mongoose.models.SiteCounters || model("SiteCounters", siteCounterSchema);
+
+const warehouseCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const WarehouseCounterModel =
+  mongoose.models.WarehouseCounters ||
+  model("WarehouseCounters", warehouseCounterSchema);
+
+const productDimConfigCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ProductDimConfigCounterModel =
+  mongoose.models.ProductDimConfigCounters ||
+  model("ProductDimConfigCounters", productDimConfigCounterSchema);
+
+const productDimSizeCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ProductDimSizeCounterModel =
+  mongoose.models.ProductDimSizeCounters ||
+  model("ProductDimSizeCounters", productDimSizeCounterSchema);
+
+const productDimColorCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ProductDimColorCounterModel =
+  mongoose.models.ProductDimColorCounters ||
+  model("ProductDimColorCounters", productDimColorCounterSchema);
+
+const productDimVersionCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ProductDimVersionCounterModel =
+  mongoose.models.ProductDimVersionCounters ||
+  model("ProductDimVersionCounters", productDimVersionCounterSchema);
+
+const productDimStyleCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ProductDimStyleCounterModel =
+  mongoose.models.ProductDimStyleCounters ||
+  model("ProductDimStyleCounters", productDimStyleCounterSchema);
+
+const batchCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const BatchCounterModel =
+  mongoose.models.BatchCounters || model("BatchCounters", batchCounterSchema);
+
+const serialCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const SerialCounterModel =
+  mongoose.models.SerialCounters ||
+  model("SerialCounters", serialCounterSchema);

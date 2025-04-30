@@ -10,6 +10,9 @@ import {
   archiveCompanyById,
   unarchiveCompanyById,
   getArchivedCompanies,
+  bulkCreateCompanies,
+  bulkUpdateCompanies,
+  bulkDeleteCompanies,
 } from "../controllers/company.controller.js";
 import { cacheMiddleware } from "../middleware/cacheMiddleware.js";
 
@@ -29,5 +32,8 @@ companyRouter.put("/:companyId", updateCompanyById);
 companyRouter.delete("/:companyId", deleteCompanyById);
 companyRouter.patch("/:companyId/archive", archiveCompanyById);
 companyRouter.patch("/:companyId/unarchive", unarchiveCompanyById);
+companyRouter.post("/bulk-create", bulkCreateCompanies);
+companyRouter.put("/bulk-update", bulkUpdateCompanies);
+companyRouter.delete("/bulk-delete", bulkDeleteCompanies);
 
 export { companyRouter };

@@ -14,7 +14,7 @@ const auditLogSchema = new Schema(
       ref: "UserGlobal",
       //type: String,
       required: false,
-      // default: "UnknownUser",
+      // default: "67ec2fb004d3cc3237b58772", //devratxen
     },
     module: {
       // e.g. "Company", "SalesOrder", "Customer", "Vendor"

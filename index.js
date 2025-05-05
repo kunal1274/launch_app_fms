@@ -58,7 +58,7 @@ import multer from "multer";
 import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
 import { uploadMulter } from "./middleware/uploadMulterConfig.js";
 import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
-import { fileRouter } from "./shared_service/routes/bb0.fileUpload.routes.js";
+import { fileRouter } from "./shared_service/routes/fileUploadViaMulter.routes.js";
 import { siteRouter } from "./routes/sites.routes.js";
 // import { sendOtp } from "./controllers/userOtp.controller.js";
 // import { verifyOtp } from "./controllers/userOtp.controller.js";
@@ -233,12 +233,12 @@ AumMrigahApp.use("/fms/api/v0/sites", siteRouter);
 dbgRoutesBB3(
   "Mounting sale order Routes-BB3 router on /bb/api/v3/sales-orders"
 );
-AumMrigahApp.use("/bb/api/v3/sales-orders", salesOrderRoutes);
+AumMrigahApp.use("/fms/api/v0/sales-orders", salesOrderRoutes);
 
 // dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
 // AumMrigahApp.use("/bb/api/v3/upload", genericUploadRouter);
 
-AumMrigahApp.use("/bb/api/v3/sales-orders", fileRouter);
+AumMrigahApp.use("/fms/api/v0/sales-orders", fileRouter);
 // 7a) Upload endpoint
 // AumMrigahApp.post(
 //   "/api/v0/sales-orders/:id/files-upload",

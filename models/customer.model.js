@@ -167,6 +167,13 @@ const customerSchema = new Schema(
       maxLength: [10, `⚠️ The pan number cannot be greater than 10 chars.`],
       default: "",
     },
+    tanNum: {
+      type: String,
+      required: false,
+      minLength: [10, `⚠️ The tan number should be with min. 10 chars`],
+      maxLength: [10, `⚠️ The tan number cannot be greater than 10 chars.`],
+      default: "",
+    },
     address: {
       type: String,
       required: false,

@@ -5,10 +5,11 @@ import { SalesOrderModel } from "../../bb3_sales_management_service/models/bb3Sa
 
 const buildMeta = (f) => ({
   fileName: f.filename,
-  originalName: f.originalname,
+  fileOriginalName: f.originalname,
   fileType: f.mimetype,
-  fileUrl: `/uploads/sales-orders/${f.filename}`,
-  uploadedAt: new Date(),
+  // fileUrl: `/uploads/sales-orders/${f.filename}`,
+  fileUrl: `/uploads/${f.filename}`,
+  fileUploadedAt: new Date(),
 });
 
 export const saveFiles = async (req, res, next) => {
@@ -45,9 +46,10 @@ export const deleteFile = async (req, res, next) => {
     const f = so.files.id(req.params.fileId);
     if (!f) return res.status(404).send("File not found");
 
-    fs.unlinkSync(
-      path.join(process.cwd(), "uploads", "sales-orders", f.fileName)
-    );
+    // fs.unlinkSync(
+    //   path.join(process.cwd(), "uploads", "sales-orders", f.fileName)
+    // );
+    fs.unlinkSync(path.join(process.cwd(), "uploads", f.fileName));
     f.remove();
     await so.save();
     res.json(so.files);

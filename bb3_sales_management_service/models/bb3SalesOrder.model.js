@@ -70,10 +70,10 @@ export const STATUS_TRANSITIONS = {
 const fileSchema = new mongoose.Schema(
   {
     fileName: { type: String, required: true, unique: true },
-    originalName: { type: String, required: true },
+    fileOriginalName: { type: String, required: true },
     fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
     fileUrl: { type: String, required: true }, // URL/path of the uploaded file
-    uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+    fileUploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
   },
   { timestamps: true }
 );
@@ -776,7 +776,7 @@ const salesOrderSchema1C1I = new Schema(
     //     uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
     //   },
     // ],
-    files: [fileSchema],
+    attachedFiles: [fileSchema],
     extras: {
       type: Map,
       of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.

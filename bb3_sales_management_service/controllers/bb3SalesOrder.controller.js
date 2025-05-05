@@ -1,4 +1,6 @@
 import createError from "http-errors";
+import XLSX from "xlsx";
+import path from "path";
 import {
   SalesOrderModel,
   STATUS_TRANSITIONS,
@@ -421,6 +423,75 @@ export const cancelMovement = async (req, res, next) => {
   });
 };
 
+/* ────────── 1 ▶ Export list ────────── */
+export const exportAll = async (req, res, next) => {
+  const rows = await SalesOrderModel.find().lean();
+
+  const data = rows.map((r) => ({
+    OrderNum: r.orderNum,
+    Customer: r.customer?.name,
+    Amount: r.netAmtAfterTax,
+    Currency: r.currency,
+    Status: r.status,
+    CreatedAt: r.createdAt,
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, "SalesOrders");
+
+  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  res.setHeader(
+    "Content-Disposition",
+    "attachment; filename=sales-orders.xlsx"
+  );
+  res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.send(buf);
+};
+
+/* ────────── 2 ▶ Import bulk ────────── */
+export const importBulk = async (req, res, next) => {
+  if (!req.file) return res.status(400).json({ message: "No file" });
+
+  const wb = XLSX.read(req.file.buffer, { type: "buffer" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws);
+
+  console.log("rows", rows);
+
+  let created = 0;
+  const errors = [];
+
+  for (const row of rows) {
+    try {
+      await SalesOrderModel.create({
+        orderType: "Sales",
+        customer: row.CustomerId, // map your fields as you like
+        item: row.ItemId,
+        quantity: row.Quantity,
+        price: row.Price,
+        currency: row.Currency || "INR",
+      });
+      created += 1;
+    } catch (e) {
+      errors.push({ row, message: e.message });
+    }
+  }
+  res.json({ created, errors });
+};
+
+/* ────────── 3 ▶ Duplicate one ────────── */
+export const duplicateOne = async (req, res, next) => {
+  const orig = await SalesOrderModel.findById(req.params.id).lean();
+  if (!orig) return res.status(404).json({ message: "Not found" });
+
+  const { _id, orderNum, createdAt, updatedAt, ...clone } = orig; // drop PK + meta
+  const dupe = await SalesOrderModel.create(clone);
+
+  res.status(201).json(dupe);
+};
+
+/// Not used or approx discarded. till we are not working on it again to close this
 /* POST /sales-orders/:id/upload  */
 export const uploadFiles1 = async (req, res, next) => {
   try {

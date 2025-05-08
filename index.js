@@ -60,6 +60,8 @@ import { uploadMulter } from "./middleware/uploadMulterConfig.js";
 import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
 import { fileRouter } from "./shared_service/routes/fileUploadViaMulter.routes.js";
 import { siteRouter } from "./routes/sites.routes.js";
+// import { queueRedis } from "./batch_jobs/queue/queueRedisClient.js";
+// import { shutdownQueues } from "./batch_jobs/queue/gracefulShutdown.js";
 // import { sendOtp } from "./controllers/userOtp.controller.js";
 // import { verifyOtp } from "./controllers/userOtp.controller.js";
 // import { authenticateJWT } from "./middleware/authJwtHandler.js";
@@ -351,6 +353,22 @@ AumMrigahApp.use("/fms/api/v0/user-globals", userGlobalRouter);
 AumMrigahApp.use("/fms/api/v0/permissions", permissionRouter);
 AumMrigahApp.use("/fms/api/v0/user-roles", userRoleRouter);
 
+// bull batch jobs helper ..
+/* ─────────────────────────────────────────────────────────
+ *  Health endpoints – quick check that Redis & queue work
+ * ───────────────────────────────────────────────────────── */
+// AumMrigahApp.get("/health/queue", async (req, res) => {
+//   const redisStatus = await queueRedis.ping(); // "PONG"
+//   const waiting = await logQueue.queue.getWaitingCount();
+//   res.json({ redis: redisStatus, logJobsWaiting: waiting });
+// });
+
+// AumMrigahApp.post("/health/queue", async (req, res) => {
+//   const job = await logQueue.add({ when: new Date().toISOString() });
+//   res.json({ queued: job.id });
+// });
+
+/// environment check
 dbgRoutes("Mounting env router on /env");
 AumMrigahApp.get("/env", (req, res) => {
   res.json({ allowedOrigins });
@@ -425,6 +443,16 @@ startServer();
 //   //dbgException("❌ DB connection failed: %O", promise);
 // });
 
+// graceful shutdown (SIGINT / SIGTERM)
+// process.on("SIGINT", async () => {
+//   await shutdownQueues();
+//   process.exit(0);
+// });
+// process.on("SIGTERM", async () => {
+//   await shutdownQueues();
+//   process.exit(0);
+// });
+
 process.on("uncaughtException", (err) => {
   logger.error("🛑 Uncaught Exception", {
     message: err.message,
@@ -440,3 +468,5 @@ process.on("unhandledRejection", (reason) => {
   });
   process.exit(1);
 });
+
+/* ───────────────────────────────────────────────────────── */

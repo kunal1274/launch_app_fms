@@ -10,6 +10,7 @@ import logger, {
   loggerJsonFormat,
   logStackError,
 } from "../utility/logger.util.js";
+import { SiteCounterModel } from "../models/counter.model.js";
 
 /**
  * Helper to invalidate Redis cache for sites.
@@ -391,9 +392,26 @@ export const bulkCreateSites = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
+    const n = docs.length;
     logger.info("💾 Bulk create: inserting sites", {
       context: "bulkCreateSites",
-      count: docs.length,
+      count: n,
+    });
+
+    // 1) Reserve a block of sequence numbers
+    const counter = await SiteCounterModel.findOneAndUpdate(
+      { _id: "siteCode" },
+      { $inc: { seq: n } },
+      { new: true, upsert: true, session }
+    );
+
+    const endSeq = counter.seq;
+    const startSeq = endSeq - n + 1;
+
+    // 2) Assign a unique code to each doc
+    docs.forEach((doc, idx) => {
+      const seqNumber = (startSeq + idx).toString().padStart(3, "0");
+      doc.code = `SITE_${seqNumber}`; // ADDED
     });
 
     const created = await SiteModel.insertMany(docs, { session });
@@ -412,6 +430,7 @@ export const bulkCreateSites = async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
+
     await invalidateSiteCache();
 
     logger.info("✅ Bulk create successful", {
@@ -457,9 +476,9 @@ export const bulkUpdateSites = async (req, res) => {
     });
 
     const results = [];
-    for (const { id, update } of updates) {
+    for (const { _id, update } of updates) {
       const updated = await SiteModel.findByIdAndUpdate(
-        id,
+        _id,
         { ...update, updatedBy: req.user?.username || "Unknown" },
         { new: true, runValidators: true, session }
       );

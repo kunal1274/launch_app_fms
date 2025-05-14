@@ -180,6 +180,82 @@ export const WarehouseCounterModel =
   mongoose.models.WarehouseCounters ||
   model("WarehouseCounters", warehouseCounterSchema);
 
+const zoneCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ZoneCounterModel =
+  mongoose.models.ZoneCounters || model("ZoneCounters", zoneCounterSchema);
+
+const locationCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const LocationCounterModel =
+  mongoose.models.LocationCounters ||
+  model("LocationCounters", locationCounterSchema);
+
+const rackCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const RackCounterModel =
+  mongoose.models.RackCounters || model("RackCounters", rackCounterSchema);
+
+const shelfCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const ShelfCounterModel =
+  mongoose.models.ShelfCounters || model("ShelfCounters", shelfCounterSchema);
+
+const binCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const BinCounterModel =
+  mongoose.models.BinCounters || model("BinCounters", binCounterSchema);
+
 const productDimConfigCounterSchema = new Schema({
   _id: {
     type: String,

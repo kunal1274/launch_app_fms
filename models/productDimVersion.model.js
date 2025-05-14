@@ -26,6 +26,10 @@ const productDimVersionSchema = new Schema(
       },
       default: "Physical",
     },
+    values: {
+      type: [String],
+      required: true,
+    },
     active: {
       type: Boolean,
       required: true,

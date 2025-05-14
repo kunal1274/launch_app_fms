@@ -60,6 +60,19 @@ import { uploadMulter } from "./middleware/uploadMulterConfig.js";
 import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
 import { fileRouter } from "./shared_service/routes/fileUploadViaMulter.routes.js";
 import { siteRouter } from "./routes/sites.routes.js";
+import printRoutes from "./routes/print.routes.js";
+import whRouter from "./routes/warehouse.routes.js";
+import zoneRouter from "./routes/zone.routes.js";
+import locationRouter from "./routes/location.routes.js";
+import rackRouter from "./routes/rack.routes.js";
+import shelfRouter from "./routes/shelf.routes.js";
+import binRouter from "./routes/bin.routes.js";
+import configRouter from "./routes/productDimConfig.routes.js";
+import colorRouter from "./routes/productDimColor.routes.js";
+import sizeRouter from "./routes/productDimSize.routes.js";
+import styleRouter from "./routes/productDimStyle.routes.js";
+import versionRouter from "./routes/productDimVersion.routes.js";
+
 // import { queueRedis } from "./batch_jobs/queue/queueRedisClient.js";
 // import { shutdownQueues } from "./batch_jobs/queue/gracefulShutdown.js";
 // import { sendOtp } from "./controllers/userOtp.controller.js";
@@ -224,18 +237,50 @@ dbgRoutes("Mounting itemRouter router on /fms/api/v0/items");
 AumMrigahApp.use("/fms/api/v0/items", itemRouter);
 dbgRoutes("Mounting companyRouter router on /fms/api/v0/companies");
 AumMrigahApp.use("/fms/api/v0/companies", companyRouter);
+
+// Sales and AR Module
 dbgRoutes("Mounting salesOrderRouter router on /fms/api/v0/salesorders");
 AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
+
+// Procurement Module and AP module
 dbgRoutes("Mounting purchaseOrderRouter router on /fms/api/v0/purchaseorders");
 AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
+
+// Inventory Management Module
+// --- Storage Dimensions -----//
 dbgRoutes("Mounting sites router on /fms/api/v0/sites");
 AumMrigahApp.use("/fms/api/v0/sites", siteRouter);
+dbgRoutes("Mounting warehouse router on /fms/api/v0/warehouses");
+AumMrigahApp.use("/fms/api/v0/warehouses", whRouter);
+dbgRoutes("Mounting zone router on /fms/api/v0/zones");
+AumMrigahApp.use("/fms/api/v0/zones", zoneRouter);
+dbgRoutes("Mounting location router on /fms/api/v0/locations");
+AumMrigahApp.use("/fms/api/v0/locations", locationRouter);
+dbgRoutes("Mounting rack router on /fms/api/v0/racks");
+AumMrigahApp.use("/fms/api/v0/racks", rackRouter);
+dbgRoutes("Mounting shelf router on /fms/api/v0/shelves");
+AumMrigahApp.use("/fms/api/v0/shelves", shelfRouter);
+dbgRoutes("Mounting bin router on /fms/api/v0/bins");
+AumMrigahApp.use("/fms/api/v0/bins", binRouter);
+
+// --- Product Dimensions -----//
+dbgRoutes("Mounting sites router on /fms/api/v0/configurations");
+AumMrigahApp.use("/fms/api/v0/configurations", configRouter);
+dbgRoutes("Mounting color router on /fms/api/v0/colors");
+AumMrigahApp.use("/fms/api/v0/colors", colorRouter);
+dbgRoutes("Mounting size router on /fms/api/v0/sizes");
+AumMrigahApp.use("/fms/api/v0/sizes", sizeRouter);
+dbgRoutes("Mounting style router on /fms/api/v0/styles");
+AumMrigahApp.use("/fms/api/v0/styles", styleRouter);
+dbgRoutes("Mounting version router on /fms/api/v0/versions");
+AumMrigahApp.use("/fms/api/v0/versions", versionRouter);
 
 // Sales Management Service -bb3
 dbgRoutesBB3(
   "Mounting sale order Routes-BB3 router on /bb/api/v3/sales-orders"
 );
 AumMrigahApp.use("/fms/api/v0/sales-orders", salesOrderRoutes);
+// AumMrigahApp.use("/fms/api/v0/sales-orders", printRoutes);
 
 // dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
 // AumMrigahApp.use("/bb/api/v3/upload", genericUploadRouter);

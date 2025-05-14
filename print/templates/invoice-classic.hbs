@@ -1,0 +1,90 @@
+<html lang="en">
+  <head>
+    <meta charset="utf‑8" />
+    <style>
+      @page { margin: 28mm 18mm; font-family: Arial, sans-serif; } h1 {
+      font-size: 20pt; text-transform: uppercase; letter-spacing: 1px; } h2 {
+      font-size: 12pt; margin: 0; } .tiny{ font-size: 8pt; color:#555 } table {
+      width:100%; border-collapse:collapse; margin-top:12pt } th,td{ border:1px
+      solid #ccc; padding:4pt 6pt; font-size:9pt; } th { background:#f3f3f3;
+      text-align:left } .right{ text-align:right } .totals td{ border:none; }
+    </style>
+  </head>
+  <body>
+    <!-- Header ------------------------------------------------------------------>
+  <table>
+    <tr>
+      <td style="border:none">
+        <h1>Tax Invoice</h1>
+        <h2>{{order.orderNum}}</h2>
+      </td>
+      {{!-- <td style="border:none;text-align:right">
+        <img src="/uploads/20250505-120312-322657682-kali11.png" width="110" />
+          
+      </td> --}}
+    </tr>
+  </table>
+
+  <!-- Seller / Buyer --------------------------------------------------------->
+  <table style="margin-top:20pt">
+    <tr>
+      <th style="width:50%">Seller</th>
+      <th>Bill To</th>
+    </tr>
+    <tr>
+      <td>
+        <strong>{{company?.companyName}}</strong><br/>
+        {{company.primaryGSTAddress}}<br/>
+        GSTIN&nbsp;{{company.taxInfo.gstNumber}}<br/>
+        {{company.email}}
+      </td>
+      <td>
+        <strong>{{order.customer.name}}</strong><br/>
+        {{order.salesAddress}}<br/>
+        {{order.customer.contactNum}}
+      </td>
+    </tr>
+  </table>
+
+  <!-- Item lines ------------------------------------------------------------->
+  <table>
+    <tr>
+      <th>#</th><th>Description</th><th class="right">Qty</th><th class="right">Price</th>
+      <th class="right">Disc%</th><th class="right">Tax%</th><th class="right">Amount</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>{{order.item.name}}</td>
+      <td class="right">{{order.quantity}}</td>
+      <td class="right">{{fmtMoney order.price}}</td>
+      <td class="right">{{order.discount}}</td>
+      <td class="right">{{order.tax}}</td>
+      <td class="right">{{fmtMoney order.netAmtAfterTax}}</td>
+    </tr>
+  </table>
+
+  <!-- Totals ----------------------------------------------------------------->
+    <table class="totals" style="margin-top:6pt">
+      <tr><td class="right" style="width:80%">Net Amount&nbsp;</td>
+        <td class="right" style="width:20%">{{fmtMoney
+            order.netAmtAfterTax
+          }}</td></tr>
+      <tr><td class="right">With‑holding Tax&nbsp;</td>
+        <td class="right">{{fmtMoney order.withholdingTaxAmt}}</td></tr>
+      <tr><td class="right"><strong>Grand Total</strong>&nbsp;</td>
+        <td class="right"><strong>{{fmtMoney order.netAR}}</strong></td></tr>
+      <tr><td class="right tiny" colspan="2">
+          Amount in words:
+          {{moneyWords order.netAR order.currency}}
+        </td></tr>
+    </table>
+
+    <p class="tiny" style="margin-top:24pt">
+      This is a computer generated invoice and does not require a signature.<br
+      />
+      {{company.companyName}}
+      &copy;
+      {{yearNow}}
+    </p>
+  </body>
+</html>

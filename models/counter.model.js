@@ -336,6 +336,36 @@ export const ProductDimStyleCounterModel =
   mongoose.models.ProductDimStyleCounters ||
   model("ProductDimStyleCounters", productDimStyleCounterSchema);
 
+const batchGroupCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const BatchGroupCounterModel =
+  mongoose.models.BatchGroupCounters ||
+  model("BatchGroupCounters", batchGroupCounterSchema);
+
+const serialGroupCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const SerialGroupCounterModel =
+  mongoose.models.SerialGroupCounters ||
+  model("SerialGroupCounters", serialGroupCounterSchema);
+
 const batchCounterSchema = new Schema({
   _id: {
     type: String,

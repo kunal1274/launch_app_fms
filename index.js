@@ -72,6 +72,8 @@ import colorRouter from "./routes/productDimColor.routes.js";
 import sizeRouter from "./routes/productDimSize.routes.js";
 import styleRouter from "./routes/productDimStyle.routes.js";
 import versionRouter from "./routes/productDimVersion.routes.js";
+import batchRouter from "./routes/trackingDimBatch.routes.js";
+import serialRouter from "./routes/trackingDimSerial.routes.js";
 
 // import { queueRedis } from "./batch_jobs/queue/queueRedisClient.js";
 // import { shutdownQueues } from "./batch_jobs/queue/gracefulShutdown.js";
@@ -274,6 +276,12 @@ dbgRoutes("Mounting style router on /fms/api/v0/styles");
 AumMrigahApp.use("/fms/api/v0/styles", styleRouter);
 dbgRoutes("Mounting version router on /fms/api/v0/versions");
 AumMrigahApp.use("/fms/api/v0/versions", versionRouter);
+
+// --- Tracking Dimensions -----//
+dbgRoutes("Mounting batch router on /fms/api/v0/batches");
+AumMrigahApp.use("/fms/api/v0/batches", batchRouter);
+dbgRoutes("Mounting serial router on /fms/api/v0/serials");
+AumMrigahApp.use("/fms/api/v0/serials", serialRouter);
 
 // Sales Management Service -bb3
 dbgRoutesBB3(

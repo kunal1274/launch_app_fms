@@ -1,76 +1,128 @@
+// models/batch.model.js
+
 import mongoose, { model, Schema } from "mongoose";
 import { BatchCounterModel } from "./counter.model.js";
 
-const batchSchema = new Schema(
+// ——— Sub-schema for each batch value ———
+const batchValueSchema = new Schema(
   {
-    code: {
-      type: String,
-      required: false,
-      unique: true,
-    },
     num: {
       type: String,
       required: true,
+      trim: true,
+    },
+    name: {
+      type: String,
+      trim: true,
     },
     mfgDate: {
       type: Date,
+      required: true,
       default: Date.now,
     },
     expDate: {
       type: Date,
-      default: Date.now,
+      required: true,
+      default: function () {
+        // `this` is the sub‐document; add 24h (in ms) to mfgDate
+        return new Date(this.mfgDate.getTime() + 24 * 60 * 60 * 1000);
+      },
     },
     status: {
       type: String,
       enum: ["Created", "Ready", "Closed", "Obsolete"],
       default: "Ready",
     },
+
+    // if you later need serial-tracking per value:
     serialTracking: {
       type: Boolean,
       default: false,
     },
-    description: {
+    serialNumbers: {
+      type: [String],
+      default: [],
+      // only required if serialTracking===true
+      validate: {
+        validator(arr) {
+          return !this.serialTracking || (Array.isArray(arr) && arr.length > 0);
+        },
+        message: "Enable serialTracking to supply at least one serial number.",
+      },
+    },
+
+    attributes: {
+      type: Map,
+      of: Schema.Types.Mixed,
+      default: {},
+    },
+    archived: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+
+// ——— Top-level batch schema ———
+const batchSchema = new Schema(
+  {
+    // auto-generated master code for the batch group
+    code: {
+      type: String,
+      unique: true,
+    },
+
+    name: {
       type: String,
       required: false,
     },
+
+    // your array of individual batches
+    values: {
+      type: [batchValueSchema],
+      default: [],
+    },
+
+    description: String,
     type: {
       type: String,
-      required: true,
-      enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
-      },
+      enum: ["Physical", "Virtual"],
       default: "Physical",
     },
     active: {
       type: Boolean,
-      required: true,
       default: false,
     },
-    archived: { type: Boolean, default: false }, // New field
+    archived: {
+      type: Boolean,
+      default: false,
+    },
+
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: "GlobalGroups",
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
       ref: "Companies",
     },
-    // New field for file uploads
+
     files: [
       {
-        fileName: { type: String, required: true }, // Name of the file
+        fileName: { type: String, required: true },
         fileOriginalName: { type: String, required: true },
-        fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
-        fileUrl: { type: String, required: true }, // URL/path of the uploaded file
-        fileUploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+        fileType: { type: String, required: true },
+        fileUrl: { type: String, required: true },
+        fileUploadedAt: { type: Date, default: Date.now },
       },
     ],
+
     extras: {
       type: Map,
-      of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
+      of: Schema.Types.Mixed,
       default: {},
     },
   },
@@ -79,59 +131,44 @@ const batchSchema = new Schema(
   }
 );
 
-batchSchema.pre("save", async function (next) {
-  if (!this.isNew) return next();
+// ——— Index to enforce unique master code ———
+batchSchema.index({ code: 1 }, { unique: true });
 
-  try {
-    this.num = this.num.trim(); // Trim num before anything
-
-    // Ensure expDate is after mfgDate
-    if (this.expDate <= this.mfgDate) {
-      throw new Error("❌ Expiry date must be after manufacturing date.");
-    }
-
-    await this.validate(); // Ensure schema-level validations
-
-    // Duplicate check for `num` (case-insensitive)
-    const existingBatch = await BatchModel.findOne({ num: this.num }).collation(
-      {
-        locale: "en",
-        strength: 2,
-      }
-    );
-
-    if (existingBatch) {
-      throw new Error(`❌ A batch with this num already exists: ${this.num}`);
-    }
-
-    // Generate internal batch code only if not already set
-    if (!this.code) {
-      const counter = await BatchCounterModel.findOneAndUpdate(
-        { _id: "batchCode" },
-        { $inc: { seq: 1 } },
-        { new: true, upsert: true }
+// ——— Validate sub-docs & generate `code` ———
+batchSchema.pre("validate", async function (next) {
+  // 1) Ensure each value has expDate > mfgDate
+  for (const val of this.values) {
+    if (val.expDate <= val.mfgDate) {
+      return next(
+        new Error(
+          `Expiry date must be after manufacturing date for batch ${val.num}.`
+        )
       );
-
-      if (!counter || counter.seq === undefined) {
-        throw new Error("❌ Failed to generate Batch code");
-      }
-
-      const seqNumber = counter.seq.toString().padStart(9, "0");
-      this.code = `BN_${seqNumber}`;
     }
-
-    next();
-  } catch (error) {
-    console.error("❌ Error during batch save:", error.stack);
-    next(error);
-  } finally {
-    console.log("ℹ️ Batch pre-save complete");
   }
+
+  // 2) Ensure no duplicate `num` within this.values array
+  const nums = this.values.map((v) => v.num.toLowerCase().trim());
+  const dup = nums.find((n, i) => nums.indexOf(n) !== i);
+  if (dup) {
+    return next(new Error(`Duplicate batch number in values: "${dup}".`));
+  }
+
+  // 3) Auto-generate master `code` if missing
+  if (!this.code) {
+    const counter = await BatchCounterModel.findOneAndUpdate(
+      { _id: "batchCode" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    if (!counter?.seq && counter.seq !== 0) {
+      return next(new Error("Failed to generate batch code"));
+    }
+    this.code = `BH_${String(counter.seq).padStart(9, "0")}`;
+  }
+
+  next();
 });
-
-// Apply toJSON to include getters
-
-// siteSchema.set("toJSON", { getters: true });
 
 export const BatchModel =
   mongoose.models.Batches || model("Batches", batchSchema);

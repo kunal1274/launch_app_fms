@@ -54,6 +54,63 @@ const itemSchema = new Schema(
       },
       get: (v) => v.toFixed(2), // Format when retrieving
     },
+    site: {
+      type: Schema.Types.ObjectId,
+      ref: "Sites", // from site.model.js
+    },
+    warehouse: {
+      type: Schema.Types.ObjectId,
+      ref: "Warehouses", // from site.model.js
+    },
+    zone: {
+      type: Schema.Types.ObjectId,
+      ref: "Zones", // from site.model.js
+    },
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: "Locations", // from site.model.js
+    },
+    rack: {
+      type: Schema.Types.ObjectId,
+      ref: "Racks", // from site.model.js
+    },
+    shelf: {
+      type: Schema.Types.ObjectId,
+      ref: "Shelves", // from site.model.js
+    },
+    bin: {
+      type: Schema.Types.ObjectId,
+      ref: "Bins", // from site.model.js
+    },
+    config: {
+      type: Schema.Types.ObjectId,
+      ref: "Configurations", // from site.model.js
+    },
+    color: {
+      type: Schema.Types.ObjectId,
+      ref: "Colors", // from site.model.js
+    },
+    size: {
+      type: Schema.Types.ObjectId,
+      ref: "Sizes", // from site.model.js
+    },
+    style: {
+      type: Schema.Types.ObjectId,
+      ref: "Styles", // from site.model.js
+    },
+    version: {
+      type: Schema.Types.ObjectId,
+      ref: "Versions", // from site.model.js
+    },
+    batch: {
+      type: Schema.Types.ObjectId,
+      ref: "Batches", // from site.model.js
+    },
+    serial: {
+      type: Schema.Types.ObjectId,
+      ref: "Serials", // from site.model.js
+    },
+
     active: {
       type: Boolean,
       required: true,
@@ -74,9 +131,10 @@ const itemSchema = new Schema(
     files: [
       {
         fileName: { type: String, required: true }, // Name of the file
+        fileOriginalName: { type: String, required: true },
         fileType: { type: String, required: true }, // MIME type (e.g., "application/pdf", "image/png")
         fileUrl: { type: String, required: true }, // URL/path of the uploaded file
-        uploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
+        fileUploadedAt: { type: Date, default: Date.now }, // Timestamp for the upload
       },
     ],
     extras: {

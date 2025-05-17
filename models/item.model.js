@@ -60,55 +60,59 @@ const itemSchema = new Schema(
     },
     warehouse: {
       type: Schema.Types.ObjectId,
-      ref: "Warehouses", // from site.model.js
+      ref: "Warehouses", // from warehouse.model.js
     },
     zone: {
       type: Schema.Types.ObjectId,
-      ref: "Zones", // from site.model.js
+      ref: "Zones", // from zone.model.js
     },
     location: {
       type: Schema.Types.ObjectId,
-      ref: "Locations", // from site.model.js
+      ref: "Locations", // from location.model.js
+    },
+    aisle: {
+      type: Schema.Types.ObjectId,
+      ref: "Aisles", // from aisle.model.js
     },
     rack: {
       type: Schema.Types.ObjectId,
-      ref: "Racks", // from site.model.js
+      ref: "Racks", // from rack.model.js
     },
     shelf: {
       type: Schema.Types.ObjectId,
-      ref: "Shelves", // from site.model.js
+      ref: "Shelves", // from shelf.model.js
     },
     bin: {
       type: Schema.Types.ObjectId,
-      ref: "Bins", // from site.model.js
+      ref: "Bins", // from bin.model.js
     },
     config: {
       type: Schema.Types.ObjectId,
-      ref: "Configurations", // from site.model.js
+      ref: "Configurations", // from config.model.js
     },
     color: {
       type: Schema.Types.ObjectId,
-      ref: "Colors", // from site.model.js
+      ref: "Colors", // from color.model.js
     },
     size: {
       type: Schema.Types.ObjectId,
-      ref: "Sizes", // from site.model.js
+      ref: "Sizes", // from size.model.js
     },
     style: {
       type: Schema.Types.ObjectId,
-      ref: "Styles", // from site.model.js
+      ref: "Styles", // from style.model.js
     },
     version: {
       type: Schema.Types.ObjectId,
-      ref: "Versions", // from site.model.js
+      ref: "Versions", // from version.model.js
     },
     batch: {
       type: Schema.Types.ObjectId,
-      ref: "Batches", // from site.model.js
+      ref: "Batches", // from batch.model.js
     },
     serial: {
       type: Schema.Types.ObjectId,
-      ref: "Serials", // from site.model.js
+      ref: "Serials", // from serial.model.js
     },
 
     active: {

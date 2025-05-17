@@ -211,6 +211,21 @@ export const LocationCounterModel =
   mongoose.models.LocationCounters ||
   model("LocationCounters", locationCounterSchema);
 
+const aisleCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Check if the model already exists before defining it
+export const AisleCounterModel =
+  mongoose.models.AisleCounters || model("AisleCounters", aisleCounterSchema);
+
 const rackCounterSchema = new Schema({
   _id: {
     type: String,
@@ -394,3 +409,18 @@ const serialCounterSchema = new Schema({
 export const SerialCounterModel =
   mongoose.models.SerialCounters ||
   model("SerialCounters", serialCounterSchema);
+
+const inventJournalCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const InventJournalCounterModel =
+  mongoose.models.InventJournalCounters ||
+  model("InventJournalCounters", inventJournalCounterSchema);

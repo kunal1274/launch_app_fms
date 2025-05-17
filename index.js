@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config(); // Loads .env into process.env
-import fs from "fs";
+// import fs from "fs";
 import path from "path";
 
 import createDebug from "debug";
@@ -55,12 +55,12 @@ import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrde
 import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
 import siteRoutes from "./bb1_inventory_management_service/routes/bb1.site.routes.js";
 import multer from "multer";
-import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
-import { uploadMulter } from "./middleware/uploadMulterConfig.js";
-import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
+// import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
+// import { uploadMulter } from "./middleware/uploadMulterConfig.js";
+// import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
 import { fileRouter } from "./shared_service/routes/fileUploadViaMulter.routes.js";
 import { siteRouter } from "./routes/sites.routes.js";
-import printRoutes from "./routes/print.routes.js";
+// import printRoutes from "./routes/print.routes.js";
 import whRouter from "./routes/warehouse.routes.js";
 import zoneRouter from "./routes/zone.routes.js";
 import locationRouter from "./routes/location.routes.js";
@@ -74,6 +74,16 @@ import styleRouter from "./routes/productDimStyle.routes.js";
 import versionRouter from "./routes/productDimVersion.routes.js";
 import batchRouter from "./routes/trackingDimBatch.routes.js";
 import serialRouter from "./routes/trackingDimSerial.routes.js";
+import aisleRouter from "./routes/aisle.routes.js";
+
+import inventJournalRouter from "./routes/inventJournal.routes.js";
+
+// import redisClient from "./middleware/redisClient.js";
+
+// redisClient.flushall((err, succeeded) => {
+//   if (err) console.error("Redis flush failed:", err);
+//   else console.log("Redis cache cleared");
+// });
 
 // import { queueRedis } from "./batch_jobs/queue/queueRedisClient.js";
 // import { shutdownQueues } from "./batch_jobs/queue/gracefulShutdown.js";
@@ -258,6 +268,8 @@ dbgRoutes("Mounting zone router on /fms/api/v0/zones");
 AumMrigahApp.use("/fms/api/v0/zones", zoneRouter);
 dbgRoutes("Mounting location router on /fms/api/v0/locations");
 AumMrigahApp.use("/fms/api/v0/locations", locationRouter);
+dbgRoutes("Mounting rack router on /fms/api/v0/aisles");
+AumMrigahApp.use("/fms/api/v0/aisles", aisleRouter);
 dbgRoutes("Mounting rack router on /fms/api/v0/racks");
 AumMrigahApp.use("/fms/api/v0/racks", rackRouter);
 dbgRoutes("Mounting shelf router on /fms/api/v0/shelves");
@@ -282,6 +294,10 @@ dbgRoutes("Mounting batch router on /fms/api/v0/batches");
 AumMrigahApp.use("/fms/api/v0/batches", batchRouter);
 dbgRoutes("Mounting serial router on /fms/api/v0/serials");
 AumMrigahApp.use("/fms/api/v0/serials", serialRouter);
+
+// --- Inventory Journals --- //
+dbgRoutes("Mounting inventory journal router on /fms/api/v0/invent-journals");
+AumMrigahApp.use("/fms/api/v0/invent-journals", inventJournalRouter);
 
 // Sales Management Service -bb3
 dbgRoutesBB3(
@@ -506,19 +522,49 @@ startServer();
 //   process.exit(0);
 // });
 
+// process.on("uncaughtException", (err) => {
+//   logger.error("🛑 Uncaught Exception", {
+//     message: err.message,
+//     stack: err.stack,
+//   });
+//   process.exit(1);
+// });
+
+// process.on("unhandledRejection", (reason) => {
+//   logger.error("🛑 Unhandled Rejection", {
+//     message: reason instanceof Error ? reason.message : String(reason),
+//     stack: reason instanceof Error ? reason.stack : undefined,
+//   });
+//   process.exit(1);
+// });
+
+// 1) Print raw uncaught exceptions to console immediately
 process.on("uncaughtException", (err) => {
-  logger.error("🛑 Uncaught Exception", {
-    message: err.message,
-    stack: err.stack,
-  });
+  console.error("💥 Uncaught Exception:", err.stack || err);
+  // Also log via your logger if you still want, but include stack manually:
+  if (typeof logger !== "undefined") {
+    logger.error("💥 Uncaught Exception", {
+      message: err.message,
+      stack: err.stack,
+    });
+  }
   process.exit(1);
 });
 
-process.on("unhandledRejection", (reason) => {
-  logger.error("🛑 Unhandled Rejection", {
-    message: reason instanceof Error ? reason.message : String(reason),
-    stack: reason instanceof Error ? reason.stack : undefined,
-  });
+// 2) Print raw unhandled rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error(
+    "⚠️ Unhandled Rejection at:",
+    promise,
+    "\nReason:",
+    reason.stack || reason
+  );
+  if (typeof logger !== "undefined") {
+    logger.error("⚠️ Unhandled Rejection", {
+      message: reason?.message || reason,
+      stack: reason?.stack,
+    });
+  }
   process.exit(1);
 });
 

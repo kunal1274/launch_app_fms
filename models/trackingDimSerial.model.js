@@ -34,22 +34,22 @@ const serialValueSchema = new Schema(
       default: "Ready",
     },
 
-    // if you later need serial-tracking per value:
-    serialTracking: {
-      type: Boolean,
-      default: false,
-    },
-    serialNumbers: {
-      type: [String],
-      default: [],
-      // only required if serialTracking===true
-      validate: {
-        validator(arr) {
-          return !this.serialTracking || (Array.isArray(arr) && arr.length > 0);
-        },
-        message: "Enable serialTracking to supply at least one serial number.",
-      },
-    },
+    // // if you later need serial-tracking per value:
+    // serialTracking: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+    // serialNumbers: {
+    //   type: [String],
+    //   default: [],
+    //   // only required if serialTracking===true
+    //   validate: {
+    //     validator(arr) {
+    //       return !this.serialTracking || (Array.isArray(arr) && arr.length > 0);
+    //     },
+    //     message: "Enable serialTracking to supply at least one serial number.",
+    //   },
+    // },
 
     attributes: {
       type: Map,

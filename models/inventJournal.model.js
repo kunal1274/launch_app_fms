@@ -10,6 +10,7 @@ const journalLineSchema = new Schema(
     item: { type: Schema.Types.ObjectId, ref: "Items", required: true },
     lineDate: { type: Date, required: true, default: Date.now }, // may override header.journalDate
     quantity: { type: Number, required: true, default: 1 }, // +ve number always
+    loadOnInventoryValue: { type: Number, default: 0 }, // <-- NEW
     // pricing
     costPrice: { type: Number, required: true, default: 0 }, // from your stock-balance service
     purchasePrice: { type: Number, default: 0 }, // if a receipt

@@ -55,7 +55,7 @@ async function findDraftDuplicates(lines) {
   return warnings;
 }
 
-async function applyJournal(journal, session) {
+async function applyJournal1(journal, session) {
   for (const line of journal.lines) {
     const key = {
       item: line.item,
@@ -113,10 +113,73 @@ async function applyJournal(journal, session) {
   }
 }
 
+async function applyJournal2(journal, session) {
+  for (const line of journal.lines) {
+    const key = {
+      item: line.item,
+      site: line.from?.site || line.to?.site,
+      warehouse: line.from?.warehouse || line.to?.warehouse,
+      config: line.config,
+      color: line.color,
+      size: line.size,
+      batch: line.batch,
+      serial: line.serial,
+    };
+
+    // 2) Load the existing stock‐balance (if any)
+    let sb = await StockBalanceModel.findOne(key).session(session);
+
+    // If it didn’t exist yet, initialize one locally so we can read costPrice
+    if (!sb) {
+      sb = new StockBalanceModel({ ...key });
+    }
+
+    // HANDLE COUNTING: only qty
+    if (journal.type === "COUNTING") {
+      sb.quantity += line.quantity;
+      // cost/value stays the same
+    }
+    // HANDLE ZERO‐QTY “load” adjustments
+    else if (line.quantity === 0 && line.loadOnInventoryValue) {
+      sb.totalCostValue += line.loadOnInventoryValue;
+      // qty untouched
+    }
+    // HANDLE TRANSFER
+    else if (journal.type === "TRANSFER") {
+      // your existing debit/credit logic…
+      // e.g. updateBalance(line.from, -line.quantity, …)
+      //      updateBalance(line.to,   +line.quantity, …)
+      // (omit here for brevity)
+    }
+    // NORMAL IN/OUT or ADJUSTMENT
+    else {
+      // same as before: receipts vs issues
+      const receiptQty = Math.max(line.quantity, 0);
+      const issueQty = Math.max(-line.quantity, 0);
+
+      const purchaseDelta = receiptQty * line.purchasePrice;
+      const revenueDelta = issueQty * line.salesPrice;
+      const costDelta = receiptQty ? purchaseDelta : -issueQty * sb.costPrice;
+
+      sb.quantity += line.quantity;
+      sb.totalPurchaseValue += purchaseDelta;
+      sb.totalRevenueValue += revenueDelta;
+      sb.totalCostValue += costDelta;
+    }
+
+    if (sb.quantity > 0) {
+      sb.costPrice = sb.totalCostValue / sb.quantity;
+    } else {
+      sb.costPrice = 0;
+    }
+    await sb.save({ session });
+  }
+}
+
 /**
  * Reverse a posted journal
  */
-export async function reverseJournal(journal, session) {
+export async function reverseJournal1(journal, session) {
   for (const line of journal.lines) {
     // 1) Build the exact same key you used in applyJournal
     const key = {
@@ -156,6 +219,330 @@ export async function reverseJournal(journal, session) {
     sb.costPrice = sb.quantity > 0 ? sb.totalCostValue / sb.quantity : 0;
 
     await sb.save({ session });
+  }
+}
+
+export async function reverseJournal2(journal, session) {
+  for (const line of journal.lines) {
+    // 1) Build the exact same key you used in applyJournal
+    const key = {
+      item: line.item,
+      site: line.from?.site || line.to?.site,
+      warehouse: line.from?.warehouse || line.to?.warehouse,
+      config: line.config,
+      color: line.color,
+      size: line.size,
+      style: line.style,
+      version: line.version,
+      batch: line.batch,
+      serial: line.serial,
+    };
+
+    // 2) Lookup the existing stock‐balance
+    const sb = await StockBalanceModel.findOne(key).session(session);
+    if (!sb) throw new Error("Stock record not found for reversal.");
+    // REVERSE COUNTING
+    if (journal.type === "COUNTING") {
+      sb.quantity -= line.quantity;
+    }
+    // REVERSE ZERO‐QTY LOAD
+    else if (line.quantity === 0 && line.loadOnInventoryValue) {
+      sb.totalCostValue -= line.loadOnInventoryValue;
+    }
+    // REVERSE TRANSFER
+    else if (journal.type === "TRANSFER") {
+      // reverse your debit/credit logic…
+    }
+    // REVERSE NORMAL IN/OUT
+    else {
+      const receiptQty = Math.max(line.quantity, 0);
+      const issueQty = Math.max(-line.quantity, 0);
+
+      const purchaseDelta = receiptQty * line.purchasePrice;
+      const revenueDelta = issueQty * line.salesPrice;
+      const costDelta = receiptQty ? purchaseDelta : -issueQty * sb.costPrice;
+
+      sb.quantity -= line.quantity;
+      sb.totalPurchaseValue -= purchaseDelta;
+      sb.totalRevenueValue -= revenueDelta;
+      sb.totalCostValue -= costDelta;
+    }
+
+    // 5) Recompute moving‐average cost (or zero if no stock remains)
+    sb.costPrice = sb.quantity > 0 ? sb.totalCostValue / sb.quantity : 0;
+
+    await sb.save({ session });
+  }
+}
+
+// services/stockBalance.service.js
+
+export default class StockBalanceService {
+  /**
+   * Apply a journal: INOUT, ADJUSTMENT, COUNTING, or TRANSFER.
+   */
+  static async applyJournal(journal, session) {
+    for (const line of journal.lines) {
+      // 1) Build the parts of the key that are always used
+      const commonKey = {
+        item: line.item,
+        config: line.config,
+        color: line.color,
+        size: line.size,
+        style: line.style,
+        version: line.version,
+        batch: line.batch,
+        serial: line.serial,
+      };
+
+      // helper to upsert & increment
+      async function upsert(key, deltas) {
+        const sb = await StockBalanceModel.findOneAndUpdate(
+          key,
+          { $inc: deltas },
+          { new: true, upsert: true, setDefaultsOnInsert: true, session }
+        );
+        // recalc moving‐average cost
+        sb.costPrice = sb.quantity > 0 ? sb.totalCostValue / sb.quantity : 0;
+        await sb.save({ session });
+      }
+
+      switch (journal.type) {
+        case "COUNTING":
+          // only adjust qty at the "from" site/wh
+          await upsert(
+            {
+              ...commonKey,
+              site: line.from.site,
+              warehouse: line.from.warehouse,
+            },
+            { quantity: line.quantity }
+          );
+          break;
+
+        case "TRANSFER":
+          // decrement from
+          {
+            const fromKey = {
+              ...commonKey,
+              site: line.from.site,
+              warehouse: line.from.warehouse,
+              zone: line.from.zone,
+              location: line.from.location,
+              aisle: line.from.aisle,
+              rack: line.from.rack,
+              shelf: line.from.shelf,
+              bin: line.from.bin,
+            };
+            // fetch existing costPrice on "from" bin
+            const fromSb = await StockBalanceModel.findOne(fromKey).session(
+              session
+            );
+            const fromCost = fromSb?.costPrice || 0;
+
+            await upsert(fromKey, {
+              quantity: -line.quantity,
+              totalCostValue: -line.quantity * fromCost,
+            });
+          }
+          // increment to
+          {
+            const toKey = {
+              ...commonKey,
+              site: line.to.site,
+              warehouse: line.to.warehouse,
+              zone: line.to.zone,
+              location: line.to.location,
+              aisle: line.to.aisle,
+              rack: line.to.rack,
+              shelf: line.to.shelf,
+              bin: line.to.bin,
+            };
+            // use same cost (moving average) from the from-side
+            const fromSb = await StockBalanceModel.findOne({
+              ...commonKey,
+              site: line.from.site,
+              warehouse: line.from.warehouse,
+            }).session(session);
+            const fromCost = fromSb?.costPrice || 0;
+
+            await upsert(toKey, {
+              quantity: line.quantity,
+              totalCostValue: line.quantity * fromCost,
+            });
+          }
+          break;
+
+        default:
+          // ADJUSTMENT or INOUT
+          // special zero-qty “load” case:
+          if (line.quantity === 0 && line.loadOnInventoryValue) {
+            await upsert(
+              {
+                ...commonKey,
+                site: line.from?.site || line.to.site,
+                warehouse: line.from?.warehouse || line.to.warehouse,
+              },
+              { totalCostValue: line.loadOnInventoryValue }
+            );
+          } else {
+            // normal receipts/issues
+            const receiptQty = Math.max(line.quantity, 0);
+            const issueQty = Math.max(-line.quantity, 0);
+
+            const purchaseDelta = receiptQty * line.purchasePrice;
+            const revenueDelta = issueQty * line.salesPrice;
+
+            // fetch existing costPrice
+            const sbExisting = await StockBalanceModel.findOne({
+              ...commonKey,
+              site: line.from?.site || line.to.site,
+              warehouse: line.from?.warehouse || line.to.warehouse,
+            }).session(session);
+            const existingCost = sbExisting?.costPrice || 0;
+
+            // if receipt, costDelta = purchaseDelta; if issue, costDelta = -issueQty * existingCost
+            const costDelta = receiptQty
+              ? purchaseDelta
+              : -issueQty * existingCost;
+
+            await upsert(
+              {
+                ...commonKey,
+                site: line.from?.site || line.to.site,
+                warehouse: line.from?.warehouse || line.to.warehouse,
+              },
+              {
+                quantity: line.quantity,
+                totalPurchaseValue: purchaseDelta,
+                totalRevenueValue: revenueDelta,
+                totalCostValue: costDelta,
+              }
+            );
+          }
+          break;
+      }
+    }
+  }
+
+  /**
+   * Reverse a posted journal: exactly undo the same deltas.
+   */
+  static async reverseJournal(journal, session) {
+    for (const line of journal.lines) {
+      const commonKey = {
+        item: line.item,
+        config: line.config,
+        color: line.color,
+        size: line.size,
+        style: line.style,
+        version: line.version,
+        batch: line.batch,
+        serial: line.serial,
+      };
+
+      async function upsert(key, deltas) {
+        const sb = await StockBalanceModel.findOneAndUpdate(
+          key,
+          { $inc: deltas },
+          { new: true, upsert: true, setDefaultsOnInsert: true, session }
+        );
+        sb.costPrice = sb.quantity > 0 ? sb.totalCostValue / sb.quantity : 0;
+        await sb.save({ session });
+      }
+
+      switch (journal.type) {
+        case "COUNTING":
+          await upsert(
+            {
+              ...commonKey,
+              site: line.from.site,
+              warehouse: line.from.warehouse,
+            },
+            { quantity: -line.quantity }
+          );
+          break;
+
+        case "TRANSFER":
+          {
+            // reverse "from" credit:
+            const fromKey = {
+              ...commonKey,
+              site: line.from.site,
+              warehouse: line.from.warehouse,
+            };
+            const fromSb = await StockBalanceModel.findOne(fromKey).session(
+              session
+            );
+            const fromCost = fromSb?.costPrice || 0;
+            await upsert(fromKey, {
+              quantity: line.quantity,
+              totalCostValue: line.quantity * fromCost,
+            });
+          }
+          {
+            // reverse "to" debit:
+            const toKey = {
+              ...commonKey,
+              site: line.to.site,
+              warehouse: line.to.warehouse,
+            };
+            const toSb = await StockBalanceModel.findOne(toKey).session(
+              session
+            );
+            const toCost = toSb?.costPrice || 0;
+            await upsert(toKey, {
+              quantity: -line.quantity,
+              totalCostValue: -line.quantity * toCost,
+            });
+          }
+          break;
+
+        default:
+          if (line.quantity === 0 && line.loadOnInventoryValue) {
+            await upsert(
+              {
+                ...commonKey,
+                site: line.from?.site || line.to.site,
+                warehouse: line.from?.warehouse || line.to.warehouse,
+              },
+              { totalCostValue: -line.loadOnInventoryValue }
+            );
+          } else {
+            const receiptQty = Math.max(line.quantity, 0);
+            const issueQty = Math.max(-line.quantity, 0);
+
+            const purchaseDelta = receiptQty * line.purchasePrice;
+            const revenueDelta = issueQty * line.salesPrice;
+
+            const sbExisting = await StockBalanceModel.findOne({
+              ...commonKey,
+              site: line.from?.site || line.to.site,
+              warehouse: line.from?.warehouse || line.to.warehouse,
+            }).session(session);
+            const existingCost = sbExisting?.costPrice || 0;
+
+            const costDelta = receiptQty
+              ? purchaseDelta
+              : -issueQty * existingCost;
+
+            await upsert(
+              {
+                ...commonKey,
+                site: line.from?.site || line.to.site,
+                warehouse: line.from?.warehouse || line.to.warehouse,
+              },
+              {
+                quantity: -line.quantity,
+                totalPurchaseValue: -purchaseDelta,
+                totalRevenueValue: -revenueDelta,
+                totalCostValue: -costDelta,
+              }
+            );
+          }
+          break;
+      }
+    }
   }
 }
 
@@ -403,7 +790,7 @@ export const postJournal = async (req, res) => {
       });
 
     // apply each line to stock balances
-    await applyJournal(journal, session);
+    await StockBalanceService.applyJournal(journal, session);
 
     journal.status = "POSTED";
     journal.posted = true;
@@ -457,7 +844,7 @@ export const cancelJournal = async (req, res) => {
 
     if (journal.status === "POSTED") {
       // reverse stock changes
-      await reverseJournal(journal, session);
+      await StockBalanceService.reverseJournal(journal, session);
     }
 
     journal.status = "CANCELLED";

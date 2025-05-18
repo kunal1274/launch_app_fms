@@ -77,6 +77,7 @@ import serialRouter from "./routes/trackingDimSerial.routes.js";
 import aisleRouter from "./routes/aisle.routes.js";
 
 import inventJournalRouter from "./routes/inventJournal.routes.js";
+import stockBalanceRouter from "./routes/inventStockBalance.routes.js";
 
 // import redisClient from "./middleware/redisClient.js";
 
@@ -298,6 +299,9 @@ AumMrigahApp.use("/fms/api/v0/serials", serialRouter);
 // --- Inventory Journals --- //
 dbgRoutes("Mounting inventory journal router on /fms/api/v0/invent-journals");
 AumMrigahApp.use("/fms/api/v0/invent-journals", inventJournalRouter);
+
+dbgRoutes("Mounting stock-balances router on /fms/api/v0/stock-balances");
+AumMrigahApp.use("/fms/api/v0/stock-balances", stockBalanceRouter);
 
 // Sales Management Service -bb3
 dbgRoutesBB3(

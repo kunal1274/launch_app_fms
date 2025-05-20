@@ -34,7 +34,7 @@ export const createStockBalance = async (req, res) => {
     const sb = await StockBalanceModel.create(data);
 
     await createAuditLog({
-      user: req.user?.username || "System",
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
       module: "StockBalance",
       action: "CREATE",
       recordId: sb._id,
@@ -85,7 +85,7 @@ export const bulkCreateStockBalances = async (req, res) => {
     await Promise.all(
       created.map((sb) =>
         createAuditLog({
-          user: req.user?.username || "System",
+          user: req.user?.username || "67ec2fb004d3cc3237b58772",
           module: "StockBalance",
           action: "BULK_CREATE",
           recordId: sb._id,
@@ -177,7 +177,7 @@ export const updateStockBalanceById = async (req, res) => {
     }
 
     await createAuditLog({
-      user: req.user?.username || "System",
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
       module: "StockBalance",
       action: "UPDATE",
       recordId: sb._id,
@@ -231,7 +231,7 @@ export const bulkUpdateStockBalances = async (req, res) => {
       if (!sb) throw new Error(`StockBalance not found: ${_id}`);
 
       await createAuditLog({
-        user: req.user?.username || "System",
+        user: req.user?.username || "67ec2fb004d3cc3237b58772",
         module: "StockBalance",
         action: "BULK_UPDATE",
         recordId: sb._id,
@@ -275,7 +275,7 @@ export const deleteStockBalanceById = async (req, res) => {
     }
 
     await createAuditLog({
-      user: req.user?.username || "System",
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
       module: "StockBalance",
       action: "DELETE",
       recordId: sb._id,
@@ -316,7 +316,7 @@ export const bulkDeleteStockBalances = async (req, res) => {
       if (!sb) throw new Error(`StockBalance not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "System",
+        user: req.user?.username || "67ec2fb004d3cc3237b58772",
         module: "StockBalance",
         action: "BULK_DELETE",
         recordId: sb._id,
@@ -366,7 +366,9 @@ export const getProvisionalStockBalances = async (req, res) => {
     const posted = await StockBalanceModel.find().lean();
 
     // 2) Load all journals in DRAFT status
-    const drafts = await InventoryJournalModel.find({ status: "DRAFT" }).lean();
+    const drafts = await InventoryJournalModel.find({
+      status: { $in: ["DRAFT", "CONFIRMED"] },
+    }).lean();
 
     // 3) A helper to build a unique map‐key from any "balance"‐like object
     //    We concatenate item + all 15 dimensions into a single string.
@@ -728,7 +730,9 @@ export const getStockTransactions = async (req, res) => {
 
         const qty = line.quantity;
         const posted = journal.status === "POSTED";
-        const draft = journal.status === "DRAFT";
+        const draft =
+          journal.status === "DRAFT" || journal.status === "CONFIRMED";
+        //const draft = ["DRAFT", "CONFIRMED"].includes(journal.status);
         const inQty = qty > 0 ? qty : 0;
         const outQty = qty < 0 ? -qty : 0;
         const purchaseV = inQty * line.purchasePrice;

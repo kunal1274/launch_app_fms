@@ -34,13 +34,7 @@ const aisleSchema = new Schema(
       required: true,
     },
 
-    zone: {
-      type: Schema.Types.ObjectId,
-      ref: "Zones", // Reference to the Customer model
-      required: false,
-    },
-
-    locationLatLng: {
+    aisleLatLng: {
       type: String, // Adjust the type if address is more complex
       required: false, // Ensures that salesAddress is always set
     },
@@ -146,7 +140,7 @@ aisleSchema.pre("save", async function (next) {
 
     // Generate item code
     const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
-    this.code = `RK_${seqNumber}`;
+    this.code = `AS_${seqNumber}`;
 
     next();
   } catch (error) {

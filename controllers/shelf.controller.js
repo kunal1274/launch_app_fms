@@ -26,10 +26,9 @@ export const createShelf = async (req, res) => {
     const {
       name,
       type,
-      location,
-      zone,
+      rack,
       description,
-      locationLatLng,
+      shelfLatLng,
       remarks,
       company,
       groups,
@@ -39,24 +38,23 @@ export const createShelf = async (req, res) => {
     } = req.body;
 
     // require name, type, and location
-    if (!name || !type || !location) {
-      logger.warn("Shelf Creation - Missing fields", {
+    if (!name || !type || !rack) {
+      logger.warn("Shelf Creation - Missing fields - name , type and rack ", {
         context: "createShelf",
         body: req.body,
       });
       return res.status(422).json({
         status: "failure",
-        message: "⚠️ name, type, and location are required.",
+        message: "⚠️ name, type, and rack are required.",
       });
     }
 
     const shelf = await ShelfModel.create({
       name,
       type,
-      location,
-      zone,
+      rack,
       description,
-      locationLatLng,
+      shelfLatLng,
       remarks,
       company,
       groups,

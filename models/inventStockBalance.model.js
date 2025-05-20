@@ -45,6 +45,13 @@ const stockBalanceSchema = new Schema(
     costPrice: { type: Number, default: 0 }, // moving-average cost
     totalRevenueValue: { type: Number, default: 0 },
     totalPurchaseValue: { type: Number, default: 0 },
+    totalReserveValue: { type: Number, default: 0 },
+    totalSalesValue: { type: Number, default: 0 },
+    extras: {
+      type: Map,
+      of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.
+      default: {},
+    },
   },
   {
     timestamps: true,

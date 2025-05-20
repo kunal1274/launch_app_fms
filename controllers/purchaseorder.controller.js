@@ -1,10 +1,14 @@
 // import { PurchaseOrderModel } from "../models/purchaseorders.muuSHakaH.model.js";
 import mongoose from "mongoose";
-import { PurchaseOrderModel } from "../models/purchaseorder.model.js";
+import {
+  PurchaseOrderModel,
+  STATUS_TRANSITIONS,
+} from "../models/purchaseorder.model.js";
 import { PurchaseOrderCounterModel } from "../models/counter.model.js";
 import { ItemModel } from "../models/item.model.js";
 import { VendorModel } from "../models/vendor.model.js";
 import { logError } from "../utility/logError.utils.js";
+import PurchaseStockService from "../services/purchaseStock.service.js";
 
 /**
  * Helper function to validate status transitions
@@ -478,7 +482,7 @@ export const addPayment = async (req, res) => {
 /**
  * Change the status of a Purchase Order
  */
-export const changePurchaseOrderStatus = async (req, res) => {
+export const changePurchaseOrderStatus1 = async (req, res) => {
   try {
     const { purchaseOrderId } = req.params;
     const { newStatus, invoiceDate, dueDate } = req.body; // optionally provided
@@ -535,6 +539,148 @@ export const changePurchaseOrderStatus = async (req, res) => {
     res.status(200).json(order);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+// controllers/purchaseOrder.controller.js
+
+/**
+ * Change the status of a Purchase Order, adjusting provisional/real stock as needed.
+ */
+export const changePurchaseOrderStatus = async (req, res) => {
+  const { purchaseOrderId } = req.params;
+  const { newStatus, invoiceDate, dueDate } = req.body;
+
+  // 1) Basic validation outside the transaction
+  const po = await PurchaseOrderModel.findById(purchaseOrderId);
+  if (!po) {
+    return res
+      .status(404)
+      .json({ status: "failure", message: "Purchase Order not found" });
+  }
+  const allowed = STATUS_TRANSITIONS[po.status] || [];
+  if (!allowed.includes(newStatus)) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Invalid status transition ${po.status} → ${newStatus}`,
+    });
+  }
+
+  // 2) Start a session & transaction
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    // 3) Re-load the document *within* the transaction
+    const order = await PurchaseOrderModel.findById(purchaseOrderId).session(
+      session
+    );
+
+    // 4) Perform your reserve / release / apply / reverse calls:
+    if (newStatus === "Confirmed" && order.status === "Draft") {
+      await PurchaseStockService.reservePO(order, session);
+    }
+    if (
+      ["Draft", "Cancelled"].includes(newStatus) &&
+      order.status === "Confirmed"
+    ) {
+      await PurchaseStockService.releasePO(order, session);
+    }
+    if (newStatus === "Invoiced") {
+      await PurchaseStockService.releasePO(order, session);
+      await PurchaseStockService.applyPO(order, session);
+      order.invoiceDate = invoiceDate ? new Date(invoiceDate) : new Date();
+      order.dueDate = dueDate
+        ? new Date(dueDate)
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
+    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+      await PurchaseStockService.reversePO(order, session);
+    }
+
+    // 5) Finally update the PO status and save
+    order.status = newStatus;
+    await order.save({ session });
+
+    // 6) Commit everything
+    await session.commitTransaction();
+    return res.json({ status: "success", data: order });
+  } catch (err) {
+    // 7) Abort on any error
+    await session.abortTransaction();
+    console.error("❌ changePurchaseOrderStatus failed:", err);
+    return res.status(400).json({
+      status: "failure",
+      message: err.message || "Could not change purchase order status",
+    });
+  } finally {
+    // 8) End the session
+    session.endSession();
+  }
+};
+
+export const changePurchaseOrderStatus2 = async (req, res) => {
+  const { purchaseOrderId } = req.params;
+  const { newStatus, invoiceDate, dueDate } = req.body;
+
+  // 1) Load & validate your PO outside the txn
+  const po = await PurchaseOrderModel.findById(purchaseOrderId);
+  if (!po)
+    return res
+      .status(404)
+      .json({ status: "failure", message: "Purchase Order not found" });
+
+  const allowed = STATUS_TRANSITIONS[po.status] || [];
+  if (!allowed.includes(newStatus)) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Invalid status transition ${po.status} → ${newStatus}`,
+    });
+  }
+
+  // 2) Start a session
+  const session = await mongoose.startSession();
+  try {
+    // 3) Wrap *all* your updates in withTransaction
+    await session.withTransaction(async () => {
+      // (a) Re-load inside txn to get the right snapshot
+      const order = await PurchaseOrderModel.findById(purchaseOrderId).session(
+        session
+      );
+
+      // (b) Reserve / release / apply / reverse as needed
+      if (newStatus === "Confirmed" && order.status === "Draft") {
+        await PurchaseStockService.reservePO(order, session);
+      }
+      if (
+        ["Draft", "Cancelled"].includes(newStatus) &&
+        order.status === "Confirmed"
+      ) {
+        await PurchaseStockService.releasePO(order, session);
+      }
+      if (newStatus === "Invoiced") {
+        await PurchaseStockService.releasePO(order, session);
+        await PurchaseStockService.applyPO(order, session);
+        order.invoiceDate = invoiceDate || new Date();
+        order.dueDate =
+          dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      }
+      if (newStatus === "Cancelled" && order.status === "Invoiced") {
+        await PurchaseStockService.reversePO(order, session);
+      }
+
+      // (c) Finally persist the new status
+      order.status = newStatus;
+      await order.save({ session });
+    });
+    // 4) If we get here, the transaction was committed
+    return res.json({ status: "success", data: po });
+  } catch (err) {
+    // withTransaction has already aborted for us
+    console.error("Transaction aborted:", err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  } finally {
+    session.endSession();
   }
 };
 

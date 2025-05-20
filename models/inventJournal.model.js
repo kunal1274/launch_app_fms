@@ -76,7 +76,15 @@ const inventoryJournalSchema = new Schema(
     status: {
       type: String,
       required: true,
-      enum: ["DRAFT", "POSTED", "CANCELLED", "ADMINMODE", "ANYMODE"],
+      enum: [
+        "DRAFT",
+        "CONFIRMED",
+        "POSTED",
+        "REVERSED",
+        "CANCELLED",
+        "ADMINMODE",
+        "ANYMODE",
+      ],
       default: "DRAFT",
     },
 

@@ -223,7 +223,8 @@ export async function getStockTransactionsPerBalance(req) {
         // 4) Build the transaction row
         const qty = line.quantity;
         const posted = journal.status === "POSTED";
-        const draft = journal.status === "DRAFT";
+        const draft =
+          journal.status === "DRAFT" || journal.status === "CONFIRMED";
         const inQty = qty > 0 ? qty : 0;
         const outQty = qty < 0 ? -qty : 0;
         const purchaseV = inQty * line.purchasePrice;

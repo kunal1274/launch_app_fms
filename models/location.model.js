@@ -39,6 +39,10 @@ const locationSchema = new Schema(
       ref: "Zones", // Reference to the Customer model
       required: false,
     },
+    locationAddress: {
+      type: String,
+      required: false,
+    },
 
     locationLatLng: {
       type: String, // Adjust the type if address is more complex

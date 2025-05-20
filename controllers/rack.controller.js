@@ -26,10 +26,9 @@ export const createRack = async (req, res) => {
     const {
       name,
       type,
-      location,
-      zone,
+      aisle,
       description,
-      locationLatLng,
+      rackLatLng,
       remarks,
       company,
       groups,
@@ -39,24 +38,23 @@ export const createRack = async (req, res) => {
     } = req.body;
 
     // require name, type, and location
-    if (!name || !type || !location) {
-      logger.warn("Rack Creation - Missing fields", {
+    if (!name || !type || !aisle) {
+      logger.warn("Rack Creation - Missing fields - name , type and aisle ", {
         context: "createRack",
         body: req.body,
       });
       return res.status(422).json({
         status: "failure",
-        message: "⚠️ name, type, and location are required.",
+        message: "⚠️ name, type, and aisle are required.",
       });
     }
 
     const rack = await RackModel.create({
       name,
       type,
-      location,
-      zone,
+      aisle,
       description,
-      locationLatLng,
+      rackLatLng,
       remarks,
       company,
       groups,

@@ -6,6 +6,8 @@ import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
 import { StockBalanceModel } from "../models/inventStockBalance.model.js";
+import { InventoryTransactionModel } from "../models/inventoryTransaction.model.js";
+import ProvisionalBalanceService from "../services/provisionalBalance.service.js";
 
 // In-memory helper to compute a line key based on dimensions
 const makeLineKey = (l) =>
@@ -546,6 +548,53 @@ export default class StockBalanceService {
   }
 }
 
+function toTxn(journal, line) {
+  // 1) storage dims:
+  const storageDims =
+    journal.type === "TRANSFER"
+      ? { ...line.from, ...line.to }
+      : { ...line.from };
+
+  // 2) product + tracking dims:
+  const prodTrackDims = {
+    config: line.config,
+    color: line.color,
+    size: line.size,
+    style: line.style,
+    version: line.version,
+    batch: line.batch,
+    serial: line.serial,
+  };
+
+  return {
+    txnDate: line.lineDate,
+    sourceType: "JOURNAL",
+    sourceId: journal._id,
+    sourceLine: line.lineNum,
+    item: line.item,
+
+    // FINAL dims object includes both storage *and* prod/track dims:
+    dims: {
+      ...storageDims,
+      ...prodTrackDims,
+    },
+
+    qty: line.quantity,
+    costPrice: line.costPrice,
+    purchasePrice: line.purchasePrice,
+    salesPrice: line.salesPrice,
+    transferPrice: line.transferPrice,
+    taxes: {
+      gst: line.transferGst,
+      withholdingTax: line.transferWithholdingTax,
+    },
+    extras: {
+      journalCode: journal.code,
+      journalType: journal.type,
+    },
+  };
+}
+
 async function invalidateJournalCache(key = "/fms/api/v0/journals") {
   try {
     await redisClient.del(key);
@@ -768,10 +817,89 @@ export const deleteJournalById = async (req, res) => {
   }
 };
 
+export const confirmJournal = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const journal = await InventoryJournalModel.findById(
+      req.params.journalId
+    ).session(session);
+    if (!journal) return res.status(404).json({ message: "journal not found" });
+    if (journal.status !== "DRAFT")
+      return res.status(409).json({ message: "Only DRAFT can be confirmed" });
+
+    // 1) Write provisional‐txns
+    const provTxns = journal.lines.map((line) => ({
+      ...toTxn(journal, line),
+      sourceType: "JOURNAL_PROV",
+      extras: { ...toTxn(journal, line).extras, phase: "reserve" },
+    }));
+    await InventoryTransactionModel.insertMany(provTxns, { session });
+
+    // 2) Reserve balances
+    await ProvisionalBalanceService.reserveJournal(journal, session);
+
+    // 3) Flip status
+    journal.status = "CONFIRMED";
+    await journal.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+    return res.json({ status: "success", data: journal });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const cancelJournal = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const journal = await InventoryJournalModel.findById(
+      req.params.journalId
+    ).session(session);
+    if (!journal) return res.status(404).json({ message: "journal not found" });
+    if (journal.status !== "DRAFT" || journal.status !== "CONFIRMED")
+      return res
+        .status(409)
+        .json({ message: "Only DRAFT or CONFIRMED can be cancelled" });
+
+    // 0) Release provisional if we previously confirmed
+    await ProvisionalBalanceService.releaseJournal(journal, session);
+    // 0a) write reversal‐prov‐txns
+    const revProv = journal.lines.map((line) => {
+      const t = toTxn(journal, line);
+      return {
+        ...t,
+        sourceType: "JOURNAL_PROV",
+        qty: -t.qty,
+        purchasePrice: -t.purchasePrice,
+        salesPrice: -t.salesPrice,
+        extras: { ...t.extras, phase: "unreserve" },
+      };
+    });
+    await InventoryTransactionModel.insertMany(revProv, { session });
+
+    // 3) Flip status
+    journal.status = "CANCELLED";
+    await journal.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+    return res.json({ status: "success", data: journal });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 /**
  * Post a journal: apply stock changes and mark POSTED
  */
-export const postJournal = async (req, res) => {
+export const postJournal1 = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -788,6 +916,84 @@ export const postJournal = async (req, res) => {
         status: "failure",
         message: "Only DRAFT journals can be posted.",
       });
+
+    // 1) Write all lines into InventoryTransactions
+    const txns = journal.lines.map((line) => toTxn(journal, line));
+    await InventoryTransactionModel.insertMany(txns, { session });
+
+    // apply each line to stock balances
+    await StockBalanceService.applyJournal(journal, session);
+
+    journal.status = "POSTED";
+    journal.posted = true;
+    journal.postedAt = new Date();
+    await journal.save({ session });
+    await createAuditLog({
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
+      module: "InventoryJournal",
+      action: "POST",
+      recordId: journal._id,
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+    await invalidateJournalCache();
+
+    return res
+      .status(200)
+      .json({ status: "success", message: "Journal posted.", data: journal });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    logStackError("❌ Post Journal Error", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error posting journal.",
+      error: error.message,
+    });
+  }
+};
+
+export const postJournal = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { journalId } = req.params;
+    const journal = await InventoryJournalModel.findById(journalId).session(
+      session
+    );
+    if (!journal)
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Journal not found." });
+    if (journal.status !== "CONFIRMED")
+      return res.status(409).json({
+        status: "failure",
+        message: "Only CONFIRMED journals can be posted.",
+      });
+
+    // if (!journal || journal.status!=="CONFIRMED")
+    //   return res.status(409).json({ message: "Must be CONFIRMED to post" });
+
+    // 0) Release provisional if we previously confirmed
+    await ProvisionalBalanceService.releaseJournal(journal, session);
+    // 0a) write reversal‐prov‐txns
+    const revProv = journal.lines.map((line) => {
+      const t = toTxn(journal, line);
+      return {
+        ...t,
+        sourceType: "JOURNAL_PROV",
+        qty: -t.qty,
+        purchasePrice: -t.purchasePrice,
+        salesPrice: -t.salesPrice,
+        extras: { ...t.extras, phase: "unreserve" },
+      };
+    });
+    await InventoryTransactionModel.insertMany(revProv, { session });
+
+    // 1) Write all lines into InventoryTransactions- real transactions
+    const txns = journal.lines.map((line) => toTxn(journal, line));
+    await InventoryTransactionModel.insertMany(txns, { session });
 
     // apply each line to stock balances
     await StockBalanceService.applyJournal(journal, session);
@@ -825,7 +1031,7 @@ export const postJournal = async (req, res) => {
 /**
  * Cancel a journal: reverse if POSTED, mark CANCELLED
  */
-export const cancelJournal = async (req, res) => {
+export const reverseJournal = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -838,21 +1044,44 @@ export const cancelJournal = async (req, res) => {
         .status(404)
         .json({ status: "failure", message: "Journal not found." });
     if (journal.status === "CANCELLED")
+      return res.status(409).json({
+        status: "failure",
+        message: "Journal is  cancelled and cant be reversed",
+      });
+    if (journal.status === "REVERSED")
       return res
         .status(409)
-        .json({ status: "failure", message: "Already cancelled." });
+        .json({ status: "failure", message: "Already reversed." });
 
     if (journal.status === "POSTED") {
       // reverse stock changes
       await StockBalanceService.reverseJournal(journal, session);
     }
 
-    journal.status = "CANCELLED";
+    // 2) Write reversal transactions (negating qty & values)
+    const reversals = journal.lines.map((line) => {
+      const txn = toTxn(journal, line);
+      return {
+        ...txn,
+        qty: -txn.qty,
+        costPrice: txn.costPrice,
+        purchasePrice: -txn.purchasePrice,
+        salesPrice: -txn.salesPrice,
+        transferPrice: -txn.transferPrice,
+        extras: {
+          ...txn.extras,
+          reversalOf: journal.code,
+        },
+      };
+    });
+    await InventoryTransactionModel.insertMany(reversals, { session });
+
+    journal.status = "REVERSED";
     await journal.save({ session });
     await createAuditLog({
       user: req.user?.username || "67ec2fb004d3cc3237b58772",
       module: "InventoryJournal",
-      action: "CANCEL",
+      action: "REVERSE",
       recordId: journal._id,
     });
 
@@ -862,16 +1091,16 @@ export const cancelJournal = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      message: "Journal cancelled.",
+      message: "Journal reversed.",
       data: journal,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Cancel Journal Error", error);
+    logStackError("❌ Reverse Journal Error", error);
     return res.status(500).json({
       status: "failure",
-      message: "Error cancelling journal.",
+      message: "Error reversing journal.",
       error: error.message,
     });
   }

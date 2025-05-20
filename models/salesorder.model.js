@@ -68,7 +68,14 @@ export const STATUS_TRANSITIONS1 = {
 
 export const STATUS_TRANSITIONS = {
   Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
-  Confirmed: ["Draft", "Cancelled", "Invoiced", "AdminMode", "AnyMode"],
+  Confirmed: [
+    "Draft",
+    "Confirmed",
+    "Cancelled",
+    "Invoiced",
+    "AdminMode",
+    "AnyMode",
+  ],
   Invoiced: ["AdminMode", "AnyMode"],
   Cancelled: ["AdminMode", "AnyMode"],
   AdminMode: ["Draft", "AnyMode"],
@@ -146,15 +153,64 @@ const salesOrderSchema1C1I = new Schema(
       ref: "Items", // Reference to the Item model
       required: true,
     },
-    site: {
-      type: String,
-      required: true,
-      default: "Main",
-    },
+    site: { type: Schema.Types.ObjectId, ref: "Sites", required: false },
     warehouse: {
-      type: String,
-      required: true,
-      default: "Common",
+      type: Schema.Types.ObjectId,
+      ref: "Warehouses",
+      required: false,
+    },
+    // … include zone, location, aisle, rack, shelf, bin, config, color, size, style, version, batch, serial …
+    zone: {
+      type: Schema.Types.ObjectId,
+      ref: "Zones", // from zone.model.js
+    },
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: "Locations", // from location.model.js
+    },
+    aisle: {
+      type: Schema.Types.ObjectId,
+      ref: "Aisles", // from aisle.model.js
+    },
+    rack: {
+      type: Schema.Types.ObjectId,
+      ref: "Racks", // from rack.model.js
+    },
+    shelf: {
+      type: Schema.Types.ObjectId,
+      ref: "Shelves", // from shelf.model.js
+    },
+    bin: {
+      type: Schema.Types.ObjectId,
+      ref: "Bins", // from bin.model.js
+    },
+    config: {
+      type: Schema.Types.ObjectId,
+      ref: "Configurations", // from config.model.js
+    },
+    color: {
+      type: Schema.Types.ObjectId,
+      ref: "Colors", // from color.model.js
+    },
+    size: {
+      type: Schema.Types.ObjectId,
+      ref: "Sizes", // from size.model.js
+    },
+    style: {
+      type: Schema.Types.ObjectId,
+      ref: "Styles", // from style.model.js
+    },
+    version: {
+      type: Schema.Types.ObjectId,
+      ref: "Versions", // from version.model.js
+    },
+    batch: {
+      type: Schema.Types.ObjectId,
+      ref: "Batches", // from batch.model.js
+    },
+    serial: {
+      type: Schema.Types.ObjectId,
+      ref: "Serials", // from serial.model.js
     },
     salesAddress: {
       type: String, // Adjust the type if address is more complex
@@ -691,34 +747,40 @@ const salesOrderSchema1C1I = new Schema(
         code: {
           type: String,
           required: false,
-          unique: true,
         },
         type: {
           type: String,
           required: true,
           enum: {
-            values: ["Cash", "Bank", "UPI", "Crypto", "Barter"],
+            values: ["BankAndUpi", "Cash", "Bank", "UPI", "Crypto", "Barter"],
             message:
               "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
           },
           default: "Bank",
         },
-        bankNum: {
+        bankAccNum: {
           type: String,
           required: [
-            true,
+            false,
             "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
           ],
-          unique: true,
           validate: {
             validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
             message:
               "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
           },
         },
-        name: {
+        upi: {
           type: String,
-          required: true,
+          required: false,
+        },
+        bankName: {
+          type: String,
+          required: false,
+        },
+        accountHolderName: {
+          type: String,
+          required: false,
         },
         ifsc: {
           type: String,
@@ -732,6 +794,10 @@ const salesOrderSchema1C1I = new Schema(
           type: Boolean,
           required: true,
           default: false,
+        },
+        qrDetails: {
+          type: String,
+          default: "",
         },
       },
     ],

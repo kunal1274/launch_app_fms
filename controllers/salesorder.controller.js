@@ -1,10 +1,14 @@
 // import { SalesOrderModel } from "../models/salesorders.muuSHakaH.model.js";
 import mongoose from "mongoose";
-import { SalesOrderModel } from "../models/salesorder.model.js";
+import {
+  SalesOrderModel,
+  STATUS_TRANSITIONS,
+} from "../models/salesorder.model.js";
 import { SalesOrderCounterModel } from "../models/counter.model.js";
 import { ItemModel } from "../models/item.model.js";
 import { CustomerModel } from "../models/customer.model.js";
 import { logError } from "../utility/logError.utils.js";
+import SalesStockService from "../services/salesStock.service.js";
 
 /**
  * Helper function to validate status transitions
@@ -532,7 +536,7 @@ export const addPayment = async (req, res) => {
 /**
  * Change the status of a Sales Order
  */
-export const changeSalesOrderStatus = async (req, res) => {
+export const changeSalesOrderStatus1 = async (req, res) => {
   try {
     const { salesOrderId } = req.params;
     const { newStatus, invoiceDate, dueDate } = req.body; // optionally provided
@@ -589,6 +593,76 @@ export const changeSalesOrderStatus = async (req, res) => {
     res.status(200).json(order);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+export const changeSalesOrderStatus = async (req, res) => {
+  const { salesOrderId } = req.params;
+  const { newStatus, invoiceDate, dueDate } = req.body;
+
+  // 1) Basic validation outside the transaction
+  const so = await SalesOrderModel.findById(salesOrderId);
+  if (!so) {
+    return res
+      .status(404)
+      .json({ status: "failure", message: "Sales Order not found" });
+  }
+  const allowed = STATUS_TRANSITIONS[so.status] || [];
+  if (!allowed.includes(newStatus)) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Invalid status transition ${so.status} → ${newStatus}`,
+    });
+  }
+
+  // 2) Start a session & transaction
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    // 3) Re-load the document *within* the transaction
+    const order = await SalesOrderModel.findById(salesOrderId).session(session);
+
+    // 4) Perform your reserve / release / apply / reverse calls:
+    if (newStatus === "Confirmed" && order.status === "Draft") {
+      await SalesStockService.reserveSO(order, session);
+    }
+    if (
+      ["Draft", "Cancelled"].includes(newStatus) &&
+      order.status === "Confirmed"
+    ) {
+      await SalesStockService.releaseSO(order, session);
+    }
+    if (newStatus === "Invoiced") {
+      await SalesStockService.releaseSO(order, session);
+      await SalesStockService.applySO(order, session);
+      order.invoiceDate = invoiceDate ? new Date(invoiceDate) : new Date();
+      order.dueDate = dueDate
+        ? new Date(dueDate)
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
+    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+      await SalesStockService.reverseSO(order, session);
+    }
+
+    // 5) Finally update the SO status and save
+    order.status = newStatus;
+    await order.save({ session });
+
+    // 6) Commit everything
+    await session.commitTransaction();
+    return res.json({ status: "success", data: order });
+  } catch (err) {
+    // 7) Abort on any error
+    await session.abortTransaction();
+    console.error("❌ changeSalesOrderStatus failed:", err);
+    return res.status(400).json({
+      status: "failure",
+      message: err.message || "Could not change sales order status",
+    });
+  } finally {
+    // 8) End the session
+    session.endSession();
   }
 };
 

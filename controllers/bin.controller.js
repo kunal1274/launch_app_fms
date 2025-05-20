@@ -24,10 +24,9 @@ export const createBin = async (req, res) => {
     const {
       name,
       type,
-      location,
-      zone,
+      shelf,
+      binLatLng,
       description,
-      locationLatLng,
       remarks,
       company,
       groups,
@@ -37,24 +36,23 @@ export const createBin = async (req, res) => {
     } = req.body;
 
     // require name, type, and location
-    if (!name || !type || !location) {
-      logger.warn("Bin Creation - Missing fields", {
+    if (!name || !type || !shelf) {
+      logger.warn("Bin Creation - Missing fields - bin name , type and shelf", {
         context: "createBin",
         body: req.body,
       });
       return res.status(422).json({
         status: "failure",
-        message: "⚠️ name, type, and location are required.",
+        message: "⚠️ name, type, and shelf are required.",
       });
     }
 
     const bin = await BinModel.create({
       name,
       type,
-      location,
-      zone,
+      shelf,
       description,
-      locationLatLng,
+      binLatLng,
       remarks,
       company,
       groups,

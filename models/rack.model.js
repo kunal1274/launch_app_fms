@@ -28,19 +28,13 @@ const rackSchema = new Schema(
       default: "Physical",
     },
 
-    location: {
+    aisle: {
       type: Schema.Types.ObjectId,
-      ref: "Locations", // Reference to the Customer model
+      ref: "Aisles", // Reference to the Customer model
       required: true,
     },
 
-    zone: {
-      type: Schema.Types.ObjectId,
-      ref: "Zones", // Reference to the Customer model
-      required: false,
-    },
-
-    locationLatLng: {
+    rackLatLng: {
       type: String, // Adjust the type if address is more complex
       required: false, // Ensures that salesAddress is always set
     },

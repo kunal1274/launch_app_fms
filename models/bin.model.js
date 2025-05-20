@@ -28,25 +28,13 @@ const binSchema = new Schema(
       default: "Physical",
     },
 
-    location: {
-      type: Schema.Types.ObjectId,
-      ref: "Locations", // Reference to the Customer model
-      required: true,
-    },
-
     shelf: {
       type: Schema.Types.ObjectId,
       ref: "Shelves", // Reference to the Customer model
-      required: false,
+      required: true,
     },
 
-    zone: {
-      type: Schema.Types.ObjectId,
-      ref: "Zones", // Reference to the Customer model
-      required: false,
-    },
-
-    locationLatLng: {
+    binLatLng: {
       type: String, // Adjust the type if address is more complex
       required: false, // Ensures that salesAddress is always set
     },

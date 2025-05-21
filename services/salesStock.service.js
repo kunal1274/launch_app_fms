@@ -1,5 +1,6 @@
 // services/salesStock.service.js
 
+import { InventoryTransactionModel } from "../models/inventoryTransaction.model.js";
 import { StockBalanceModel } from "../models/inventStockBalance.model.js";
 import { ProvisionalBalanceModel } from "../models/provisionalBalance.model.js";
 
@@ -156,7 +157,7 @@ class SalesStockService1 {
 }
 
 // for single  item
-class SalesStockService {
+class SalesStockService2 {
   static async reserveSO1(so, session) {
     const qty = so.orderType === "Return" ? -so.quantity : so.quantity;
     const key = {
@@ -402,6 +403,498 @@ class SalesStockService {
     sb.totalRevenueValue -= qty < 0 ? -qty * so.price : 0;
     sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;
     await sb.save({ session });
+  }
+}
+
+class SalesStockService3 {
+  /**
+   * Reserve stock for a sales order (CONFIRMED status).
+   *   - normal sale: qty → negative (outbound)
+   *   - return   : qty → positive (inbound)
+   */
+  static async reserveSO(so, session) {
+    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const value = qtySigned * so.price;
+
+    const key = {
+      item: so.item,
+      site: so.site,
+      warehouse: so.warehouse,
+      zone: so.zone,
+      location: so.location,
+      aisle: so.aisle,
+      rack: so.rack,
+      shelf: so.shelf,
+      bin: so.bin,
+      config: so.config,
+      color: so.color,
+      size: so.size,
+      style: so.style,
+      version: so.version,
+      batch: so.batch,
+      serial: so.serial,
+    };
+
+    const update = {
+      $inc: {
+        quantity: qtySigned,
+        totalReserveValue: value,
+      },
+      $set: {
+        "extras.refType": "SALES",
+        "extras.refId": so._id.toString(),
+        "extras.refNum": so.orderNum,
+      },
+    };
+
+    try {
+      await ProvisionalBalanceModel.updateOne(key, update, {
+        session,
+        upsert: true,
+      });
+    } catch (err) {
+      if (err.code !== 11000) throw err;
+      // race → retry without upsert
+      await ProvisionalBalanceModel.updateOne(key, update, { session });
+    }
+  }
+
+  /**
+   * Release stock (back to DRAFT/CANCELLED).
+   */
+  static async releaseSO(so, session) {
+    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const value = qtySigned * so.price;
+    const key = {
+      item: so.item,
+      site: so.site,
+      warehouse: so.warehouse,
+      zone: so.zone,
+      location: so.location,
+      aisle: so.aisle,
+      rack: so.rack,
+      shelf: so.shelf,
+      bin: so.bin,
+      config: so.config,
+      color: so.color,
+      size: so.size,
+      style: so.style,
+      version: so.version,
+      batch: so.batch,
+      serial: so.serial,
+    };
+    await ProvisionalBalanceModel.updateOne(
+      key,
+      { $inc: { quantity: -qtySigned, totalReserveValue: -value } },
+      { session }
+    );
+  }
+
+  /**
+   * Apply real stock movement for a sale (Invoiced).
+   */
+  static async applySO(so, session) {
+    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const key = {
+      item: so.item,
+      site: so.site,
+      warehouse: so.warehouse,
+      zone: so.zone,
+      location: so.location,
+      aisle: so.aisle,
+      rack: so.rack,
+      shelf: so.shelf,
+      bin: so.bin,
+      config: so.config,
+      color: so.color,
+      size: so.size,
+      style: so.style,
+      version: so.version,
+      batch: so.batch,
+      serial: so.serial,
+    };
+
+    // pick costPrice for reversal-of-issue
+    const existing = await StockBalanceModel.findOne(key).session(session);
+    const cost = existing?.costPrice || 0;
+
+    const deltas = {
+      quantity: qtySigned,
+      totalCostValue: qtySigned * (qtySigned > 0 ? cost : cost),
+      // for a sale, purchaseValue = 0; salesValue = (-qtySigned)*so.price
+      totalRevenueValue:
+        so.orderType === "Return"
+          ? -so.quantity * cost
+          : so.quantity * so.price,
+      totalPurchaseValue: 0,
+    };
+
+    const sb = await StockBalanceModel.findOneAndUpdate(
+      key,
+      { $inc: deltas },
+      { new: true, upsert: true, setDefaultsOnInsert: true, session }
+    );
+    sb.costPrice = sb.quantity > 0 ? sb.totalCostValue / sb.quantity : 0;
+
+    // tag reference
+    sb.extras = sb.extras || new Map();
+    sb.extras.set("refType", "SALES");
+    sb.extras.set("refId", so._id.toString());
+    sb.extras.set("refNum", so.orderNum);
+    await sb.save({ session });
+  }
+
+  /**
+   * Reverse real stock (on Cancel after Invoiced).
+   */
+  static async reverseSO(so, session) {
+    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const key = {
+      item: so.item,
+      site: so.site,
+      warehouse: so.warehouse,
+      zone: so.zone,
+      location: so.location,
+      aisle: so.aisle,
+      rack: so.rack,
+      shelf: so.shelf,
+      bin: so.bin,
+      config: so.config,
+      color: so.color,
+      size: so.size,
+      style: so.style,
+      version: so.version,
+      batch: so.batch,
+      serial: so.serial,
+    };
+
+    const sb = await StockBalanceModel.findOne(key).session(session);
+    if (!sb) throw new Error("Stock record not found for reversal");
+
+    const cost = sb.costPrice || 0;
+    sb.quantity -= qtySigned;
+    sb.totalCostValue -= qtySigned * cost;
+    sb.costPrice = sb.quantity > 0 ? sb.totalCostValue / sb.quantity : 0;
+    await sb.save({ session });
+  }
+}
+
+class SalesStockService {
+  /**
+   * Reserve inventory for a Purchase Order (Confirmed).
+   * Loops through order.lines[] (or single root line if no array).
+   */
+  static async reserveSO(order, session) {
+    const lines = Array.isArray(order.lines)
+      ? order.lines
+      : [
+          {
+            item: order.item,
+            quantity: order.quantity,
+            price: order.price,
+            site: order.site,
+            warehouse: order.warehouse,
+            zone: order.zone,
+            location: order.location,
+            aisle: order.aisle,
+            rack: order.rack,
+            shelf: order.shelf,
+            bin: order.bin,
+            config: order.config,
+            color: order.color,
+            size: order.size,
+            style: order.style,
+            version: order.version,
+            batch: order.batch,
+            serial: order.serial,
+          },
+        ];
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const ln = lines[idx];
+      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const val = qty * ln.price;
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
+
+      // 1) Upsert provisional balance
+      await ProvisionalBalanceModel.updateOne(
+        { item: ln.item, ...dims },
+        {
+          $inc: { quantity: qty, totalReserveValue: val },
+          $set: {
+            "extras.refType": "SaleOrder",
+            "extras.refId": order._id.toString(),
+            "extras.refNum": order.orderNum,
+            "extras.refLineNum": (idx + 1).toString(),
+          },
+        },
+        { upsert: true, session }
+      );
+
+      // 2) Log transaction
+      await InventoryTransactionModel.create(
+        [
+          {
+            txnDate: new Date(),
+            sourceType: "SALES",
+            sourceId: order._id,
+            sourceLine: idx + 1,
+            item: ln.item,
+            dims,
+            qty,
+            costPrice: 0,
+            purchasePrice: 0,
+            salesPrice: ln.price,
+            transferPrice: 0,
+            taxes: { gst: 0, withholdingTax: 0 },
+            extras: { action: "RESERVE", refNum: order.orderNum },
+          },
+        ],
+        { session }
+      );
+    }
+  }
+
+  static async releaseSO(order, session) {
+    const lines = Array.isArray(order.lines)
+      ? order.lines
+      : [
+          {
+            item: order.item,
+            quantity: order.quantity,
+            price: order.price,
+            site: order.site,
+            warehouse: order.warehouse,
+            zone: order.zone,
+            location: order.location,
+            aisle: order.aisle,
+            rack: order.rack,
+            shelf: order.shelf,
+            bin: order.bin,
+            config: order.config,
+            color: order.color,
+            size: order.size,
+            style: order.style,
+            version: order.version,
+            batch: order.batch,
+            serial: order.serial,
+          },
+        ];
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const ln = lines[idx];
+      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const val = qty * ln.price;
+      const dims = { /* same as above */ ...ln };
+
+      // decrement provisional
+      const pb = await ProvisionalBalanceModel.findOne(
+        { item: ln.item, ...dims },
+        null,
+        { session }
+      );
+      if (pb) {
+        pb.quantity -= qty;
+        pb.totalReserveValue -= val;
+        await pb.save({ session });
+      }
+
+      // log transaction
+      await InventoryTransactionModel.create(
+        [
+          {
+            txnDate: new Date(),
+            sourceType: "SALES",
+            sourceId: order._id,
+            sourceLine: idx + 1,
+            item: ln.item,
+            dims,
+            qty: -qty,
+            costPrice: 0,
+            purchasePrice: 0,
+            salesPrice: ln.price,
+            transferPrice: 0,
+            taxes: { gst: 0, withholdingTax: 0 },
+            extras: { action: "RELEASE", refNum: order.orderNum },
+          },
+        ],
+        { session }
+      );
+    }
+  }
+
+  static async applySO(order, session) {
+    const lines = Array.isArray(order.lines)
+      ? order.lines
+      : [
+          {
+            item: order.item,
+            quantity: order.quantity,
+            price: order.price,
+            site: order.site,
+            warehouse: order.warehouse,
+            zone: order.zone,
+            location: order.location,
+            aisle: order.aisle,
+            rack: order.rack,
+            shelf: order.shelf,
+            bin: order.bin,
+            config: order.config,
+            color: order.color,
+            size: order.size,
+            style: order.style,
+            version: order.version,
+            batch: order.batch,
+            serial: order.serial,
+          },
+        ];
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const ln = lines[idx];
+      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const price = ln.price;
+      const dims = { /* same as above */ ...ln };
+
+      // upsert real stock
+      const sb = await StockBalanceModel.findOneAndUpdate(
+        { item: ln.item, ...dims },
+        {
+          $inc: {
+            quantity: qty,
+            totalCostValue: qty * price,
+            totalPurchaseValue: qty < 0 ? -qty * price : 0,
+            totalRevenueValue: qty < 0 ? -qty * price : 0,
+            totalSalesValue: qty > 0 ? qty * price : 0,
+          },
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true, session }
+      );
+      sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;
+      sb.extras = sb.extras || new Map();
+      sb.extras.set("refType", "SalesOrder");
+      sb.extras.set("refId", order._id.toString());
+      sb.extras.set("refNum", order.orderNum);
+      sb.extras.set("refLineNum", (idx + 1).toString());
+      await sb.save({ session });
+
+      // log transaction
+      await InventoryTransactionModel.create(
+        [
+          {
+            txnDate: new Date(),
+            sourceType: "SALES",
+            sourceId: order._id,
+            sourceLine: idx + 1,
+            item: ln.item,
+            dims,
+            qty,
+            costPrice: sb.costPrice,
+            purchasePrice: price,
+            salesPrice: 0,
+            transferPrice: 0,
+            taxes: { gst: 0, withholdingTax: 0 },
+            extras: {
+              action:
+                order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
+              refNum: order.orderNum,
+            },
+          },
+        ],
+        { session }
+      );
+    }
+  }
+
+  static async reverseSO(order, session) {
+    const lines = Array.isArray(order.lines)
+      ? order.lines
+      : [
+          {
+            item: order.item,
+            quantity: order.quantity,
+            price: order.price,
+            site: order.site,
+            warehouse: order.warehouse,
+            zone: order.zone,
+            location: order.location,
+            aisle: order.aisle,
+            rack: order.rack,
+            shelf: order.shelf,
+            bin: order.bin,
+            config: order.config,
+            color: order.color,
+            size: order.size,
+            style: order.style,
+            version: order.version,
+            batch: order.batch,
+            serial: order.serial,
+          },
+        ];
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const ln = lines[idx];
+      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const price = ln.price;
+      const dims = { /* same as above */ ...ln };
+
+      // decrement real stock
+      const sb = await StockBalanceModel.findOne({
+        item: ln.item,
+        ...dims,
+      }).session(session);
+      if (!sb) throw new Error("Stock record not found for reversal");
+      sb.quantity -= qty;
+      sb.totalCostValue -= qty * price;
+      sb.totalPurchaseValue -= qty < 0 ? -qty * price : 0;
+      sb.totalRevenueValue -= qty < 0 ? -qty * price : 0;
+      sb.totalSalesValue -= qty > 0 ? qty * price : 0;
+      sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;
+      await sb.save({ session });
+
+      // log transaction
+      await InventoryTransactionModel.create(
+        [
+          {
+            txnDate: new Date(),
+            sourceType: "SALES",
+            sourceId: order._id,
+            sourceLine: idx + 1,
+            item: ln.item,
+            dims,
+            qty: -qty,
+            costPrice: sb.costPrice,
+            purchasePrice: price,
+            salesPrice: 0,
+            transferPrice: 0,
+            taxes: { gst: 0, withholdingTax: 0 },
+            extras: {
+              action:
+                order.orderType === "Return"
+                  ? "SALES_RETURN_REVERSAL"
+                  : "SALES_ISSUE_REVERSAL",
+              refNum: order.orderNum,
+            },
+          },
+        ],
+        { session }
+      );
+    }
   }
 }
 

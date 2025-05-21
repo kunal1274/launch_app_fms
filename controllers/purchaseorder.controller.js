@@ -547,6 +547,72 @@ export const changePurchaseOrderStatus1 = async (req, res) => {
 /**
  * Change the status of a Purchase Order, adjusting provisional/real stock as needed.
  */
+
+export const changePurchaseOrderStatus2 = async (req, res) => {
+  const { purchaseOrderId } = req.params;
+  const { newStatus, invoiceDate, dueDate } = req.body;
+
+  // 1) Load & validate your PO outside the txn
+  const po = await PurchaseOrderModel.findById(purchaseOrderId);
+  if (!po)
+    return res
+      .status(404)
+      .json({ status: "failure", message: "Purchase Order not found" });
+
+  const allowed = STATUS_TRANSITIONS[po.status] || [];
+  if (!allowed.includes(newStatus)) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Invalid status transition ${po.status} → ${newStatus}`,
+    });
+  }
+
+  // 2) Start a session
+  const session = await mongoose.startSession();
+  try {
+    // 3) Wrap *all* your updates in withTransaction
+    await session.withTransaction(async () => {
+      // (a) Re-load inside txn to get the right snapshot
+      const order = await PurchaseOrderModel.findById(purchaseOrderId).session(
+        session
+      );
+
+      // (b) Reserve / release / apply / reverse as needed
+      if (newStatus === "Confirmed" && order.status === "Draft") {
+        await PurchaseStockService.reservePO(order, session);
+      }
+      if (
+        ["Draft", "Cancelled"].includes(newStatus) &&
+        order.status === "Confirmed"
+      ) {
+        await PurchaseStockService.releasePO(order, session);
+      }
+      if (newStatus === "Invoiced") {
+        await PurchaseStockService.releasePO(order, session);
+        await PurchaseStockService.applyPO(order, session);
+        order.invoiceDate = invoiceDate || new Date();
+        order.dueDate =
+          dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      }
+      if (newStatus === "Cancelled" && order.status === "Invoiced") {
+        await PurchaseStockService.reversePO(order, session);
+      }
+
+      // (c) Finally persist the new status
+      order.status = newStatus;
+      await order.save({ session });
+    });
+    // 4) If we get here, the transaction was committed
+    return res.json({ status: "success", data: po });
+  } catch (err) {
+    // withTransaction has already aborted for us
+    console.error("Transaction aborted:", err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  } finally {
+    session.endSession();
+  }
+};
+
 export const changePurchaseOrderStatus = async (req, res) => {
   const { purchaseOrderId } = req.params;
   const { newStatus, invoiceDate, dueDate } = req.body;
@@ -615,71 +681,6 @@ export const changePurchaseOrderStatus = async (req, res) => {
     });
   } finally {
     // 8) End the session
-    session.endSession();
-  }
-};
-
-export const changePurchaseOrderStatus2 = async (req, res) => {
-  const { purchaseOrderId } = req.params;
-  const { newStatus, invoiceDate, dueDate } = req.body;
-
-  // 1) Load & validate your PO outside the txn
-  const po = await PurchaseOrderModel.findById(purchaseOrderId);
-  if (!po)
-    return res
-      .status(404)
-      .json({ status: "failure", message: "Purchase Order not found" });
-
-  const allowed = STATUS_TRANSITIONS[po.status] || [];
-  if (!allowed.includes(newStatus)) {
-    return res.status(400).json({
-      status: "failure",
-      message: `Invalid status transition ${po.status} → ${newStatus}`,
-    });
-  }
-
-  // 2) Start a session
-  const session = await mongoose.startSession();
-  try {
-    // 3) Wrap *all* your updates in withTransaction
-    await session.withTransaction(async () => {
-      // (a) Re-load inside txn to get the right snapshot
-      const order = await PurchaseOrderModel.findById(purchaseOrderId).session(
-        session
-      );
-
-      // (b) Reserve / release / apply / reverse as needed
-      if (newStatus === "Confirmed" && order.status === "Draft") {
-        await PurchaseStockService.reservePO(order, session);
-      }
-      if (
-        ["Draft", "Cancelled"].includes(newStatus) &&
-        order.status === "Confirmed"
-      ) {
-        await PurchaseStockService.releasePO(order, session);
-      }
-      if (newStatus === "Invoiced") {
-        await PurchaseStockService.releasePO(order, session);
-        await PurchaseStockService.applyPO(order, session);
-        order.invoiceDate = invoiceDate || new Date();
-        order.dueDate =
-          dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      }
-      if (newStatus === "Cancelled" && order.status === "Invoiced") {
-        await PurchaseStockService.reversePO(order, session);
-      }
-
-      // (c) Finally persist the new status
-      order.status = newStatus;
-      await order.save({ session });
-    });
-    // 4) If we get here, the transaction was committed
-    return res.json({ status: "success", data: po });
-  } catch (err) {
-    // withTransaction has already aborted for us
-    console.error("Transaction aborted:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
-  } finally {
     session.endSession();
   }
 };

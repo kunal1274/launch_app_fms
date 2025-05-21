@@ -901,7 +901,10 @@ class PurchaseStockService {
             transferPrice: 0,
             taxes: { gst: 0, withholdingTax: 0 },
             extras: {
-              action: order.orderType === "Return" ? "RETURN" : "RECEIPT",
+              action:
+                order.orderType === "Return"
+                  ? "PURCHASE_RETURN"
+                  : "PURCHASE_RECEIPT",
               refNum: order.orderNum,
             },
           },
@@ -975,8 +978,8 @@ class PurchaseStockService {
             extras: {
               action:
                 order.orderType === "Return"
-                  ? "RETURN_REVERSAL"
-                  : "RECEIPT_REVERSAL",
+                  ? "PURCHASE_RETURN_REVERSAL"
+                  : "PURCHASE_RECEIPT_REVERSAL",
               refNum: order.orderNum,
             },
           },

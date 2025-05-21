@@ -43,10 +43,21 @@ const stockBalanceSchema = new Schema(
     quantity: { type: Number, required: true, default: 0 },
     totalCostValue: { type: Number, required: true, default: 0 }, // sum(qty * costPrice)
     costPrice: { type: Number, default: 0 }, // moving-average cost
-    totalRevenueValue: { type: Number, default: 0 },
-    totalPurchaseValue: { type: Number, default: 0 },
     totalReserveValue: { type: Number, default: 0 },
+    totalUnReserveValue: { type: Number, default: 0 },
+    totalRevenueValue: { type: Number, default: 0 },
+    totalAccruedPurchaseValue: { type: Number, default: 0 },
+    totalDeferredRevenueValue: { type: Number, default: 0 },
+    totalPurchaseValue: { type: Number, default: 0 },
     totalSalesValue: { type: Number, default: 0 },
+    totalCOGSValue: { type: Number, default: 0 },
+    totalCOGPValue: { type: Number, default: 0 },
+    totalReceiptValue: { type: Number, default: 0 },
+    totalReceiptReturnValue: { type: Number, default: 0 },
+    totalReceiptReversalValue: { type: Number, default: 0 },
+    totalIssueValue: { type: Number, default: 0 },
+    totalIssueReturnValue: { type: Number, default: 0 },
+    totalIssueReversalValue: { type: Number, default: 0 },
     extras: {
       type: Map,
       of: Schema.Types.Mixed, // can store strings, numbers, objects, etc.

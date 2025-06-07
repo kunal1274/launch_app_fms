@@ -153,10 +153,7 @@ rackSchema.pre("save", async function (next) {
 });
 
 rackSchema.pre(/^find/, function (next) {
-  this.populate("location", "code name description type active").populate(
-    "zone",
-    "code name description type active"
-  );
+  this.populate("aisle", "code name description type active");
   next();
 });
 

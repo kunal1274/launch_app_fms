@@ -7,6 +7,7 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { WarehouseModel } from "../models/warehouse.model.js";
 
 /** Helper to invalidate the Zones cache */
 const invalidateZoneCache = async (key = "/fms/api/v0/zones") => {
@@ -47,6 +48,16 @@ export const createZone = async (req, res) => {
       });
     }
 
+    const wh = await WarehouseModel.findById(warehouse);
+    if (!wh) {
+      return res
+        .status(404)
+        .json({
+          status: "failure",
+          message: `⚠️ Warehouse ${warehouse} not found.`,
+        });
+    }
+
     const zone = await ZoneModel.create({
       name,
       type,
@@ -59,7 +70,7 @@ export const createZone = async (req, res) => {
       files,
       extras,
       active,
-      createdBy: req.user?.username || "SystemZoneCreation",
+      createdBy: req.user?.username || "67ec2fb004d3cc3237b58772",
     });
 
     await createAuditLog({

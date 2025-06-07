@@ -793,7 +793,24 @@ class PurchaseStockService {
       const ln = lines[idx];
       const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
       const val = qty * ln.price;
-      const dims = { /* same as above */ ...ln };
+      // const dims = { /* same as above */ ...ln };
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
 
       // decrement provisional
       const pb = await ProvisionalBalanceModel.findOne(
@@ -861,7 +878,24 @@ class PurchaseStockService {
       const ln = lines[idx];
       const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
       const price = ln.price;
-      const dims = { /* same as above */ ...ln };
+      // const dims = { /* same as above */ ...ln };
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
 
       // upsert real stock
       const sb = await StockBalanceModel.findOneAndUpdate(
@@ -944,7 +978,24 @@ class PurchaseStockService {
       const ln = lines[idx];
       const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
       const price = ln.price;
-      const dims = { /* same as above */ ...ln };
+      // const dims = { /* same as above */ ...ln };
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
 
       // decrement real stock
       const sb = await StockBalanceModel.findOne({

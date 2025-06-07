@@ -153,10 +153,7 @@ binSchema.pre("save", async function (next) {
 });
 
 binSchema.pre(/^find/, function (next) {
-  this.populate("location", "code name description type active").populate(
-    "zone",
-    "code name description type active"
-  );
+  this.populate("shelf", "code name description type active");
   next();
 });
 

@@ -76,7 +76,7 @@ export const STATUS_TRANSITIONS = {
     "AdminMode",
     "AnyMode",
   ],
-  Invoiced: ["AdminMode", "AnyMode"],
+  Invoiced: ["Cancelled", "AdminMode", "AnyMode"],
   Cancelled: ["AdminMode", "AnyMode"],
   AdminMode: ["Draft", "AnyMode"],
   AnyMode: ["Draft", "Confirmed", "Invoiced", "Cancelled", "AdminMode"],
@@ -107,6 +107,22 @@ export function getDaysFromPaymentTerm(paymentTerm) {
   }
 }
 
+const salesLineSchema = new Schema({
+  lineNum: { type: String, required: false },
+  item: { type: Schema.Types.ObjectId, ref: "Items" },
+  // optional storage/product dims for inventory lines:
+  dims: {
+    site: { type: Schema.Types.ObjectId, ref: "Sites" },
+    warehouse: { type: Schema.Types.ObjectId, ref: "Warehouses" },
+    config: { type: Schema.Types.ObjectId, ref: "Configurations" },
+    batch: { type: Schema.Types.ObjectId, ref: "Batches" },
+    serial: { type: Schema.Types.ObjectId, ref: "Serials" },
+  },
+  // link back to sub-ledger txn
+
+  extras: { type: Map, of: Schema.Types.Mixed, default: {} },
+});
+
 // Sales Order Schema
 const salesOrderSchema1C1I = new Schema(
   {
@@ -132,6 +148,10 @@ const salesOrderSchema1C1I = new Schema(
       //unique: true,
       default: "NA",
     },
+
+    // ── NEW: once “Invoiced” → link to the voucher we generate
+    voucherId: { type: Schema.Types.ObjectId, ref: "FinancialVouchers" },
+    voucherNo: { type: String },
     // ***** NEW FIELDS ADDED *****
     invoiceDate: {
       type: Date,
@@ -148,6 +168,7 @@ const salesOrderSchema1C1I = new Schema(
       ref: "Customers", // Reference to the Customer model
       required: true,
     },
+    lines: { type: [salesLineSchema], required: false },
     item: {
       type: Schema.Types.ObjectId,
       ref: "Items", // Reference to the Item model
@@ -244,6 +265,22 @@ const salesOrderSchema1C1I = new Schema(
         return Math.round(v * 100) / 100;
       },
     },
+    costPrice: {
+      type: Number,
+      required: true,
+      default: 0.0,
+      set: function (v) {
+        return Math.round(v * 100) / 100;
+      },
+    },
+    purchPrice: {
+      type: Number,
+      required: true,
+      default: 0.0,
+      set: function (v) {
+        return Math.round(v * 100) / 100;
+      },
+    },
     currency: {
       type: String,
       required: true,
@@ -253,6 +290,11 @@ const salesOrderSchema1C1I = new Schema(
           "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
       },
       default: "INR",
+    },
+    exchangeRate: {
+      type: Number,
+      required: true,
+      default: 1,
     },
 
     charges: {

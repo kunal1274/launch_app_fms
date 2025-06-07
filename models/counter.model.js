@@ -424,3 +424,33 @@ const inventJournalCounterSchema = new Schema({
 export const InventJournalCounterModel =
   mongoose.models.InventJournalCounters ||
   model("InventJournalCounters", inventJournalCounterSchema);
+
+const finVoucherCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const FinancialVoucherCounterModel =
+  mongoose.models.FinancialVoucherCounters ||
+  model("FinancialVoucherCounters", finVoucherCounterSchema);
+
+const salesInvoiceNumberCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const SalesInvoiceNumberCounterModel =
+  mongoose.models.SalesInvoiceNumberCounters ||
+  model("SalesInvoiceNumberCounters", salesInvoiceNumberCounterSchema);

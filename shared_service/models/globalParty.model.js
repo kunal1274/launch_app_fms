@@ -29,6 +29,10 @@ const globalPartySchema = new Schema(
           "Individual",
           "Organization",
           "OperatingUnit",
+          "Item",
+          "Bank",
+          "Account",
+          // need to think on site masters etc.
         ],
         message:
           "{VALUE} is not a valid partyType. Use 'None','Customer','Vendor','Employee','Worker','Contractor','ContactPerson','Individual','Organization','OperatingUnit'.",

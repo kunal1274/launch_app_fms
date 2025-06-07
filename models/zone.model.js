@@ -56,7 +56,7 @@ const zoneSchema = new Schema(
     createdBy: {
       type: String,
       required: true,
-      default: "SystemWHCreation",
+      default: "SystemZoneCreation",
     },
     updatedBy: {
       type: String,

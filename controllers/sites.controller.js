@@ -482,7 +482,7 @@ export const bulkUpdateSites = async (req, res) => {
         { ...update, updatedBy: req.user?.username || "Unknown" },
         { new: true, runValidators: true, session }
       );
-      if (!updated) throw new Error(`Site not found: ${id}`);
+      if (!updated) throw new Error(`Site not found: ${_id}`);
 
       await createAuditLog({
         user: req.user?.username || "67ec2fb004d3cc3237b58772",

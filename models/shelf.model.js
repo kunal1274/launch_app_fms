@@ -153,10 +153,7 @@ shelfSchema.pre("save", async function (next) {
 });
 
 shelfSchema.pre(/^find/, function (next) {
-  this.populate("location", "code name description type active").populate(
-    "zone",
-    "code name description type active"
-  );
+  this.populate("rack", "code name description type active");
   next();
 });
 

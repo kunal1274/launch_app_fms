@@ -41,6 +41,12 @@ const customerSchema = new Schema(
       type: String,
       required: true,
     },
+    parentAccount: {
+      // if Custmer account is hierarchical
+      type: Schema.Types.ObjectId,
+      ref: "Customers",
+      default: null,
+    },
     contactNum: {
       type: String,
       required: [true, "Contact number is required."],
@@ -178,6 +184,21 @@ const customerSchema = new Schema(
       type: String,
       required: false,
       default: "",
+    },
+    ledgerGroup: {
+      // this will be used in futuer like to group multiple customer accounts to post to single account code
+      type: String,
+      default: "",
+      trim: true,
+      // e.g. "OPERATIONS", "FINANCE", "GLOBAL" (for multi-entity usage)
+    },
+    linkedCoaAccount: {
+      type: Schema.Types.ObjectId,
+      ref: "Accounts",
+      required: [
+        false,
+        "Every Customer Account must specify the corresponding leaf AccountModel _id",
+      ],
     },
     remarks: {
       type: String,

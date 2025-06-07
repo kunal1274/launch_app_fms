@@ -153,10 +153,7 @@ aisleSchema.pre("save", async function (next) {
 });
 
 aisleSchema.pre(/^find/, function (next) {
-  this.populate("location", "code name description type active").populate(
-    "zone",
-    "code name description type active"
-  );
+  this.populate("location", "code name description type active");
   next();
 });
 

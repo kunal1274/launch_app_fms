@@ -4,11 +4,16 @@ import {
   SalesOrderModel,
   STATUS_TRANSITIONS,
 } from "../models/salesorder.model.js";
-import { SalesOrderCounterModel } from "../models/counter.model.js";
+import {
+  SalesInvoiceNumberCounterModel,
+  SalesOrderCounterModel,
+} from "../models/counter.model.js";
 import { ItemModel } from "../models/item.model.js";
 import { CustomerModel } from "../models/customer.model.js";
 import { logError } from "../utility/logError.utils.js";
 import SalesStockService from "../services/salesStock.service.js";
+import { ARTransactionModel } from "../models/arTransaction.model.js";
+import VoucherService from "../services/voucher.service.js";
 
 /**
  * Helper function to validate status transitions
@@ -113,6 +118,21 @@ async function generateInvoiceNumber() {
   const monthPrefix = now.toLocaleString("en-US", { month: "short" });
   const companyPrefix = process.env.COMPANY_PREFIX || "DEF";
   return `${companyPrefix}/${financialYear}/${monthPrefix}/INV-${seqNumber}`;
+}
+
+export async function getNextInvoiceNum() {
+  const ctr = await SalesInvoiceNumberCounterModel.findByIdAndUpdate(
+    { _id: "salesInvoiceNum" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+
+  if (!ctr || ctr.seq === undefined) {
+    throw new Error("❌ Failed to generate sales invoice number");
+  }
+
+  // Format exactly like you want, e.g. INV_000001
+  return `SINV_${ctr.seq.toString().padStart(6, "0")}`;
 }
 
 export const createSalesOrder = async (req, res) => {
@@ -666,7 +686,7 @@ export const changeSalesOrderStatus2 = async (req, res) => {
   }
 };
 
-export const changeSalesOrderStatus = async (req, res) => {
+export const changeSalesOrderStatus3 = async (req, res) => {
   const { salesOrderId } = req.params;
   const { newStatus, invoiceDate, dueDate } = req.body;
 
@@ -732,6 +752,104 @@ export const changeSalesOrderStatus = async (req, res) => {
     });
   } finally {
     // 8) End the session
+    session.endSession();
+  }
+};
+
+export const changeSalesOrderStatus = async (req, res) => {
+  const { salesOrderId } = req.params;
+  const { newStatus, invoiceDate, dueDate } = req.body;
+  const so = await SalesOrderModel.findById(salesOrderId);
+  // 1) Basic validation outside the transaction
+
+  if (!so) {
+    return res
+      .status(404)
+      .json({ status: "failure", message: "Sales Order not found" });
+  }
+  const allowed = STATUS_TRANSITIONS[so.status] || [];
+  if (!allowed.includes(newStatus)) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Invalid status transition ${so.status} → ${newStatus}`,
+    });
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const order = await SalesOrderModel.findById(salesOrderId).session(session);
+    if (newStatus === "Confirmed" && order.status === "Draft") {
+      await SalesStockService.reserveSO(order, session);
+    }
+    if (
+      ["Draft", "Cancelled"].includes(newStatus) &&
+      order.status === "Confirmed"
+    ) {
+      await SalesStockService.releaseSO(order, session);
+    }
+
+    // 1) Reserve/release unchanged...
+    if (newStatus === "Invoiced") {
+      if (!order.invoiceNum || order.invoiceNum === "NA") {
+        order.invoiceNum = await getNextInvoiceNum();
+      }
+      // a) release/reserve as before
+      await SalesStockService.releaseSO(order, session);
+      // b) apply stock and capture created txns
+      const invTxns = await SalesStockService.applySO(order, session);
+
+      // c) AR transaction
+      const [arTxn] = await ARTransactionModel.create(
+        [
+          {
+            txnDate: invoiceDate || new Date(),
+            sourceType: "SALES",
+            sourceId: order._id,
+            sourceLine: 1,
+            customer: order.customer,
+            amount: order.netAR,
+            extras: { orderNum: order.orderNum },
+          },
+        ],
+        { session }
+      );
+      //const arTxn = null;
+      // d) build taxTxn, whtTxn, chargesTxn similarly...
+      const taxTxn = null;
+      const whtTxn = null;
+      const chargesTxn = null;
+      const discTxn = null;
+
+      // e) create the voucher
+      const voucher = await VoucherService.createSalesVoucher(
+        { order, invTxns, arTxn, taxTxn, whtTxn, chargesTxn, discTxn },
+        session
+      );
+
+      // ── NEW: link it back onto the invoice record
+      order.voucherId = voucher._id;
+      order.voucherNo = voucher.voucherNo;
+
+      order.invoiceDate = invoiceDate ? new Date(invoiceDate) : new Date();
+      order.dueDate = dueDate
+        ? new Date(dueDate)
+        : new Date(Date.now() + 30 * 86400e3);
+    }
+
+    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+      await SalesStockService.reverseSO(order, session);
+    }
+
+    order.status = newStatus;
+    await order.save({ session });
+    await session.commitTransaction();
+    res.json({ status: "success", data: order });
+  } catch (err) {
+    await session.abortTransaction();
+    console.error(err);
+    res.status(400).json({ status: "failure", message: err.message });
+  } finally {
     session.endSession();
   }
 };

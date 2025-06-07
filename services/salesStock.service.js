@@ -662,8 +662,20 @@ class SalesStockService {
             purchasePrice: 0,
             salesPrice: ln.price,
             transferPrice: 0,
-            taxes: { gst: 0, withholdingTax: 0 },
-            extras: { action: "RESERVE", refNum: order.orderNum },
+            taxes: {
+              gst: order.taxAmount,
+              withholdingTax: order.withholdingTaxAmt,
+            },
+            extras: {
+              action:
+                order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
+              actionType: "RESERVE",
+              refNum: order.orderNum,
+              discountAmt: order.discountAmt,
+              chargesExpense: order.charges,
+              chargedAmt: 20,
+              gstPercent: order.tax,
+            },
           },
         ],
         { session }
@@ -701,7 +713,24 @@ class SalesStockService {
       const ln = lines[idx];
       const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
       const val = qty * ln.price;
-      const dims = { /* same as above */ ...ln };
+      // const dims = { /* same as above */ ...ln };
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
 
       // decrement provisional
       const pb = await ProvisionalBalanceModel.findOne(
@@ -730,8 +759,20 @@ class SalesStockService {
             purchasePrice: 0,
             salesPrice: ln.price,
             transferPrice: 0,
-            taxes: { gst: 0, withholdingTax: 0 },
-            extras: { action: "RELEASE", refNum: order.orderNum },
+            taxes: {
+              gst: -order.taxAmount,
+              withholdingTax: -order.withholdingTaxAmt,
+            },
+            extras: {
+              action:
+                order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
+              actionType: "RELEASE",
+              refNum: order.orderNum,
+              discountAmt: -order.discountAmt,
+              chargesExpense: -order.charges,
+              chargedAmt: -20,
+              gstPercent: order.tax,
+            },
           },
         ],
         { session }
@@ -740,8 +781,8 @@ class SalesStockService {
   }
 
   static async applySO(order, session) {
-    const lines = Array.isArray(order.lines)
-      ? order.lines
+    const lines = Array.isArray(order.lines1)
+      ? order.lines1
       : [
           {
             item: order.item,
@@ -765,11 +806,32 @@ class SalesStockService {
           },
         ];
 
+    const txns = [];
+
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
       const price = ln.price;
-      const dims = { /* same as above */ ...ln };
+      const costPrice = ln.costPrice;
+      const purchPrice = ln.purchPrice;
+      // const dims = { /* same as above */ ...ln };
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
 
       // upsert real stock
       const sb = await StockBalanceModel.findOneAndUpdate(
@@ -777,10 +839,10 @@ class SalesStockService {
         {
           $inc: {
             quantity: qty,
-            totalCostValue: qty * price,
-            totalPurchaseValue: qty < 0 ? -qty * price : 0,
-            totalRevenueValue: qty < 0 ? -qty * price : 0,
-            totalSalesValue: qty > 0 ? qty * price : 0,
+            totalCostValue: qty * costPrice || 0,
+            totalPurchaseValue: qty * purchPrice || 0,
+            totalRevenueValue: qty * price,
+            totalSalesValue: qty * price,
           },
         },
         { new: true, upsert: true, setDefaultsOnInsert: true, session }
@@ -794,31 +856,66 @@ class SalesStockService {
       await sb.save({ session });
 
       // log transaction
-      await InventoryTransactionModel.create(
-        [
-          {
-            txnDate: new Date(),
-            sourceType: "SALES",
-            sourceId: order._id,
-            sourceLine: idx + 1,
-            item: ln.item,
-            dims,
-            qty,
-            costPrice: sb.costPrice,
-            purchasePrice: price,
-            salesPrice: 0,
-            transferPrice: 0,
-            taxes: { gst: 0, withholdingTax: 0 },
-            extras: {
-              action:
-                order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
-              refNum: order.orderNum,
-            },
-          },
-        ],
-        { session }
-      );
+      // await InventoryTransactionModel.create(
+      //   [
+      //     {
+      //       txnDate: new Date(),
+      //       sourceType: "SALES",
+      //       sourceId: order._id,
+      //       sourceLine: idx + 1,
+      //       item: ln.item,
+      //       dims,
+      //       qty,
+      //       costPrice: sb.costPrice,
+      //       purchasePrice: price,
+      //       salesPrice: 0,
+      //       transferPrice: 0,
+      //       taxes: { gst: 0, withholdingTax: 0 },
+      //       extras: {
+      //         action:
+      //           order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
+      //         actionType: "APPLY",
+      //         refNum: order.orderNum,
+      //       },
+      //     },
+      //   ],
+      //   { session }
+      // );
+      txns.push({
+        txnDate: new Date(),
+        sourceType: "SALES",
+        sourceId: order._id,
+        sourceLine: idx + 1,
+        item: ln.item,
+        dims,
+        qty,
+        costPrice: sb.costPrice,
+        purchasePrice: purchPrice,
+        salesPrice: price,
+        transferPrice: 0,
+        taxes: {
+          gst: order.taxAmount,
+          withholdingTax: order.withholdingTaxAmt,
+        },
+        extras: {
+          action: order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
+          actionType: "APPLY",
+          refNum: order.orderNum,
+          discountAmt: order.discountAmt,
+          chargesExpense: order.charges,
+          chargedAmt: 20,
+          gstPercent: order.tax,
+        },
+      });
     }
+
+    // once, at the end:
+    // bulk‐insert and return the inserted docs
+    const inserted = txns.length
+      ? await InventoryTransactionModel.insertMany(txns, { session })
+      : [];
+
+    return inserted;
   }
 
   static async reverseSO(order, session) {
@@ -851,7 +948,24 @@ class SalesStockService {
       const ln = lines[idx];
       const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
       const price = ln.price;
-      const dims = { /* same as above */ ...ln };
+      // const dims = { /* same as above */ ...ln };
+      const dims = {
+        site: ln.site,
+        warehouse: ln.warehouse,
+        zone: ln.zone,
+        location: ln.location,
+        aisle: ln.aisle,
+        rack: ln.rack,
+        shelf: ln.shelf,
+        bin: ln.bin,
+        config: ln.config,
+        color: ln.color,
+        size: ln.size,
+        style: ln.style,
+        version: ln.version,
+        batch: ln.batch,
+        serial: ln.serial,
+      };
 
       // decrement real stock
       const sb = await StockBalanceModel.findOne({
@@ -879,16 +993,24 @@ class SalesStockService {
             dims,
             qty: -qty,
             costPrice: sb.costPrice,
-            purchasePrice: price,
-            salesPrice: 0,
+            purchasePrice: 0,
+            salesPrice: price,
             transferPrice: 0,
-            taxes: { gst: 0, withholdingTax: 0 },
+            taxes: {
+              gst: order.taxAmount,
+              withholdingTax: order.withholdingTaxAmt,
+            },
             extras: {
               action:
                 order.orderType === "Return"
                   ? "SALES_RETURN_REVERSAL"
                   : "SALES_ISSUE_REVERSAL",
+              actionType: "REVERSE",
               refNum: order.orderNum,
+              discountAmt: -order.discountAmt,
+              chargesExpense: -order.charges,
+              chargedAmt: -20,
+              gstPercent: order.tax,
             },
           },
         ],

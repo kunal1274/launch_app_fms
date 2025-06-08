@@ -10,7 +10,23 @@ import logger, {
   loggerJsonFormat,
   logStackError,
 } from "../utility/logger.util.js";
-import { SiteCounterModel } from "../models/counter.model.js";
+import {
+  AisleCounterModel,
+  BinCounterModel,
+  LocationCounterModel,
+  RackCounterModel,
+  ShelfCounterModel,
+  SiteCounterModel,
+  WarehouseCounterModel,
+  ZoneCounterModel,
+} from "../models/counter.model.js";
+import { WarehouseModel } from "../models/warehouse.model.js";
+import { ZoneModel } from "../models/zone.model.js";
+import { LocationModel } from "../models/location.model.js";
+import { AisleModel } from "../models/aisle.model.js";
+import { RackModel } from "../models/rack.model.js";
+import { ShelfModel } from "../models/shelf.model.js";
+import { BinModel } from "../models/bin.model.js";
 
 /**
  * Helper to invalidate Redis cache for sites.
@@ -577,6 +593,222 @@ export const bulkDeleteSites = async (req, res) => {
     return res.status(500).json({
       status: "failure",
       message: "❌ Error during bulk site deletion.",
+      error: error.message,
+    });
+  }
+};
+
+// controllers/site.controller.js
+
+// ———— 1) Bulk delete only “leaf” Sites (skip those with children) ————
+export const bulkAllDeleteSites = async (req, res) => {
+  try {
+    // 1. Find all Site IDs that have at least one Warehouse
+    const sitesWithChildren = await WarehouseModel.distinct("site");
+    // 2. Find leaf‐sites (no warehouses)
+    const toDelete = await SiteModel.find({
+      _id: { $nin: sitesWithChildren },
+    }).select("_id code name");
+
+    if (toDelete.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "No leaf sites to delete. All sites have child warehouses.",
+      });
+    }
+
+    const deleteIds = toDelete.map((s) => s._id);
+    const deleted = await SiteModel.deleteMany({ _id: { $in: deleteIds } });
+
+    // 3) Recompute the highest used sequence from whatever codes remain
+    const remaining = await SiteModel.find({}, "code").lean();
+    let maxSeq = 0;
+    for (const { code } of remaining) {
+      // assuming your codes look like “WH_00123” or similar
+      const m = code.match(/(\d+)$/);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > maxSeq) maxSeq = n;
+      }
+    }
+
+    // 3. Reset the Site counter
+    const resetCounter = await SiteCounterModel.findByIdAndUpdate(
+      { _id: "siteCode" },
+      { seq: maxSeq },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deleted ${deleted.deletedCount} leaf site(s).`,
+      skipped: sitesWithChildren, // array of site IDs with children
+      deletedSites: toDelete, // array of deleted site docs
+      counter: resetCounter,
+    });
+  } catch (error) {
+    console.error("❌ bulkAllDeleteSites error:", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteSites",
+      error: error.message,
+    });
+  }
+};
+
+// ———— 2) Bulk delete ALL Sites + cascade to ALL children ————
+export const bulkAllDeleteSitesCascade = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // 1. Gather all Site IDs
+    const allSites = await SiteModel.find({}, "_id").lean();
+    const siteIds = allSites.map((s) => s._id);
+
+    if (siteIds.length === 0) {
+      await session.commitTransaction();
+      session.endSession();
+      return res.status(200).json({
+        status: "success",
+        message: "No sites found to delete.",
+      });
+    }
+
+    // 2. Delete cascading down the chain
+    // 2a. Warehouses
+    const whs = await WarehouseModel.find(
+      { site: { $in: siteIds } },
+      "_id"
+    ).session(session);
+    const whIds = whs.map((w) => w._id);
+    await WarehouseModel.deleteMany({ site: { $in: siteIds } }).session(
+      session
+    );
+
+    // 2b. Zones
+    const zs = await ZoneModel.find(
+      { warehouse: { $in: whIds } },
+      "_id"
+    ).session(session);
+    const zIds = zs.map((z) => z._id);
+    await ZoneModel.deleteMany({ warehouse: { $in: whIds } }).session(session);
+
+    // 2c. Locations
+    const locs = await LocationModel.find(
+      { zone: { $in: zIds } },
+      "_id"
+    ).session(session);
+    const locIds = locs.map((l) => l._id);
+    await LocationModel.deleteMany({ zone: { $in: zIds } }).session(session);
+
+    // 2d. Aisles
+    const as = await AisleModel.find(
+      { location: { $in: locIds } },
+      "_id"
+    ).session(session);
+    const aIds = as.map((a) => a._id);
+    await AisleModel.deleteMany({ location: { $in: locIds } }).session(session);
+
+    // 2e. Racks
+    const rs = await RackModel.find({ aisle: { $in: aIds } }, "_id").session(
+      session
+    );
+    const rIds = rs.map((r) => r._id);
+    await RackModel.deleteMany({ aisle: { $in: aIds } }).session(session);
+
+    // 2f. Shelves
+    const shs = await ShelfModel.find({ rack: { $in: rIds } }, "_id").session(
+      session
+    );
+    const shIds = shs.map((s) => s._id);
+    await ShelfModel.deleteMany({ rack: { $in: rIds } }).session(session);
+
+    // 2g. Bins
+    await BinModel.deleteMany({ shelf: { $in: shIds } }).session(session);
+
+    // 2h. Finally, delete all Sites
+    const deletedSites = await SiteModel.deleteMany({
+      _id: { $in: siteIds },
+    }).session(session);
+
+    // 3. Reset all relevant counters
+    const resetSiteCtr = await SiteCounterModel.findByIdAndUpdate(
+      { _id: "siteCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    // 3. Reset all relevant counters
+    const resetWhCtr = await WarehouseCounterModel.findByIdAndUpdate(
+      { _id: "whCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    // 3. Reset all relevant counters
+    const resetZoneCtr = await ZoneCounterModel.findByIdAndUpdate(
+      { _id: "zoneCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+    const resetLocCtr = await LocationCounterModel.findByIdAndUpdate(
+      { _id: "locationCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetAisleCtr = await AisleCounterModel.findByIdAndUpdate(
+      { _id: "aisleCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetRackCtr = await RackCounterModel.findByIdAndUpdate(
+      { _id: "rackCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetShelfCtr = await ShelfCounterModel.findByIdAndUpdate(
+      { _id: "shelfCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetBinCtr = await BinCounterModel.findByIdAndUpdate(
+      { _id: "binCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    // ... repeat for warehouseCode, zoneCode, locationCode, aisleCode, rackCode, shelfCode, binCode
+    // e.g.:
+    // await WarehouseCounterModel.findByIdAndUpdate({ _id: "warehouseCode" }, { seq: 0 }, { new: true, upsert: true, session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Cascade‐deleted ${deletedSites.deletedCount} site(s) + all children.`,
+      counter: {
+        site: resetSiteCtr,
+        warehouse: resetWhCtr,
+        zone: resetZoneCtr,
+        location: resetLocCtr,
+        aisle: resetAisleCtr,
+        rack: resetRackCtr,
+        shelf: resetShelfCtr,
+        bin: resetBinCtr,
+      },
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ bulkAllDeleteSitesCascade error:", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteSitesCascade",
       error: error.message,
     });
   }

@@ -7,6 +7,8 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { ZoneModel } from "../models/zone.model.js";
+import { WarehouseModel } from "../models/warehouse.model.js";
 
 /** Helper to clear Locations cache */
 const invalidateLocationCache = async (key = "/fms/api/v0/locations") => {
@@ -49,6 +51,24 @@ export const createLocation = async (req, res) => {
         message:
           "⚠️ name and type are required, and at least one of warehouse or zone.",
       });
+    }
+    if (warehouse) {
+      const wh = await WarehouseModel.findById(warehouse);
+      if (!wh) {
+        return res.status(404).json({
+          status: "failure",
+          message: `⚠️ Warehouse ${warehouse} not found.`,
+        });
+      }
+    }
+    if (zone) {
+      const zn = await ZoneModel.findById(zone);
+      if (!zn) {
+        return res.status(404).json({
+          status: "failure",
+          message: `⚠️ Zone ${zone} not found.`,
+        });
+      }
     }
 
     const loc = await LocationModel.create({
@@ -182,8 +202,29 @@ export const updateLocationById = async (req, res) => {
     const { locationId } = req.params;
     const updateData = {
       ...req.body,
+      // warehouse,
+      // zone,
       updatedBy: req.user?.username || "Unknown",
     };
+
+    if (warehouse) {
+      const wh = await WarehouseModel.findById(req.body.warehouse);
+      if (!wh) {
+        return res.status(404).json({
+          status: "failure",
+          message: `⚠️ Warehouse ${req.body.warehouse} not found.`,
+        });
+      }
+    }
+    if (zone) {
+      const zn = await ZoneModel.findById(req.body.zone);
+      if (!zn) {
+        return res.status(404).json({
+          status: "failure",
+          message: `⚠️ Zone ${req.body.zone} not found.`,
+        });
+      }
+    }
     const loc = await LocationModel.findByIdAndUpdate(locationId, updateData, {
       new: true,
       runValidators: true,

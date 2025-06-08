@@ -2,12 +2,24 @@
 
 import mongoose from "mongoose";
 import { ZoneModel } from "../models/zone.model.js";
-import { ZoneCounterModel } from "../models/counter.model.js";
+import {
+  AisleCounterModel,
+  BinCounterModel,
+  LocationCounterModel,
+  RackCounterModel,
+  ShelfCounterModel,
+  ZoneCounterModel,
+} from "../models/counter.model.js";
 import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
 import { WarehouseModel } from "../models/warehouse.model.js";
+import { LocationModel } from "../models/location.model.js";
+import { BinModel } from "../models/bin.model.js";
+import { ShelfModel } from "../models/shelf.model.js";
+import { RackModel } from "../models/rack.model.js";
+import { AisleModel } from "../models/aisle.model.js";
 
 /** Helper to invalidate the Zones cache */
 const invalidateZoneCache = async (key = "/fms/api/v0/zones") => {
@@ -50,12 +62,10 @@ export const createZone = async (req, res) => {
 
     const wh = await WarehouseModel.findById(warehouse);
     if (!wh) {
-      return res
-        .status(404)
-        .json({
-          status: "failure",
-          message: `⚠️ Warehouse ${warehouse} not found.`,
-        });
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Warehouse ${warehouse} not found.`,
+      });
     }
 
     const zone = await ZoneModel.create({
@@ -166,8 +176,18 @@ export const updateZoneById = async (req, res) => {
     const { zoneId } = req.params;
     const updateData = {
       ...req.body,
+      // warehouse,
       updatedBy: req.user?.username || "Unknown",
     };
+
+    const wh = await WarehouseModel.findById(req.body.warehouse);
+    if (!wh) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Warehouse ${req.body.warehouse} not found.`,
+      });
+    }
+
     const zone = await ZoneModel.findByIdAndUpdate(zoneId, updateData, {
       new: true,
       runValidators: true,
@@ -523,6 +543,234 @@ export const bulkDeleteZones = async (req, res) => {
       status: "failure",
       message: "Error during bulk zone deletion.",
       error: error.message,
+    });
+  }
+};
+
+// ——— 1) Bulk‐delete only “leaf” Warehouses — skip any with Zones or direct Locations ———
+export const bulkAllDeleteZones = async (req, res) => {
+  try {
+    // Gather warehouse-ids that have at least one Zone or at least one direct Location
+    //const zoneParents = await ZoneModel.distinct("warehouse");
+    const locParents = await LocationModel.distinct("warehouse");
+    const hasChildren = new Set([...locParents]);
+
+    // Find truly‐leaf warehouses (no zones AND no direct locations)
+    const leafZones = await ZoneModel.find({
+      _id: { $nin: Array.from(hasChildren) },
+    })
+      .select("_id code name")
+      .lean();
+
+    if (leafZones.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "No leaf zones to delete; every zone has direct Locations.",
+        //skippedDueToZones: zoneParents,
+        skippedDueToLocations: locParents,
+      });
+    }
+
+    // Delete those leaf warehouses
+    const deleteIds = leafZones.map((z) => z._id);
+    const deleted = await ZoneModel.deleteMany({
+      _id: { $in: deleteIds },
+    });
+
+    // 3) Recompute the highest used sequence from whatever codes remain
+    const remaining = await ZoneModel.find({}, "code").lean();
+    let maxSeq = 0;
+    for (const { code } of remaining) {
+      // assuming your codes look like “WH_00123” or similar
+      const m = code.match(/(\d+)$/);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > maxSeq) maxSeq = n;
+      }
+    }
+
+    // Reset the warehouse counter
+    const resetCounter = await ZoneCounterModel.findByIdAndUpdate(
+      { _id: "zoneCode" },
+      { seq: maxSeq },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deleted ${deleted.deletedCount} leaf zone(s).`,
+      deletedZones: leafZones,
+      //skippedDueToZones: zoneParents,
+      skippedDueToLocations: locParents,
+      counter: resetCounter,
+    });
+  } catch (err) {
+    console.error("❌ bulkAllDeleteZones error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteZones",
+      error: err.message,
+    });
+  }
+};
+
+// ——— 2) Bulk‐delete EVERYTHING: Warehouses → Zones → Locations → Aisles → Racks → Shelves → Bins ———
+export const bulkAllDeleteZonesCascade = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // 1) All zone IDs
+    const allZnDocs = await ZoneModel.find({}, "_id").session(session).lean();
+    const znIds = allZnDocs.map((z) => z._id);
+    if (znIds.length === 0) {
+      await session.commitTransaction();
+      session.endSession();
+      return res
+        .status(200)
+        .json({ status: "success", message: "No zones to delete." });
+    }
+
+    // 2) Find & delete Zones under those warehouses
+    // const zoneDocs = await ZoneModel.find({ warehouse: { $in: whIds } }, "_id")
+    //   .session(session)
+    //   .lean();
+    // const zoneIds = zoneDocs.map((z) => z._id);
+    // await ZoneModel.deleteMany({ warehouse: { $in: whIds } }).session(session);
+
+    // 3) Find & delete Locations in TWO ways:
+    //    a) Zones → Locations
+    const locFromZones = await LocationModel.find(
+      { zone: { $in: znIds } },
+      "_id"
+    )
+      .session(session)
+      .lean();
+    //    b) Direct under warehouse
+    // const locDirect = await LocationModel.find(
+    //   { warehouse: { $in: whIds } },
+    //   "_id"
+    // )
+    //   .session(session)
+    //   .lean();
+    const locIds = Array.from(
+      new Set([
+        ...locFromZones.map((l) => l._id),
+        // ...locDirect.map((l) => l._id),
+      ])
+    );
+    await LocationModel.deleteMany({ zone: { $in: znIds } }).session(session);
+    // await LocationModel.deleteMany({
+    //   $or: [{ zone: { $in: zoneIds } }, { warehouse: { $in: whIds } }],
+    // }).session(session);
+
+    // 4) Cascade down: Aisles → Racks → Shelves → Bins
+    const aisleDocs = await AisleModel.find(
+      { location: { $in: locIds } },
+      "_id"
+    )
+      .session(session)
+      .lean();
+    const aisleIds = aisleDocs.map((a) => a._id);
+    await AisleModel.deleteMany({ location: { $in: locIds } }).session(session);
+
+    const rackDocs = await RackModel.find({ aisle: { $in: aisleIds } }, "_id")
+      .session(session)
+      .lean();
+    const rackIds = rackDocs.map((r) => r._id);
+    await RackModel.deleteMany({ aisle: { $in: aisleIds } }).session(session);
+
+    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, "_id")
+      .session(session)
+      .lean();
+    const shelfIds = shelfDocs.map((s) => s._id);
+    await ShelfModel.deleteMany({ rack: { $in: rackIds } }).session(session);
+
+    await BinModel.deleteMany({ shelf: { $in: shelfIds } }).session(session);
+
+    // 5) Finally delete all Warehouses
+    const deletedZn = await ZoneModel.deleteMany({
+      _id: { $in: znIds },
+    }).session(session);
+
+    // // 6) Reset all counters
+    // const resetWhCtr = await WarehouseCounterModel.findByIdAndUpdate(
+    //   { _id: "whCode" },
+    //   { seq: 0 },
+    //   { new: true, upsert: true, session }
+    // );
+
+    // // 3. Reset all relevant counters
+    // const resetWhCtr = await WarehouseCounterModel.findByIdAndUpdate(
+    //   { _id: "whCode" },
+    //   { seq: 0 },
+    //   { new: true, upsert: true, session }
+    // );
+
+    // 3. Reset all relevant counters
+    const resetZoneCtr = await ZoneCounterModel.findByIdAndUpdate(
+      { _id: "zoneCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+    const resetLocCtr = await LocationCounterModel.findByIdAndUpdate(
+      { _id: "locationCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetAisleCtr = await AisleCounterModel.findByIdAndUpdate(
+      { _id: "aisleCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetRackCtr = await RackCounterModel.findByIdAndUpdate(
+      { _id: "rackCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetShelfCtr = await ShelfCounterModel.findByIdAndUpdate(
+      { _id: "shelfCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    const resetBinCtr = await BinCounterModel.findByIdAndUpdate(
+      { _id: "binCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    // …and likewise for zoneCode, locationCode, aisleCode, rackCode, shelfCode, binCode
+    // e.g.:
+    // await ZoneCounterModel.findByIdAndUpdate({ _id: "zoneCode" }, { seq: 0 }, { upsert: true, session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Cascade‐deleted ${deletedZn.deletedCount} zone(s) + all children.`,
+      counter: {
+        // warehouse: resetWhCtr,
+        zone: resetZoneCtr,
+        location: resetLocCtr,
+        aisle: resetAisleCtr,
+        rack: resetRackCtr,
+        shelf: resetShelfCtr,
+        bin: resetBinCtr,
+        // zone: …, location: …, aisle: …, rack: …, shelf: …, bin: …
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ bulkAllDeleteZonesCascade error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteZonesCascade",
+      error: err.message,
     });
   }
 };

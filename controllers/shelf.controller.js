@@ -7,6 +7,7 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { RackModel } from "../models/rack.model.js";
 
 /** Helper: invalidate Shelf cache */
 const invalidateShelfCache = async (key = "/fms/api/v0/shelves") => {
@@ -46,6 +47,14 @@ export const createShelf = async (req, res) => {
       return res.status(422).json({
         status: "failure",
         message: "⚠️ name, type, and rack are required.",
+      });
+    }
+
+    const rk = await RackModel.findById(rack);
+    if (!rk) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Rack ${rack} not found.`,
       });
     }
 
@@ -177,8 +186,17 @@ export const updateShelfById = async (req, res) => {
     const { shelfId } = req.params;
     const updateData = {
       ...req.body,
+      // rack,
       updatedBy: req.user?.username || "Unknown",
     };
+    const rk = await RackModel.findById(req.body.rack);
+    if (!rk) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Rack ${req.body.rack} not found.`,
+      });
+    }
+
     const shelf = await ShelfModel.findByIdAndUpdate(shelfId, updateData, {
       new: true,
       runValidators: true,

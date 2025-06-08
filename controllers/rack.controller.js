@@ -7,6 +7,7 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { AisleModel } from "../models/aisle.model.js";
 
 /** Helper: clear Redis cache for racks */
 const invalidateRackCache = async (key = "/fms/api/v0/racks") => {
@@ -63,6 +64,14 @@ export const createRack = async (req, res) => {
       active,
       createdBy: req.user?.username || "SystemRackCreation",
     });
+
+    const ai = await AisleModel.findById(aisle);
+    if (!ai) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Aisle ${aisle} not found.`,
+      });
+    }
 
     await createAuditLog({
       user: req.user?.username || "67ec2fb004d3cc3237b58772",
@@ -177,8 +186,18 @@ export const updateRackById = async (req, res) => {
     const { rackId } = req.params;
     const updateData = {
       ...req.body,
+      // aisle,
       updatedBy: req.user?.username || "Unknown",
     };
+
+    const ai = await AisleModel.findById(req.body.aisle);
+    if (!ai) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Aisle ${req.body.aisle} not found.`,
+      });
+    }
+
     const rack = await RackModel.findByIdAndUpdate(rackId, updateData, {
       new: true,
       runValidators: true,

@@ -7,6 +7,7 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { LocationModel } from "../models/location.model.js";
 
 // Helper: invalidate aisle cache
 const invalidateAisleCache = async (key = "/fms/api/v0/aisles") => {
@@ -43,6 +44,13 @@ export const createAisle = async (req, res) => {
       });
     }
 
+    const lc = await LocationModel.findById(location);
+    if (!lc) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Location ${location} not found.`,
+      });
+    }
     const aisle = await AisleModel.create({
       name,
       description,
@@ -160,8 +168,18 @@ export const updateAisleById = async (req, res) => {
     const { aisleId } = req.params;
     const updateData = {
       ...req.body,
+      // location,
       updatedBy: req.user?.username || "Unknown",
     };
+
+    const lc = await LocationModel.findById(req.body.location);
+    if (!lc) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Location ${req.body.location} not found.`,
+      });
+    }
+
     const aisle = await AisleModel.findByIdAndUpdate(aisleId, updateData, {
       new: true,
       runValidators: true,

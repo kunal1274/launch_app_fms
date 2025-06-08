@@ -13,6 +13,8 @@ import {
   bulkCreateWarehouses,
   bulkUpdateWarehouses,
   bulkDeleteWarehouses,
+  bulkAllDeleteWarehouses,
+  bulkAllDeleteWarehousesCascade,
 } from "../controllers/warehouse.controller.js";
 
 import { cacheMiddleware } from "../middleware/cacheMiddleware.js";
@@ -23,6 +25,8 @@ const whRouter = express.Router();
 whRouter.post("/bulk", bulkCreateWarehouses);
 whRouter.put("/bulk", bulkUpdateWarehouses);
 whRouter.delete("/bulk", bulkDeleteWarehouses);
+whRouter.delete("/bulk-all", bulkAllDeleteWarehouses);
+whRouter.delete("/bulk-all-cascade", bulkAllDeleteWarehousesCascade);
 
 // ─── Collection endpoints ────────────────────────
 whRouter.get("/", cacheMiddleware, getAllWarehouses);

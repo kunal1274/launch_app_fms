@@ -13,6 +13,8 @@ import {
   bulkCreateZones,
   bulkUpdateZones,
   bulkDeleteZones,
+  bulkAllDeleteZones,
+  bulkAllDeleteZonesCascade,
 } from "../controllers/zone.controller.js";
 
 const zoneRouter = express.Router();
@@ -21,6 +23,8 @@ const zoneRouter = express.Router();
 zoneRouter.post("/bulk", bulkCreateZones);
 zoneRouter.put("/bulk", bulkUpdateZones);
 zoneRouter.delete("/bulk", bulkDeleteZones);
+zoneRouter.delete("/bulk-all", bulkAllDeleteZones);
+zoneRouter.delete("/bulk-all-cascade", bulkAllDeleteZonesCascade);
 
 // ── Collection endpoints ──
 zoneRouter.get("/", getAllZones);

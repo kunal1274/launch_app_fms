@@ -7,6 +7,7 @@ import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { ShelfModel } from "../models/shelf.model.js";
 
 /** Helper: invalidate Bin cache */
 const invalidateBinCache = async (key = "/fms/api/v0/bins") => {
@@ -44,6 +45,14 @@ export const createBin = async (req, res) => {
       return res.status(422).json({
         status: "failure",
         message: "⚠️ name, type, and shelf are required.",
+      });
+    }
+
+    const sh = await ShelfModel.findById(shelf);
+    if (!sh) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Shelf ${shelf} not found.`,
       });
     }
 
@@ -175,8 +184,17 @@ export const updateBinById = async (req, res) => {
     const { binId } = req.params;
     const updateData = {
       ...req.body,
+      // shelf,
       updatedBy: req.user?.username || "Unknown",
     };
+
+    const sh = await ShelfModel.findById(req.body.shelf);
+    if (!sh) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Shelf ${req.body.shelf} not found.`,
+      });
+    }
     const bin = await BinModel.findByIdAndUpdate(binId, updateData, {
       new: true,
       runValidators: true,

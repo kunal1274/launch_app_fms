@@ -2,12 +2,18 @@
 
 import mongoose from "mongoose";
 import { RackModel } from "../models/rack.model.js";
-import { RackCounterModel } from "../models/counter.model.js";
+import {
+  BinCounterModel,
+  RackCounterModel,
+  ShelfCounterModel,
+} from "../models/counter.model.js";
 import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
 import { AisleModel } from "../models/aisle.model.js";
+import { ShelfModel } from "../models/shelf.model.js";
+import { BinModel } from "../models/bin.model.js";
 
 /** Helper: clear Redis cache for racks */
 const invalidateRackCache = async (key = "/fms/api/v0/racks") => {
@@ -50,6 +56,14 @@ export const createRack = async (req, res) => {
       });
     }
 
+    const ai = await AisleModel.findById(aisle);
+    if (!ai) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Aisle ${aisle} not found.`,
+      });
+    }
+
     const rack = await RackModel.create({
       name,
       type,
@@ -64,14 +78,6 @@ export const createRack = async (req, res) => {
       active,
       createdBy: req.user?.username || "SystemRackCreation",
     });
-
-    const ai = await AisleModel.findById(aisle);
-    if (!ai) {
-      return res.status(404).json({
-        status: "failure",
-        message: `⚠️ Aisle ${aisle} not found.`,
-      });
-    }
 
     await createAuditLog({
       user: req.user?.username || "67ec2fb004d3cc3237b58772",
@@ -357,6 +363,63 @@ export const bulkCreateRacks = async (req, res) => {
     });
   }
 
+  // 1) In-batch validation: each rack needs a name + aisle, no in-batch dupes
+  const combos = docs.map((d, idx) => {
+    if (!d.name || !d.aisle) {
+      throw new Error(
+        `Each rack must have both a name and an aisle (error at index ${idx})`
+      );
+    }
+    return { name: d.name.trim(), aisle: d.aisle, idx };
+  });
+
+  // detect in-batch duplicates
+  const seen = new Set();
+  const dupes = combos.filter(({ name, aisle }) => {
+    const key = `${aisle}:${name}`;
+    if (seen.has(key)) return true;
+    seen.add(key);
+    return false;
+  });
+  if (dupes.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate rack name+aisle in request: " +
+        [...new Set(dupes.map((d) => `${d.name}@${d.aisle}`))].join(", "),
+    });
+  }
+
+  // 2) Validate all parent aisles exist
+  const aisleIds = [...new Set(combos.map((c) => c.aisle))];
+  if (aisleIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+    return res
+      .status(400)
+      .json({ status: "failure", message: "One or more invalid aisle IDs." });
+  }
+  const countA = await AisleModel.countDocuments({ _id: { $in: aisleIds } });
+  if (countA !== aisleIds.length) {
+    return res
+      .status(404)
+      .json({ status: "failure", message: "Some parent aisles not found." });
+  }
+
+  // 3) DB‐wide uniqueness: no existing rack with same name+aisle
+  const conflictQ = combos.map(({ name, aisle }) => ({ name, aisle }));
+  const conflicts = await RackModel.find({ $or: conflictQ })
+    .select("name aisle")
+    .lean();
+  if (conflicts.length) {
+    return res.status(409).json({
+      status: "failure",
+      message:
+        "These rack name+aisle already exist: " +
+        conflicts.map((c) => `${c.name}@${c.aisle}`).join(", "),
+    });
+  }
+
+  // 4) Everything valid → reserve codes & insert
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -425,6 +488,86 @@ export const bulkUpdateRacks = async (req, res) => {
         "⚠️ Request body must be a non-empty array of {id or _id, update}.",
     });
   }
+
+  // 1) Gather any name/aisle changes for in-batch & DB uniqueness checks
+  const toCheck = [];
+  for (const { id, _id, update } of updates) {
+    const docId = id || _id;
+    if (!mongoose.Types.ObjectId.isValid(docId)) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: `Invalid rack ID: ${docId}` });
+    }
+    if (update.name || update.aisle) {
+      toCheck.push({ id: docId, name: update.name, aisle: update.aisle });
+    }
+  }
+
+  // 2) Load originals
+  const ids = toCheck.map((c) => c.id);
+  const originals = await RackModel.find({ _id: { $in: ids } })
+    .select("name aisle")
+    .lean();
+  const origMap = new Map(originals.map((o) => [o._id.toString(), o]));
+
+  // 3) Build new combos and detect in-batch dupes
+  const seen2 = new Set();
+  const dupes2 = [];
+  const combos2 = toCheck.map(({ id, name, aisle }) => {
+    const orig = origMap.get(id);
+    if (!orig) throw new Error(`Rack not found: ${id}`);
+    const newName = name != null ? name.trim() : orig.name;
+    const newAisle = aisle != null ? aisle : orig.aisle;
+    const key = `${newAisle}:${newName}`;
+    if (seen2.has(key)) dupes2.push({ name: newName, aisle: newAisle });
+    seen2.add(key);
+    return { id, name: newName, aisle: newAisle };
+  });
+  if (dupes2.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate rack name+aisle in request: " +
+        [...new Set(dupes2.map((d) => `${d.name}@${d.aisle}`))].join(", "),
+    });
+  }
+
+  // 4) Validate any new parent aisles
+  const newAisleIds = [...new Set(combos2.map((c) => c.aisle))];
+  if (newAisleIds.length) {
+    if (newAisleIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid aisle IDs in update." });
+    }
+    const cnt2 = await AisleModel.countDocuments({ _id: { $in: newAisleIds } });
+    if (cnt2 !== newAisleIds.length) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Some target aisles do not exist.",
+      });
+    }
+  }
+
+  // 5) DB‐wide uniqueness
+  const conflictQs2 = combos2.map(({ id, name, aisle }) => ({
+    _id: { $ne: id },
+    name,
+    aisle,
+  }));
+  const conflicts2 = await RackModel.find({ $or: conflictQs2 })
+    .select("name aisle")
+    .lean();
+  if (conflicts2.length) {
+    return res.status(409).json({
+      status: "failure",
+      message:
+        "These rack name+aisle pairs already exist: " +
+        conflicts2.map((c) => `${c.name}@${c.aisle}`).join(", "),
+    });
+  }
+
+  // 6) Apply updates in a transaction
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -531,6 +674,147 @@ export const bulkDeleteRacks = async (req, res) => {
       status: "failure",
       message: "Error during bulk rack deletion.",
       error: error.message,
+    });
+  }
+};
+
+/**
+ * 1) Bulk‐delete only “leaf” Racks (skip any that have child Shelves)
+ */
+export const bulkAllDeleteRacks = async (req, res) => {
+  try {
+    // 1. Find all rack IDs that have at least one Shelf
+    const racksWithChildren = await ShelfModel.distinct("rack");
+
+    // 2. Leaf‐racks are those NOT in that list
+    const leafRacks = await RackModel.find({
+      _id: { $nin: racksWithChildren },
+    })
+      .select("_id code name")
+      .lean();
+
+    if (leafRacks.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "No leaf racks to delete; every rack has child shelves.",
+        skippedDueToShelves: racksWithChildren,
+      });
+    }
+
+    // 3. Delete those leaf racks
+    const deleteIds = leafRacks.map((r) => r._id);
+    const deleted = await RackModel.deleteMany({
+      _id: { $in: deleteIds },
+    });
+
+    // 4. Recompute highest sequence from remaining codes
+    const remaining = await RackModel.find({}, "code").lean();
+    let maxSeq = 0;
+    remaining.forEach(({ code }) => {
+      const m = code.match(/(\d+)$/);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > maxSeq) maxSeq = n;
+      }
+    });
+
+    // 5. Reset the rackCode counter to maxSeq
+    const resetCounter = await RackCounterModel.findByIdAndUpdate(
+      { _id: "rackCode" },
+      { seq: maxSeq },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deleted ${deleted.deletedCount} leaf rack(s).`,
+      deletedRacks: leafRacks,
+      skippedDueToShelves: racksWithChildren,
+      counter: resetCounter,
+    });
+  } catch (err) {
+    console.error("❌ bulkAllDeleteRacks error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteRacks",
+      error: err.message,
+    });
+  }
+};
+
+/**
+ * 2) Bulk‐delete EVERYTHING: Racks → Shelves → Bins
+ */
+export const bulkAllDeleteRacksCascade = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // 1. Gather all Rack IDs
+    const allRacks = await RackModel.find({}, "_id").session(session).lean();
+    const rackIds = allRacks.map((r) => r._id);
+
+    if (rackIds.length === 0) {
+      await session.commitTransaction();
+      session.endSession();
+      return res
+        .status(200)
+        .json({ status: "success", message: "No racks to delete." });
+    }
+
+    // 2. Delete child Shelves
+    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, "_id")
+      .session(session)
+      .lean();
+    const shelfIds = shelfDocs.map((s) => s._id);
+    await ShelfModel.deleteMany({ rack: { $in: rackIds } }).session(session);
+
+    // 3. Delete child Bins
+    await BinModel.deleteMany({ shelf: { $in: shelfIds } }).session(session);
+
+    // 4. Finally delete all Racks
+    const deletedRacks = await RackModel.deleteMany({
+      _id: { $in: rackIds },
+    }).session(session);
+
+    // 5. Reset all relevant counters back to 0
+    const [resetRackCtr, resetShelfCtr, resetBinCtr] = await Promise.all([
+      RackCounterModel.findByIdAndUpdate(
+        { _id: "rackCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      ShelfCounterModel.findByIdAndUpdate(
+        { _id: "shelfCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      BinCounterModel.findByIdAndUpdate(
+        { _id: "binCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+    ]);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Cascade-deleted ${deletedRacks.deletedCount} rack(s) + all descendants.`,
+      counter: {
+        rack: resetRackCtr,
+        shelf: resetShelfCtr,
+        bin: resetBinCtr,
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ bulkAllDeleteRacksCascade error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteRacksCascade",
+      error: err.message,
     });
   }
 };

@@ -13,6 +13,8 @@ import {
   bulkCreateBins,
   bulkUpdateBins,
   bulkDeleteBins,
+  bulkAllDeleteBins,
+  bulkAllDeleteBinsCascade,
 } from "../controllers/bin.controller.js";
 
 const binRouter = express.Router();
@@ -21,6 +23,8 @@ const binRouter = express.Router();
 binRouter.post("/bulk", bulkCreateBins);
 binRouter.put("/bulk", bulkUpdateBins);
 binRouter.delete("/bulk", bulkDeleteBins);
+binRouter.delete("/bulk-all", bulkAllDeleteBins);
+binRouter.delete("/bulk-all-cascade", bulkAllDeleteBinsCascade);
 
 // Collection endpoints
 binRouter.get("/", getAllBins);

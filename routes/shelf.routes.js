@@ -13,6 +13,8 @@ import {
   bulkCreateShelves,
   bulkUpdateShelves,
   bulkDeleteShelves,
+  bulkAllDeleteShelves,
+  bulkAllDeleteShelvesCascade,
 } from "../controllers/shelf.controller.js";
 
 const shelfRouter = express.Router();
@@ -21,6 +23,8 @@ const shelfRouter = express.Router();
 shelfRouter.post("/bulk", bulkCreateShelves);
 shelfRouter.put("/bulk", bulkUpdateShelves);
 shelfRouter.delete("/bulk", bulkDeleteShelves);
+shelfRouter.delete("/bulk-all", bulkAllDeleteShelves);
+shelfRouter.delete("/bulk-all-cascade", bulkAllDeleteShelvesCascade);
 
 // ── Collection endpoints ──────────────────
 shelfRouter.get("/", getAllShelves);

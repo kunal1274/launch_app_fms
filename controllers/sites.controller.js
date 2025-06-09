@@ -405,6 +405,31 @@ export const bulkCreateSites = async (req, res) => {
     });
   }
 
+  // 1) In‐batch duplicate‐name check
+  const names = docs.map((d) => d.name && d.name.trim());
+  const dupNames = names.filter((n, i) => n && names.indexOf(n) !== i);
+  if (dupNames.length) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Duplicate site name(s) in request: ${[
+        ...new Set(dupNames),
+      ].join(", ")}`,
+    });
+  }
+
+  // 2) Conflict with existing DB names
+  const conflict = await SiteModel.find({ name: { $in: names } })
+    .select("name")
+    .lean();
+  if (conflict.length) {
+    return res.status(409).json({
+      status: "failure",
+      message: `Site name(s) already exist: ${conflict
+        .map((s) => s.name)
+        .join(", ")}`,
+    });
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -481,6 +506,48 @@ export const bulkUpdateSites = async (req, res) => {
       status: "failure",
       message: "⚠️ Request body must be a non-empty array of {id, update}.",
     });
+  }
+
+  // 1) Collect IDs and new names
+  const ids = updates.map((u) => u.id || u._id).filter(Boolean);
+  if (ids.some((i) => !mongoose.Types.ObjectId.isValid(i))) {
+    return res.status(400).json({
+      status: "failure",
+      message: "One or more invalid site IDs provided.",
+    });
+  }
+
+  const nameUpdates = updates
+    .map((u) => u.update?.name && u.update.name.trim())
+    .filter(Boolean);
+
+  // 2) In‐batch duplicate‐name check
+  const dupNames = nameUpdates.filter((n, i) => nameUpdates.indexOf(n) !== i);
+  if (dupNames.length) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Duplicate site name(s) in request: ${[
+        ...new Set(dupNames),
+      ].join(", ")}`,
+    });
+  }
+
+  // 3) DB conflict check (exclude these same IDs)
+  if (nameUpdates.length) {
+    const conflicts = await SiteModel.find({
+      name: { $in: nameUpdates },
+      _id: { $nin: ids },
+    })
+      .select("name")
+      .lean();
+    if (conflicts.length) {
+      return res.status(409).json({
+        status: "failure",
+        message: `Site name(s) already in use: ${conflicts
+          .map((s) => s.name)
+          .join(", ")}`,
+      });
+    }
   }
 
   const session = await mongoose.startSession();

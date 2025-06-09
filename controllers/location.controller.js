@@ -2,13 +2,23 @@
 
 import mongoose from "mongoose";
 import { LocationModel } from "../models/location.model.js";
-import { LocationCounterModel } from "../models/counter.model.js";
+import {
+  AisleCounterModel,
+  BinCounterModel,
+  LocationCounterModel,
+  RackCounterModel,
+  ShelfCounterModel,
+} from "../models/counter.model.js";
 import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
 import redisClient from "../middleware/redisClient.js";
 import logger, { logStackError } from "../utility/logger.util.js";
 import { winstonLogger, logError } from "../utility/logError.utils.js";
 import { ZoneModel } from "../models/zone.model.js";
 import { WarehouseModel } from "../models/warehouse.model.js";
+import { AisleModel } from "../models/aisle.model.js";
+import { RackModel } from "../models/rack.model.js";
+import { ShelfModel } from "../models/shelf.model.js";
+import { BinModel } from "../models/bin.model.js";
 
 /** Helper to clear Locations cache */
 const invalidateLocationCache = async (key = "/fms/api/v0/locations") => {
@@ -387,6 +397,94 @@ export const bulkCreateLocations = async (req, res) => {
     });
   }
 
+  // 1) Build (name + parentType + parentId) combos and catch in-batch duplicates
+  const combos = docs.map((d, i) => {
+    const name = (d.name || "").trim();
+    const hasZone = !!d.zone,
+      hasWh = !!d.warehouse;
+    if ((hasZone && hasWh) || (!hasZone && !hasWh)) {
+      throw new Error(
+        `Each location must specify exactly one parent: zone OR warehouse. Error at index ${i}.`
+      );
+    }
+    return {
+      name,
+      parentType: hasZone ? "zone" : "warehouse",
+      parentId: hasZone ? d.zone : d.warehouse,
+      idx: i,
+    };
+  });
+
+  // detect in-batch dupes
+  const seen = new Set();
+  const dupes = combos.filter(({ name, parentType, parentId }) => {
+    const key = `${parentType}:${parentId}:${name}`;
+    if (seen.has(key)) return true;
+    seen.add(key);
+    return false;
+  });
+  if (dupes.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate name/parent in payload: " +
+        [
+          ...new Set(
+            dupes.map((d) => `${d.name} @ ${d.parentType}:${d.parentId}`)
+          ),
+        ].join(", "),
+    });
+  }
+
+  // 2) Validate all parent IDs exist
+  const zoneIds = [
+    ...new Set(
+      combos.filter((c) => c.parentType === "zone").map((c) => c.parentId)
+    ),
+  ];
+  const whIds = [
+    ...new Set(
+      combos.filter((c) => c.parentType === "warehouse").map((c) => c.parentId)
+    ),
+  ];
+
+  if (
+    zoneIds.some((id) => !mongoose.Types.ObjectId.isValid(id)) ||
+    whIds.some((id) => !mongoose.Types.ObjectId.isValid(id))
+  ) {
+    return res.status(400).json({
+      status: "failure",
+      message: "One or more invalid zone or warehouse IDs.",
+    });
+  }
+  const [foundZones, foundWhs] = await Promise.all([
+    ZoneModel.countDocuments({ _id: { $in: zoneIds } }),
+    WarehouseModel.countDocuments({ _id: { $in: whIds } }),
+  ]);
+  if (foundZones !== zoneIds.length || foundWhs !== whIds.length) {
+    return res.status(404).json({
+      status: "failure",
+      message: "Some parent zone or warehouse IDs were not found.",
+    });
+  }
+
+  // 3) DB-wide uniqueness
+  const orQueries = combos.map(({ name, parentType, parentId }) => ({
+    name,
+    [parentType]: parentId,
+  }));
+  const conflicts = await LocationModel.find({ $or: orQueries })
+    .select("name zone warehouse")
+    .lean();
+  if (conflicts.length) {
+    return res.status(409).json({
+      status: "failure",
+      message:
+        "These locations already exist: " +
+        conflicts.map((c) => `${c.name} @ ${c.zone || c.warehouse}`).join(", "),
+    });
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -454,6 +552,109 @@ export const bulkUpdateLocations = async (req, res) => {
       message:
         "⚠️ Request body must be a non-empty array of {id or _id, update}.",
     });
+  }
+
+  // 1) Build combos of intended changes for name+parent
+  const combos = [];
+  for (const { id, _id, update } of updates) {
+    const docId = id || _id;
+    if (!mongoose.Types.ObjectId.isValid(docId)) {
+      return res.status(400).json({
+        status: "failure",
+        message: `Invalid location ID: ${docId}`,
+      });
+    }
+    const name = update.name?.trim();
+    const hasZone = update.zone != null;
+    const hasWh = update.warehouse != null;
+    if (hasZone && hasWh) {
+      return res.status(400).json({
+        status: "failure",
+        message: `Cannot reparent to both zone and warehouse for ${docId}.`,
+      });
+    }
+    if (name || hasZone || hasWh) {
+      combos.push({
+        id: docId,
+        name,
+        parentType: hasZone ? "zone" : hasWh ? "warehouse" : null,
+        parentId: hasZone ? update.zone : hasWh ? update.warehouse : null,
+      });
+    }
+  }
+
+  // 2) In-batch dupes
+  const seen = new Set();
+  const dupes = combos.filter((c) => {
+    if (!c.name || !c.parentType) return false;
+    const key = `${c.parentType}:${c.parentId}:${c.name}`;
+    if (seen.has(key)) return true;
+    seen.add(key);
+    return false;
+  });
+  if (dupes.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate reparent/name in request: " +
+        [
+          ...new Set(
+            dupes.map((d) => `${d.name}@${d.parentType}:${d.parentId}`)
+          ),
+        ].join(", "),
+    });
+  }
+
+  // 3) Validate any new parent IDs
+  const zids = [
+    ...new Set(
+      combos.filter((c) => c.parentType === "zone").map((c) => c.parentId)
+    ),
+  ];
+  const wids = [
+    ...new Set(
+      combos.filter((c) => c.parentType === "warehouse").map((c) => c.parentId)
+    ),
+  ];
+  if (zids.length) {
+    const cnt = await ZoneModel.countDocuments({ _id: { $in: zids } });
+    if (cnt !== zids.length) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Some target zones do not exist.",
+      });
+    }
+  }
+  if (wids.length) {
+    const cnt = await WarehouseModel.countDocuments({ _id: { $in: wids } });
+    if (cnt !== wids.length) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Some target warehouses do not exist.",
+      });
+    }
+  }
+
+  // 4) DB-wide uniqueness (excluding self)
+  const orQs = combos
+    .filter((c) => c.name && c.parentType)
+    .map(({ name, parentType, parentId, id }) => ({
+      name,
+      [parentType]: parentId,
+      _id: { $ne: id },
+    }));
+  if (orQs.length) {
+    const conflicts = await LocationModel.find({ $or: orQs })
+      .select("name zone warehouse")
+      .lean();
+    if (conflicts.length) {
+      return res.status(409).json({
+        status: "failure",
+        message:
+          "These location/name conflicts exist: " +
+          conflicts.map((c) => `${c.name}@${c.zone || c.warehouse}`).join(", "),
+      });
+    }
   }
 
   const session = await mongoose.startSession();
@@ -560,6 +761,185 @@ export const bulkDeleteLocations = async (req, res) => {
       status: "failure",
       message: "Error during bulk location deletion.",
       error: error.message,
+    });
+  }
+};
+
+/**
+ * 1) Bulk‐delete only “leaf” Locations (skip any with child Aisles)
+ */
+export const bulkAllDeleteLocations = async (req, res) => {
+  try {
+    // 1. Find all location IDs that have at least one Aisle
+    const aislesParents = await AisleModel.distinct("location");
+
+    // 2. Leaf locations = those NOT in aislesParents
+    const leafLocs = await LocationModel.find({
+      _id: { $nin: aislesParents },
+    })
+      .select("_id code name")
+      .lean();
+
+    if (leafLocs.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message:
+          "No leaf locations to delete; every location has child aisles.",
+        skippedDueToAisles: aislesParents,
+      });
+    }
+
+    // 3. Delete the leaf locations
+    const deleteIds = leafLocs.map((l) => l._id);
+    const deleted = await LocationModel.deleteMany({
+      _id: { $in: deleteIds },
+    });
+
+    // 4. Recompute max sequence from remaining codes
+    const remaining = await LocationModel.find({}, "code").lean();
+    let maxSeq = 0;
+    for (const { code } of remaining) {
+      // assuming codes like “LN_012”
+      const m = code.match(/(\d+)$/);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > maxSeq) maxSeq = n;
+      }
+    }
+
+    // 5. Reset the location counter to maxSeq
+    const resetCounter = await LocationCounterModel.findByIdAndUpdate(
+      { _id: "locationCode" },
+      { seq: maxSeq },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deleted ${deleted.deletedCount} leaf location(s).`,
+      deletedLocations: leafLocs,
+      skippedDueToAisles: aislesParents,
+      counter: resetCounter,
+    });
+  } catch (err) {
+    console.error("❌ bulkAllDeleteLocations error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteLocations",
+      error: err.message,
+    });
+  }
+};
+
+/**
+ * 2) Bulk‐delete EVERYTHING: Locations → Aisles → Racks → Shelves → Bins
+ */
+export const bulkAllDeleteLocationsCascade = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // 1. Gather all Location IDs
+    const allLocDocs = await LocationModel.find({}, "_id")
+      .session(session)
+      .lean();
+    const locIds = allLocDocs.map((l) => l._id);
+    if (locIds.length === 0) {
+      await session.commitTransaction();
+      session.endSession();
+      return res
+        .status(200)
+        .json({ status: "success", message: "No locations to delete." });
+    }
+
+    // 2. Delete child Aisles
+    const aisleDocs = await AisleModel.find(
+      { location: { $in: locIds } },
+      "_id"
+    )
+      .session(session)
+      .lean();
+    const aisleIds = aisleDocs.map((a) => a._id);
+    await AisleModel.deleteMany({ location: { $in: locIds } }).session(session);
+
+    // 3. Delete child Racks
+    const rackDocs = await RackModel.find({ aisle: { $in: aisleIds } }, "_id")
+      .session(session)
+      .lean();
+    const rackIds = rackDocs.map((r) => r._id);
+    await RackModel.deleteMany({ aisle: { $in: aisleIds } }).session(session);
+
+    // 4. Delete child Shelves
+    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, "_id")
+      .session(session)
+      .lean();
+    const shelfIds = shelfDocs.map((s) => s._id);
+    await ShelfModel.deleteMany({ rack: { $in: rackIds } }).session(session);
+
+    // 5. Delete child Bins
+    await BinModel.deleteMany({ shelf: { $in: shelfIds } }).session(session);
+
+    // 6. Finally delete all Locations
+    const deletedLocs = await LocationModel.deleteMany({
+      _id: { $in: locIds },
+    }).session(session);
+
+    // 7. Reset all relevant counters back to 0
+    const [
+      resetLocCtr,
+      resetAisleCtr,
+      resetRackCtr,
+      resetShelfCtr,
+      resetBinCtr,
+    ] = await Promise.all([
+      LocationCounterModel.findByIdAndUpdate(
+        { _id: "locationCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      AisleCounterModel.findByIdAndUpdate(
+        { _id: "aisleCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      RackCounterModel.findByIdAndUpdate(
+        { _id: "rackCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      ShelfCounterModel.findByIdAndUpdate(
+        { _id: "shelfCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      BinCounterModel.findByIdAndUpdate(
+        { _id: "binCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+    ]);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Cascade‐deleted ${deletedLocs.deletedCount} location(s) + all descendants.`,
+      counter: {
+        location: resetLocCtr,
+        aisle: resetAisleCtr,
+        rack: resetRackCtr,
+        shelf: resetShelfCtr,
+        bin: resetBinCtr,
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ bulkAllDeleteLocationsCascade error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteLocationsCascade",
+      error: err.message,
     });
   }
 };

@@ -12,6 +12,8 @@ import {
   bulkCreateAisles,
   bulkUpdateAisles,
   bulkDeleteAisles,
+  bulkAllDeleteAisles,
+  bulkAllDeleteAislesCascade,
 } from "../controllers/aisle.controller.js";
 
 const aisleRouter = express.Router();
@@ -20,6 +22,8 @@ const aisleRouter = express.Router();
 aisleRouter.post("/bulk", bulkCreateAisles);
 aisleRouter.put("/bulk", bulkUpdateAisles);
 aisleRouter.delete("/bulk", bulkDeleteAisles);
+aisleRouter.delete("/bulk-all", bulkAllDeleteAisles);
+aisleRouter.delete("/bulk-all-cascade", bulkAllDeleteAislesCascade);
 
 // Collection endpoints
 aisleRouter.get("/", getAllAisles);

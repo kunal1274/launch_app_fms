@@ -13,6 +13,8 @@ import {
   bulkCreateRacks,
   bulkUpdateRacks,
   bulkDeleteRacks,
+  bulkAllDeleteRacks,
+  bulkAllDeleteRacksCascade,
 } from "../controllers/rack.controller.js";
 
 const rackRouter = express.Router();
@@ -21,6 +23,8 @@ const rackRouter = express.Router();
 rackRouter.post("/bulk", bulkCreateRacks);
 rackRouter.put("/bulk", bulkUpdateRacks);
 rackRouter.delete("/bulk", bulkDeleteRacks);
+rackRouter.delete("/bulk-all", bulkAllDeleteRacks);
+rackRouter.delete("/bulk-all-cascade", bulkAllDeleteRacksCascade);
 
 // ── Collection endpoints ───────────────
 rackRouter.get("/", getAllRacks);

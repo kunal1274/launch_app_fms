@@ -383,6 +383,47 @@ export const bulkCreateWarehouses = async (req, res) => {
     });
   }
 
+  // 1) Pre-validate that every `d.site` exists in Sites
+  const siteIds = [...new Set(docs.map((d) => d.site))];
+  const existing = await SiteModel.find({ _id: { $in: siteIds } })
+    .select("_id")
+    .lean();
+  const existingSet = new Set(existing.map((s) => s._id.toString()));
+  const missing = siteIds.filter((id) => !existingSet.has(id.toString()));
+  if (missing.length) {
+    return res.status(404).json({
+      status: "failure",
+      message: `Site(s) not found: ${missing.join(", ")}`,
+    });
+  }
+
+  // 2) In‐batch duplicate‐name check
+  const names = docs.map((d) => d.name);
+  const dupInBatch = names.filter((n, i) => names.indexOf(n) !== i);
+  if (dupInBatch.length) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Duplicate warehouse name(s) in request: ${[
+        ...new Set(dupInBatch),
+      ].join(", ")}`,
+    });
+  }
+
+  // 3) Conflict with existing DB names
+  const conflict = await WarehouseModel.find({
+    name: { $in: names },
+  })
+    .select("name")
+    .lean();
+  if (conflict.length) {
+    return res.status(409).json({
+      status: "failure",
+      message: `Warehouse name(s) already exist: ${conflict
+        .map((w) => w.name)
+        .join(", ")}`,
+    });
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -447,6 +488,80 @@ export const bulkUpdateWarehouses = async (req, res) => {
         "⚠️ Request body must be a non-empty array of { id or _id, update }.",
     });
   }
+
+  // 1) Gather all to-be-updated IDs and new names
+  const ids = updates.map((u) => u.id || u._id).filter(Boolean);
+  if (ids.some((i) => !mongoose.Types.ObjectId.isValid(i))) {
+    return res.status(400).json({
+      status: "failure",
+      message: "One or more invalid warehouse IDs provided.",
+    });
+  }
+
+  // 2) If any update.name present, collect them
+  const nameUpdates = updates.map((u) => u.update?.name).filter(Boolean);
+  // in‐batch duplicate‐name check
+  const dupNames = nameUpdates.filter((n, i) => nameUpdates.indexOf(n) !== i);
+  if (dupNames.length) {
+    return res.status(400).json({
+      status: "failure",
+      message: `Duplicate names in request: ${[...new Set(dupNames)].join(
+        ", "
+      )}`,
+    });
+  }
+
+  // 3) Check conflicts in DB (excluding these same IDs)
+  if (nameUpdates.length) {
+    const conflicts = await WarehouseModel.find({
+      name: { $in: nameUpdates },
+      _id: { $nin: ids },
+    })
+      .select("name")
+      .lean();
+    if (conflicts.length) {
+      return res.status(409).json({
+        status: "failure",
+        message: `Warehouse name(s) already in use: ${conflicts
+          .map((w) => w.name)
+          .join(", ")}`,
+      });
+    }
+  }
+
+  // 4) Site‐existence check for any update.site
+  const siteUpdates = updates.map((u) => u.update?.site).filter(Boolean);
+  if (siteUpdates.length) {
+    const uniqSites = [...new Set(siteUpdates)];
+    const existing = await SiteModel.find({ _id: { $in: uniqSites } })
+      .select("_id")
+      .lean();
+    const existSet = new Set(existing.map((s) => s._id.toString()));
+    const missing = uniqSites.filter((id) => !existSet.has(id.toString()));
+    if (missing.length) {
+      return res.status(404).json({
+        status: "failure",
+        message: `Site(s) not found: ${missing.join(", ")}`,
+      });
+    }
+  }
+
+  // // 1) Pre-validate any `site` references
+  // const toCheckSite = updates.map((u) => u.update?.site).filter(Boolean);
+  // if (toCheckSite.length) {
+  //   const uniqueSites = [...new Set(toCheckSite)];
+  //   const existing = await SiteModel.find({ _id: { $in: uniqueSites } })
+  //     .select("_id")
+  //     .lean();
+  //   const existingSet = new Set(existing.map((s) => s._id.toString()));
+  //   const missing = uniqueSites.filter((id) => !existingSet.has(id.toString()));
+  //   if (missing.length) {
+  //     return res.status(404).json({
+  //       status: "failure",
+  //       message: `Site(s) not found: ${missing.join(", ")}`,
+  //     });
+  //   }
+  // }
 
   const session = await mongoose.startSession();
   session.startTransaction();

@@ -368,6 +368,68 @@ export const bulkCreateZones = async (req, res) => {
     });
   }
 
+  // 1) Extract combos and check in-batch duplicates (name+warehouse)
+  const combos = docs.map((d) => ({
+    name: (d.name || "").trim(),
+    warehouse: d.warehouse,
+  }));
+  const seen = new Set();
+  const dupes = combos.filter(({ name, warehouse }) => {
+    const key = `${warehouse}:${name}`;
+    if (seen.has(key)) return true;
+    seen.add(key);
+    return false;
+  });
+  if (dupes.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate zone name/warehouse in request: " +
+        [
+          ...new Set(
+            dupes.map(({ name, warehouse }) => `${name} @ ${warehouse}`)
+          ),
+        ].join(", "),
+    });
+  }
+
+  // 2) Validate all warehouse IDs exist
+  const warehouseIds = [...new Set(combos.map((c) => c.warehouse))];
+  if (warehouseIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+    return res.status(400).json({
+      status: "failure",
+      message: "One or more invalid warehouse IDs.",
+    });
+  }
+  const existingWh = await WarehouseModel.find({
+    _id: { $in: warehouseIds },
+  })
+    .select("_id")
+    .lean();
+  if (existingWh.length !== warehouseIds.length) {
+    const found = new Set(existingWh.map((w) => w._id.toString()));
+    const bad = warehouseIds.filter((id) => !found.has(id.toString()));
+    return res.status(404).json({
+      status: "failure",
+      message: `Warehouse not found: ${bad.join(", ")}`,
+    });
+  }
+
+  // 3) DB-wide uniqueness check
+  const dbConflicts = await ZoneModel.find({
+    $or: combos.map(({ name, warehouse }) => ({ name, warehouse })),
+  })
+    .select("name warehouse")
+    .lean();
+  if (dbConflicts.length) {
+    return res.status(409).json({
+      status: "failure",
+      message:
+        "These zone(s) already exist: " +
+        dbConflicts.map((z) => `${z.name} @ ${z.warehouse}`).join(", "),
+    });
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -435,6 +497,92 @@ export const bulkUpdateZones = async (req, res) => {
       message:
         "⚠️ Request body must be a non-empty array of {id or _id, update}.",
     });
+  }
+
+  // 1) Collect all IDs and intended new (name, warehouse) combos
+  const ids = [];
+  const combos = [];
+  for (const { id, _id, update } of updates) {
+    const docId = id || _id;
+    if (!mongoose.Types.ObjectId.isValid(docId)) {
+      return res.status(400).json({
+        status: "failure",
+        message: `Invalid zone ID: ${docId}`,
+      });
+    }
+    ids.push(docId);
+
+    if (update.name || update.warehouse) {
+      combos.push({
+        name: update.name ? update.name.trim() : null,
+        warehouse: update.warehouse || null,
+        id: docId,
+      });
+    }
+  }
+
+  // 2) In-batch duplicates check (ignore entries that aren’t changing both)
+  const seen = new Set();
+  const dupes = combos.filter(({ name, warehouse }) => {
+    if (!name || !warehouse) return false;
+    const key = `${warehouse}:${name}`;
+    if (seen.has(key)) return true;
+    seen.add(key);
+    return false;
+  });
+  if (dupes.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate update of zone name/warehouse in request: " +
+        [
+          ...new Set(
+            dupes.map(({ name, warehouse }) => `${name} @ ${warehouse}`)
+          ),
+        ].join(", "),
+    });
+  }
+
+  // 3) Validate any new warehouse IDs
+  const newWhIds = [...new Set(combos.map((c) => c.warehouse).filter(Boolean))];
+  if (newWhIds.length) {
+    if (newWhIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+      return res.status(400).json({
+        status: "failure",
+        message: "One or more invalid warehouse IDs in updates.",
+      });
+    }
+    const found = await WarehouseModel.countDocuments({
+      _id: { $in: newWhIds },
+    });
+    if (found !== newWhIds.length) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Some target warehouses do not exist.",
+      });
+    }
+  }
+
+  // 4) DB-wide uniqueness: for every combo, ensure no other zone has that name+warehouse
+  const conflictQueries = combos
+    .filter((c) => c.name && c.warehouse)
+    .map(({ name, warehouse, id }) => ({
+      name,
+      warehouse,
+      _id: { $ne: id },
+    }));
+  if (conflictQueries.length) {
+    const conflicts = await ZoneModel.find({ $or: conflictQueries })
+      .select("name warehouse")
+      .lean();
+    if (conflicts.length) {
+      return res.status(409).json({
+        status: "failure",
+        message:
+          "Zone name/warehouse conflicts: " +
+          conflicts.map((z) => `${z.name} @ ${z.warehouse}`).join(", "),
+      });
+    }
   }
 
   const session = await mongoose.startSession();

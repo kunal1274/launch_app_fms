@@ -13,6 +13,8 @@ import {
   bulkCreateLocations,
   bulkUpdateLocations,
   bulkDeleteLocations,
+  bulkAllDeleteLocations,
+  bulkAllDeleteLocationsCascade,
 } from "../controllers/location.controller.js";
 
 const locationRouter = express.Router();
@@ -21,6 +23,8 @@ const locationRouter = express.Router();
 locationRouter.post("/bulk", bulkCreateLocations);
 locationRouter.put("/bulk", bulkUpdateLocations);
 locationRouter.delete("/bulk", bulkDeleteLocations);
+locationRouter.delete("/bulk-all", bulkAllDeleteLocations);
+locationRouter.delete("/bulk-all-cascade", bulkAllDeleteLocationsCascade);
 
 // ── Collection endpoints ────────────────────
 locationRouter.get("/", getAllLocations);

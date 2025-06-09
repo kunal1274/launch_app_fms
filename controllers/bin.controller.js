@@ -354,6 +354,66 @@ export const bulkCreateBins = async (req, res) => {
     });
   }
 
+  // 1) Validate required fields & collect parent IDs
+  const combos = docs.map((d, idx) => {
+    if (!d.name || !d.shelf) {
+      throw new Error(
+        `Each bin must have both a name and a shelf (error at index ${idx})`
+      );
+    }
+    return { name: d.name.trim(), shelf: d.shelf };
+  });
+
+  // 2) In-batch duplicate check on (name + shelf)
+  const seen = new Set(),
+    duplicates = [];
+  combos.forEach(({ name, shelf }) => {
+    const key = `${shelf}:${name}`;
+    if (seen.has(key)) duplicates.push(key);
+    seen.add(key);
+  });
+  if (duplicates.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate bin name+shelf in request: " +
+        [...new Set(duplicates)].join(", "),
+    });
+  }
+
+  // 3) Parent validation: all referenced shelves must exist
+  const shelfIds = [...new Set(combos.map((c) => c.shelf))];
+  if (shelfIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+    return res
+      .status(400)
+      .json({ status: "failure", message: "Invalid shelf IDs present." });
+  }
+  const shelfCount = await ShelfModel.countDocuments({
+    _id: { $in: shelfIds },
+  });
+  if (shelfCount !== shelfIds.length) {
+    return res.status(404).json({
+      status: "failure",
+      message: "One or more parent shelves not found.",
+    });
+  }
+
+  // 4) Cross‐batch uniqueness: ensure no existing name+shelf collision
+  const conflictQs = combos.map(({ name, shelf }) => ({ name, shelf }));
+  const conflicts = await BinModel.find({ $or: conflictQs })
+    .select("name shelf")
+    .lean();
+  if (conflicts.length) {
+    return res.status(409).json({
+      status: "failure",
+      message:
+        "These bin name+shelf pairs already exist: " +
+        conflicts.map((c) => `${c.name}@${c.shelf}`).join(", "),
+    });
+  }
+
+  // 5) All validation passed: reserve codes & insert
+
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -423,6 +483,86 @@ export const bulkUpdateBins = async (req, res) => {
         "⚠️ Request body must be a non-empty array of {id or _id, update}.",
     });
   }
+
+  // 1) Prepare combo checks for any name/shelf changes
+  const toCheck = [];
+  for (const { id, _id, update } of updates) {
+    const docId = id || _id;
+    if (!mongoose.Types.ObjectId.isValid(docId)) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: `Invalid bin ID: ${docId}` });
+    }
+    if (update.name || update.shelf) {
+      toCheck.push({ id: docId, name: update.name, shelf: update.shelf });
+    }
+  }
+
+  // 2) Load existing bins for those IDs
+  const ids = toCheck.map((c) => c.id);
+  const originals = await BinModel.find({ _id: { $in: ids } })
+    .select("name shelf")
+    .lean();
+  const origMap = new Map(originals.map((o) => [o._id.toString(), o]));
+
+  // 3) Build new combos, detect in-batch duplicates
+  const seen2 = new Set(),
+    dupes2 = [];
+  const combos2 = toCheck.map(({ id, name, shelf }) => {
+    const orig = origMap.get(id);
+    if (!orig) throw new Error(`Bin not found: ${id}`);
+    const newName = name != null ? name.trim() : orig.name;
+    const newShelf = shelf != null ? shelf : orig.shelf;
+    const key = `${newShelf}:${newName}`;
+    if (seen2.has(key)) dupes2.push(key);
+    seen2.add(key);
+    return { id, name: newName, shelf: newShelf };
+  });
+  if (dupes2.length) {
+    return res.status(400).json({
+      status: "failure",
+      message:
+        "Duplicate bin name+shelf in request: " +
+        [...new Set(dupes2)].join(", "),
+    });
+  }
+
+  // 4) Validate any new parent shelves
+  const newShelfIds = [...new Set(combos2.map((c) => c.shelf))];
+  if (newShelfIds.length) {
+    if (newShelfIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid shelf IDs in update." });
+    }
+    const cnt2 = await ShelfModel.countDocuments({ _id: { $in: newShelfIds } });
+    if (cnt2 !== newShelfIds.length) {
+      return res.status(404).json({
+        status: "failure",
+        message: "Some parent shelves do not exist.",
+      });
+    }
+  }
+
+  // 5) DB-wide uniqueness: avoid conflicts with other bins
+  const conflictQs2 = combos2.map(({ id, name, shelf }) => ({
+    _id: { $ne: id },
+    name,
+    shelf,
+  }));
+  const conflicts2 = await BinModel.find({ $or: conflictQs2 })
+    .select("name shelf")
+    .lean();
+  if (conflicts2.length) {
+    return res.status(409).json({
+      status: "failure",
+      message:
+        "These bin name+shelf pairs already exist: " +
+        conflicts2.map((c) => `${c.name}@${c.shelf}`).join(", "),
+    });
+  }
+
+  // 6) Perform updates transactionally
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -529,6 +669,112 @@ export const bulkDeleteBins = async (req, res) => {
       status: "failure",
       message: "Error during bulk bin deletion.",
       error: error.message,
+    });
+  }
+};
+
+/**
+ * 1) Bulk‐delete only “leaf” Bins (i.e. all of them),
+ *    but leave any code gaps intact by resetting the counter
+ *    to the highest remaining code.
+ */
+export const bulkAllDeleteBins = async (req, res) => {
+  try {
+    // 1. Fetch all existing bins (they are all leaves)
+    const existing = await BinModel.find().select("_id code").lean();
+    if (existing.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "No bins to delete.",
+        deletedCount: 0,
+      });
+    }
+
+    // 2. Delete them all
+    const deleteIds = existing.map((b) => b._id);
+    const deleted = await BinModel.deleteMany({ _id: { $in: deleteIds } });
+
+    // 3. Scan remaining codes (if any) to find highest sequence
+    const remaining = await BinModel.find().select("code").lean();
+    let maxSeq = 0;
+    for (const { code } of remaining) {
+      const m = code.match(/(\d+)$/);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > maxSeq) maxSeq = n;
+      }
+    }
+
+    // 4. Reset the binCode counter to maxSeq
+    const resetCounter = await BinCounterModel.findByIdAndUpdate(
+      { _id: "binCode" },
+      { seq: maxSeq },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deleted ${deleted.deletedCount} bin(s).`,
+      counter: resetCounter,
+    });
+  } catch (err) {
+    console.error("❌ bulkAllDeleteBins error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteBins",
+      error: err.message,
+    });
+  }
+};
+
+/**
+ * 2) Bulk‐delete EVERYTHING: Bins only (no deeper cascade),
+ *    within a transaction, resetting both binCode and shelfCode.
+ */
+export const bulkAllDeleteBinsCascade = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // 1. Delete all bins
+    const deleted = await BinModel.deleteMany({}).session(session);
+
+    // 2. Optionally, if you ever wanted to cascade “up” to shelves,
+    //    you could delete empty shelves here—but bins have no children,
+    //    so we skip that.
+
+    // 3. Reset both binCode and shelfCode counters to zero
+    const [resetBinCtr, resetShelfCtr] = await Promise.all([
+      BinCounterModel.findByIdAndUpdate(
+        { _id: "binCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+      ShelfCounterModel.findByIdAndUpdate(
+        { _id: "shelfCode" },
+        { seq: 0 },
+        { new: true, upsert: true, session }
+      ),
+    ]);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Cascade‐deleted ${deleted.deletedCount} bin(s).`,
+      counter: {
+        bin: resetBinCtr,
+        //shelf: resetShelfCtr,
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ bulkAllDeleteBinsCascade error:", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Error in bulkAllDeleteBinsCascade",
+      error: err.message,
     });
   }
 };

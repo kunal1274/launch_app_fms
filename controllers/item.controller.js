@@ -5,6 +5,184 @@ import { ItemModel } from "../models/item.model.js";
 import { ItemCounterModel } from "../models/counter.model.js";
 import { logError, winstonLogger } from "../utility/logError.utils.js";
 
+// controllers/metadata.controller.js
+
+import { SiteModel } from "../models/site.model.js";
+import { WarehouseModel } from "../models/warehouse.model.js";
+import { ZoneModel } from "../models/zone.model.js";
+import { RackModel } from "../models/rack.model.js";
+import { ShelfModel } from "../models/shelf.model.js";
+import { AisleModel } from "../models/aisle.model.js";
+import { BinModel } from "../models/bin.model.js";
+import { ProductDimConfigModel } from "../models/productDimConfig.model.js";
+import { ProductDimColorModel } from "../models/productDimColor.model.js";
+import { ProductDimSizeModel } from "../models/productDimSize.model.js";
+import { ProductDimStyleModel } from "../models/productDimStyle.model.js";
+import { ProductDimVersionModel } from "../models/productDimVersion.model.js";
+import { BatchModel } from "../models/trackingDimBatch.model.js";
+import { SerialModel } from "../models/trackingDimSerial.model.js";
+
+/**
+ * GET /fms/api/v0/metadata/items
+ * Returns all dropdown lists needed by the ItemForm in one payload.
+ */
+export const getMetadataItems = async (req, res) => {
+  try {
+    // Query all reference collections in parallel
+    const [
+      sites,
+      warehouses,
+      zones,
+      racks,
+      shelves,
+      aisles,
+      bins,
+      configurations,
+      colors,
+      sizes,
+      styles,
+      versions,
+      batches,
+      serials,
+    ] = await Promise.all([
+      SiteModel.find({}),
+      WarehouseModel.find({}),
+      ZoneModel.find({}),
+      RackModel.find({}),
+      ShelfModel.find({}),
+      AisleModel.find({}),
+      BinModel.find({}),
+      ProductDimConfigModel.find({}),
+      ProductDimColorModel.find({}),
+      ProductDimSizeModel.find({}),
+      ProductDimStyleModel.find({}),
+      ProductDimVersionModel.find({}),
+      BatchModel.find({}),
+      SerialModel.find({}),
+    ]);
+
+    // Send everything in one atomic response
+    res.status(200).json({
+      status: "success",
+      data: {
+        sites,
+        warehouses,
+        zones,
+        racks,
+        shelves,
+        aisles,
+        bins,
+        configurations,
+        colors,
+        sizes,
+        styles,
+        versions,
+        batches,
+        serials,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching metadata:", error);
+    res.status(500).json({
+      status: "failure",
+      message: "Couldn’t load form metadata",
+      error: error.message,
+    });
+  }
+};
+
+export const getMetadataAndItem = async (req, res) => {
+  const { itemId } = req.params;
+  try {
+    const [
+      sites,
+      warehouses,
+      zones,
+      racks,
+      shelves,
+      aisles,
+      bins,
+      configurations,
+      colors,
+      sizes,
+      styles,
+      versions,
+      batches,
+      serials,
+      item,
+    ] = await Promise.all([
+      SiteModel.find({}),
+      WarehouseModel.find({}),
+      ZoneModel.find({}),
+      RackModel.find({}),
+      ShelfModel.find({}),
+      AisleModel.find({}),
+      BinModel.find({}),
+      ProductDimConfigModel.find({}),
+      ProductDimColorModel.find({}),
+      ProductDimSizeModel.find({}),
+      ProductDimStyleModel.find({}),
+      ProductDimVersionModel.find({}),
+      BatchModel.find({}),
+      SerialModel.find({}),
+      ItemModel.findById(itemId).populate([
+        "site",
+        "warehouse",
+        "zone",
+        "location",
+        "aisle",
+        "rack",
+        "shelf",
+        "bin",
+        "config",
+        "color",
+        "size",
+        "style",
+        "version",
+        "batch",
+        "serial",
+      ]),
+    ]);
+
+    if (!item) {
+      return res.status(404).json({
+        status: "failure",
+        message: `Item ${itemId} not found.`,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        metadata: {
+          sites,
+          warehouses,
+          zones,
+          racks,
+          shelves,
+          aisles,
+          bins,
+          configurations,
+          colors,
+          sizes,
+          styles,
+          versions,
+          batches,
+          serials,
+        },
+        item,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching combined metadata + item:", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "Couldn’t load item details and metadata",
+      error: error.message,
+    });
+  }
+};
+
 export const createItem = async (req, res) => {
   const itemBody = req.body;
   try {

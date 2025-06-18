@@ -4,6 +4,7 @@ import {
   deleteItem,
   getItem,
   getItems,
+  getMetadataItems,
   updateItem,
   uploadFilesAgainstItem,
 } from "../controllers/item.controller.js";
@@ -12,8 +13,12 @@ import { upload } from "../middleware/uploadConfig.js";
 
 const itemRouter = expressItem.Router();
 
+// New batch metadata endpoint
+itemRouter.get("/metadata", getMetadataItems);
+
 itemRouter.post("/", createItem);
 itemRouter.get("/", getItems);
+itemRouter.get("/:itemId/metadata", getMetadataItems);
 itemRouter.get("/:itemId", getItem);
 itemRouter.put("/:itemId", updateItem);
 itemRouter.delete("/:itemId", deleteItem);

@@ -190,6 +190,15 @@ const vendorSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Companies",
     },
+    linkedCoaAccount: {
+      type: Schema.Types.ObjectId,
+      ref: "Accounts",
+      default: null,
+      required: [
+        true,
+        "Every Vendor must specify the corresponding leaf AccountModel _id",
+      ],
+    },
     bankDetails: [
       {
         code: {

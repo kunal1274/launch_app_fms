@@ -1,0 +1,36 @@
+{
+  "ts": 1752395657990,
+  "method": "POST",
+  "path": "/fms/api/v0/colors",
+  "body": {
+    "name": "Color of the Nokia",
+    "type": "Virtual",
+    "description": "Site 12th July 1425",
+    "values": [
+      "Red",
+      "White",
+      "Green"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Color configuration created successfully.",
+    "data": {
+      "name": "Color of the Nokia",
+      "description": "Site 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Red",
+        "White",
+        "Green"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "COL_001"
+    }
+  }
+}

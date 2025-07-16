@@ -1,0 +1,1557 @@
+[
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "get-all-empty",
+    "name": "Get all on empty DB",
+    "group": "READ",
+    "request": {
+      "method": "GET",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": null
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": []
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "99",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "30",
+        "etag": "W/\"1e-JkPcI+pGj7BBTxOuZTVVIm91zaY\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "data": []
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-minimal",
+    "name": "Create minimal account",
+    "group": "CREATE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "1000",
+        "accountName": "Cash",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      }
+    },
+    "expected": {
+      "status": 201,
+      "body": {
+        "status": "success",
+        "data": {
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "currency": "INR",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 201,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "98",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "460",
+        "etag": "W/\"1cc-/93M1Wjnf+DT/brAGx7+LgUeX7c\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Account created.",
+        "data": {
+          "globalPartyId": "685990a78391a2f8e5dfaf72",
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "parentAccount": null,
+          "normalBalance": "DEBIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "_id": "685990a78391a2f8e5dfaf75",
+          "createdAt": "2025-06-23T17:36:39.525Z",
+          "updatedAt": "2025-06-23T17:36:39.525Z",
+          "sysCode": "LA_000001",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-all-fields",
+    "name": "Create with all fields",
+    "group": "CREATE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "1001",
+        "accountName": "Savings",
+        "type": "ASSET",
+        "normalBalance": "DEBIT",
+        "isLeaf": false,
+        "allowManualPost": false,
+        "currency": "USD",
+        "description": "Full account",
+        "group": "OPERATIONS"
+      }
+    },
+    "expected": {
+      "status": 201,
+      "body": {
+        "status": "success",
+        "data": {
+          "accountCode": "1001",
+          "accountName": "Savings",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "isLeaf": false,
+          "allowManualPost": false,
+          "currency": "USD",
+          "description": "Full account",
+          "group": "OPERATIONS"
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 201,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "97",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "487",
+        "etag": "W/\"1e7-KvTxb23D8DjpfrXg+RIxawCg4NM\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Account created.",
+        "data": {
+          "globalPartyId": "685990a78391a2f8e5dfaf78",
+          "accountCode": "1001",
+          "accountName": "Savings",
+          "type": "ASSET",
+          "parentAccount": null,
+          "normalBalance": "DEBIT",
+          "isLeaf": false,
+          "allowManualPost": false,
+          "currency": "USD",
+          "description": "Full account",
+          "group": "OPERATIONS",
+          "isArchived": false,
+          "active": false,
+          "_id": "685990a78391a2f8e5dfaf7b",
+          "createdAt": "2025-06-23T17:36:39.594Z",
+          "updatedAt": "2025-06-23T17:36:39.594Z",
+          "sysCode": "LA_000002",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "syscode-sequence",
+    "name": "SysCode increments",
+    "group": "SEQUENCE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "1002",
+        "accountName": "Equity",
+        "type": "EQUITY",
+        "normalBalance": "CREDIT"
+      }
+    },
+    "expected": {
+      "status": 201,
+      "body": {
+        "status": "success",
+        "data": {
+          "sysCode": "LA_000003"
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 201,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "96",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "464",
+        "etag": "W/\"1d0-BSUi8Ps/upO8X2Bp/EFIDsdEDSM\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Account created.",
+        "data": {
+          "globalPartyId": "685990a78391a2f8e5dfaf7e",
+          "accountCode": "1002",
+          "accountName": "Equity",
+          "type": "EQUITY",
+          "parentAccount": null,
+          "normalBalance": "CREDIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "_id": "685990a78391a2f8e5dfaf81",
+          "createdAt": "2025-06-23T17:36:39.651Z",
+          "updatedAt": "2025-06-23T17:36:39.651Z",
+          "sysCode": "LA_000003",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "check-global-party",
+    "name": "GlobalPartyId generated",
+    "group": "READ",
+    "request": {
+      "method": "GET",
+      "url": "/bb0/api/v0/accounts/685990a78391a2f8e5dfaf75",
+      "headers": {},
+      "body": null
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": {
+          "globalPartyId": "685990a78391a2f8e5dfaf72"
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "95",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "431",
+        "etag": "W/\"1af-THSv89bfGNCInnZsZjoyOHVSK3I\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "data": {
+          "_id": "685990a78391a2f8e5dfaf75",
+          "globalPartyId": "685990a78391a2f8e5dfaf72",
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "parentAccount": null,
+          "normalBalance": "DEBIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "createdAt": "2025-06-23T17:36:39.525Z",
+          "updatedAt": "2025-06-23T17:36:39.525Z",
+          "sysCode": "LA_000001",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-missing",
+    "name": "Missing mandatory fields",
+    "group": "NEGATIVE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountName": "No Code"
+      }
+    },
+    "expected": {
+      "status": 400,
+      "body": null,
+      "headers": null
+    },
+    "actual": {
+      "status": 400,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "94",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "96",
+        "etag": "W/\"60-lBiqhn053cGdnv8mncNlBxp2f4A\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "failure",
+        "message": "accountCode, accountName, type, and normalBalance are required."
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-no-leaf",
+    "name": "Create non-leaf only",
+    "group": "CREATE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "2000",
+        "accountName": "Liabilities",
+        "type": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "isLeaf": false
+      }
+    },
+    "expected": {
+      "status": 201,
+      "body": {
+        "status": "success",
+        "data": {
+          "accountCode": "2000",
+          "isLeaf": false
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 201,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "93",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "473",
+        "etag": "W/\"1d9-bV+r3lZuRDTWZ6jjNxc5R52iDEE\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Account created.",
+        "data": {
+          "globalPartyId": "685990a78391a2f8e5dfaf85",
+          "accountCode": "2000",
+          "accountName": "Liabilities",
+          "type": "LIABILITY",
+          "parentAccount": null,
+          "normalBalance": "CREDIT",
+          "isLeaf": false,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "_id": "685990a78391a2f8e5dfaf88",
+          "createdAt": "2025-06-23T17:36:39.748Z",
+          "updatedAt": "2025-06-23T17:36:39.748Z",
+          "sysCode": "LA_000004",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-child-success",
+    "name": "Create child under non-leaf",
+    "group": "CREATE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "2001",
+        "accountName": "Short-Term Loans",
+        "type": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "parentAccount": "{{create-no-leaf.data._id}}"
+      }
+    },
+    "expected": {
+      "status": 201,
+      "body": {
+        "status": "success",
+        "data": {
+          "accountCode": "2001",
+          "parentAccount": "685990a78391a2f8e5dfaf88"
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 201,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "92",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "499",
+        "etag": "W/\"1f3-iuYqtGe90epISfwiv3kxVelrTu8\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Account created.",
+        "data": {
+          "globalPartyId": "685990a78391a2f8e5dfaf8c",
+          "accountCode": "2001",
+          "accountName": "Short-Term Loans",
+          "type": "LIABILITY",
+          "parentAccount": "685990a78391a2f8e5dfaf88",
+          "normalBalance": "CREDIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "_id": "685990a78391a2f8e5dfaf8f",
+          "createdAt": "2025-06-23T17:36:39.804Z",
+          "updatedAt": "2025-06-23T17:36:39.804Z",
+          "sysCode": "LA_000005",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-child-parent-notfound",
+    "name": "Child w/ missing parent",
+    "group": "NEGATIVE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "2002",
+        "accountName": "Phantom",
+        "type": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "507f1f77bcf86cd799439011"
+      }
+    },
+    "expected": {
+      "status": 404,
+      "body": null,
+      "headers": null
+    },
+    "actual": {
+      "status": 404,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "91",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "58",
+        "etag": "W/\"3a-B9gxOx4t7kqtCGzefvAce8txIU8\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "failure",
+        "message": "Parent Account not found."
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "create-child-parent-isLeaf",
+    "name": "Child under leaf parent",
+    "group": "NEGATIVE",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": {
+        "accountCode": "2003",
+        "accountName": "Bad Child",
+        "type": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-minimal.data._id}}"
+      }
+    },
+    "expected": {
+      "status": 422,
+      "body": null,
+      "headers": null
+    },
+    "actual": {
+      "status": 422,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "90",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "65",
+        "etag": "W/\"41-Eq9fgmiXAQ+1HoSOd32G/JTWNJs\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "failure",
+        "message": "Parent Account cannot be a leaf."
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "get-all",
+    "name": "Get all accounts",
+    "group": "READ",
+    "request": {
+      "method": "GET",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": null
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "1000"
+          },
+          {
+            "accountCode": "1001"
+          },
+          {
+            "accountCode": "1002"
+          },
+          {
+            "accountCode": "2000"
+          },
+          {
+            "accountCode": "2001"
+          }
+        ]
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "89",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "2132",
+        "etag": "W/\"854-4zMsvpipt/q62ODI0rxlN5TukIo\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "data": [
+          {
+            "_id": "685990a78391a2f8e5dfaf75",
+            "globalPartyId": "685990a78391a2f8e5dfaf72",
+            "accountCode": "1000",
+            "accountName": "Cash",
+            "type": "ASSET",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.525Z",
+            "updatedAt": "2025-06-23T17:36:39.525Z",
+            "sysCode": "LA_000001",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf7b",
+            "globalPartyId": "685990a78391a2f8e5dfaf78",
+            "accountCode": "1001",
+            "accountName": "Savings",
+            "type": "ASSET",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": false,
+            "allowManualPost": false,
+            "currency": "USD",
+            "description": "Full account",
+            "group": "OPERATIONS",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.594Z",
+            "updatedAt": "2025-06-23T17:36:39.594Z",
+            "sysCode": "LA_000002",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf81",
+            "globalPartyId": "685990a78391a2f8e5dfaf7e",
+            "accountCode": "1002",
+            "accountName": "Equity",
+            "type": "EQUITY",
+            "parentAccount": null,
+            "normalBalance": "CREDIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.651Z",
+            "updatedAt": "2025-06-23T17:36:39.651Z",
+            "sysCode": "LA_000003",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf88",
+            "globalPartyId": "685990a78391a2f8e5dfaf85",
+            "accountCode": "2000",
+            "accountName": "Liabilities",
+            "type": "LIABILITY",
+            "parentAccount": null,
+            "normalBalance": "CREDIT",
+            "isLeaf": false,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.748Z",
+            "updatedAt": "2025-06-23T17:36:39.748Z",
+            "sysCode": "LA_000004",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf8f",
+            "globalPartyId": "685990a78391a2f8e5dfaf8c",
+            "accountCode": "2001",
+            "accountName": "Short-Term Loans",
+            "type": "LIABILITY",
+            "parentAccount": "685990a78391a2f8e5dfaf88",
+            "normalBalance": "CREDIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.804Z",
+            "updatedAt": "2025-06-23T17:36:39.804Z",
+            "sysCode": "LA_000005",
+            "__v": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "get-one",
+    "name": "Get one by ID",
+    "group": "READ",
+    "request": {
+      "method": "GET",
+      "url": "/bb0/api/v0/accounts/685990a78391a2f8e5dfaf88",
+      "headers": {},
+      "body": null
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": {
+          "accountCode": "2000"
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "88",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "444",
+        "etag": "W/\"1bc-+DddHn0EDI21e41qwiYRhjlsQSY\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "data": {
+          "_id": "685990a78391a2f8e5dfaf88",
+          "globalPartyId": "685990a78391a2f8e5dfaf85",
+          "accountCode": "2000",
+          "accountName": "Liabilities",
+          "type": "LIABILITY",
+          "parentAccount": null,
+          "normalBalance": "CREDIT",
+          "isLeaf": false,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "createdAt": "2025-06-23T17:36:39.748Z",
+          "updatedAt": "2025-06-23T17:36:39.748Z",
+          "sysCode": "LA_000004",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:39",
+    "id": "bulk-create-accounts",
+    "name": "Bulk create accounts",
+    "group": "BULK",
+    "request": {
+      "method": "POST",
+      "url": "/bb0/api/v0/accounts/bulk",
+      "headers": {},
+      "body": {
+        "data": [
+          {
+            "accountCode": "3000",
+            "accountName": "Alpha",
+            "type": "ASSET",
+            "normalBalance": "DEBIT"
+          },
+          {
+            "accountCode": "3001",
+            "accountName": "Beta",
+            "type": "LIABILITY",
+            "normalBalance": "CREDIT"
+          },
+          {
+            "accountCode": "3002",
+            "accountName": "Gamma",
+            "type": "EXPENSE",
+            "normalBalance": "DEBIT"
+          }
+        ]
+      }
+    },
+    "expected": {
+      "status": 201,
+      "body": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "3000"
+          },
+          {
+            "accountCode": "3001"
+          },
+          {
+            "accountCode": "3002"
+          }
+        ]
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 201,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "87",
+        "date": "Mon, 23 Jun 2025 17:36:39 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "1285",
+        "etag": "W/\"505-wsV4jdp4+gbObk8loAsXZhBA9FM\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Inserted 3 account(s).",
+        "data": [
+          {
+            "globalPartyId": "685990a78391a2f8e5dfaf97",
+            "accountCode": "3000",
+            "accountName": "Alpha",
+            "type": "ASSET",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "_id": "685990a78391a2f8e5dfaf9a",
+            "createdAt": "2025-06-23T17:36:39.936Z",
+            "updatedAt": "2025-06-23T17:36:39.936Z",
+            "sysCode": "LA_000006",
+            "__v": 0
+          },
+          {
+            "globalPartyId": "685990a78391a2f8e5dfaf9d",
+            "accountCode": "3001",
+            "accountName": "Beta",
+            "type": "LIABILITY",
+            "parentAccount": null,
+            "normalBalance": "CREDIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "_id": "685990a78391a2f8e5dfafa0",
+            "createdAt": "2025-06-23T17:36:39.970Z",
+            "updatedAt": "2025-06-23T17:36:39.970Z",
+            "sysCode": "LA_000007",
+            "__v": 0
+          },
+          {
+            "globalPartyId": "685990a78391a2f8e5dfafa3",
+            "accountCode": "3002",
+            "accountName": "Gamma",
+            "type": "EXPENSE",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "_id": "685990a88391a2f8e5dfafa6",
+            "createdAt": "2025-06-23T17:36:40.008Z",
+            "updatedAt": "2025-06-23T17:36:40.008Z",
+            "sysCode": "LA_000008",
+            "__v": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:40",
+    "id": "update-account",
+    "name": "Update account + parent",
+    "group": "UPDATE",
+    "request": {
+      "method": "PUT",
+      "url": "/bb0/api/v0/accounts/685990a78391a2f8e5dfaf75",
+      "headers": {},
+      "body": {
+        "accountName": "Cash Updated",
+        "parentAccount": "{{create-no-leaf.data._id}}"
+      }
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": {
+          "accountName": "Cash Updated",
+          "parentAccount": "685990a78391a2f8e5dfaf88"
+        }
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "86",
+        "date": "Mon, 23 Jun 2025 17:36:40 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "490",
+        "etag": "W/\"1ea-IVtbZ7VqMly1GxRC7xQOwfQF80A\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Account updated.",
+        "data": {
+          "_id": "685990a78391a2f8e5dfaf75",
+          "globalPartyId": "685990a78391a2f8e5dfaf72",
+          "accountCode": "1000",
+          "accountName": "Cash Updated",
+          "type": "ASSET",
+          "parentAccount": "685990a78391a2f8e5dfaf88",
+          "normalBalance": "DEBIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR",
+          "description": "",
+          "group": "",
+          "isArchived": false,
+          "active": false,
+          "createdAt": "2025-06-23T17:36:39.525Z",
+          "updatedAt": "2025-06-23T17:36:40.050Z",
+          "sysCode": "LA_000001",
+          "__v": 0
+        }
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:40",
+    "id": "update-account-bad-parent",
+    "name": "Update w/ missing parent",
+    "group": "NEGATIVE",
+    "request": {
+      "method": "PUT",
+      "url": "/bb0/api/v0/accounts/685990a78391a2f8e5dfaf75",
+      "headers": {},
+      "body": {
+        "parentAccount": "507f1f77bcf86cd799439011"
+      }
+    },
+    "expected": {
+      "status": 404,
+      "body": null,
+      "headers": null
+    },
+    "actual": {
+      "status": 404,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "85",
+        "date": "Mon, 23 Jun 2025 17:36:40 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "58",
+        "etag": "W/\"3a-B9gxOx4t7kqtCGzefvAce8txIU8\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "failure",
+        "message": "Parent Account not found."
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:40",
+    "id": "bulk-update-accounts",
+    "name": "Bulk update accounts",
+    "group": "BULK",
+    "request": {
+      "method": "PATCH",
+      "url": "/bb0/api/v0/accounts/bulk",
+      "headers": {},
+      "body": {
+        "data": [
+          {
+            "_id": "{{create-minimal.data._id}}",
+            "accountName": "Cash Multi"
+          },
+          {
+            "_id": "{{create-all-fields.data._id}}",
+            "currency": "EUR"
+          }
+        ]
+      }
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": [
+          {
+            "_id": "685990a78391a2f8e5dfaf75",
+            "accountName": "Cash Multi"
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf7b",
+            "currency": "EUR"
+          }
+        ]
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "84",
+        "date": "Mon, 23 Jun 2025 17:36:40 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "926",
+        "etag": "W/\"39e-DboozfbG0Q/0mXWuZC0DcY9foSw\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "message": "Updated 2 account(s).",
+        "data": [
+          {
+            "_id": "685990a78391a2f8e5dfaf75",
+            "globalPartyId": "685990a78391a2f8e5dfaf72",
+            "accountCode": "1000",
+            "accountName": "Cash Multi",
+            "type": "ASSET",
+            "parentAccount": "685990a78391a2f8e5dfaf88",
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.525Z",
+            "updatedAt": "2025-06-23T17:36:40.098Z",
+            "sysCode": "LA_000001",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf7b",
+            "globalPartyId": "685990a78391a2f8e5dfaf78",
+            "accountCode": "1001",
+            "accountName": "Savings",
+            "type": "ASSET",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": false,
+            "allowManualPost": false,
+            "currency": "EUR",
+            "description": "Full account",
+            "group": "OPERATIONS",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.594Z",
+            "updatedAt": "2025-06-23T17:36:40.103Z",
+            "sysCode": "LA_000002",
+            "__v": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "ts": "23/06/2025, 23:06:40",
+    "id": "get-all-after-bulk",
+    "name": "Get all accounts after bulk",
+    "group": "READ",
+    "request": {
+      "method": "GET",
+      "url": "/bb0/api/v0/accounts",
+      "headers": {},
+      "body": null
+    },
+    "expected": {
+      "status": 200,
+      "body": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "1000"
+          },
+          {
+            "accountCode": "1001"
+          },
+          {
+            "accountCode": "1002"
+          },
+          {
+            "accountCode": "2000"
+          },
+          {
+            "accountCode": "2001"
+          },
+          {
+            "accountCode": "3000"
+          },
+          {
+            "accountCode": "3001"
+          },
+          {
+            "accountCode": "3002"
+          }
+        ]
+      },
+      "headers": null
+    },
+    "actual": {
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "origin-agent-cluster": "?1",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "SAMEORIGIN",
+        "x-permitted-cross-domain-policies": "none",
+        "x-xss-protection": "0",
+        "x-ratelimit-limit": "100",
+        "x-ratelimit-remaining": "83",
+        "date": "Mon, 23 Jun 2025 17:36:40 GMT",
+        "x-ratelimit-reset": "1750702000",
+        "vary": "Origin",
+        "access-control-allow-credentials": "true",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "3381",
+        "etag": "W/\"d35-OF5LfC7CGmS3h6GuWn5OH+YIYYU\"",
+        "connection": "close"
+      },
+      "body": {
+        "status": "success",
+        "data": [
+          {
+            "_id": "685990a78391a2f8e5dfaf75",
+            "globalPartyId": "685990a78391a2f8e5dfaf72",
+            "accountCode": "1000",
+            "accountName": "Cash Multi",
+            "type": "ASSET",
+            "parentAccount": "685990a78391a2f8e5dfaf88",
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.525Z",
+            "updatedAt": "2025-06-23T17:36:40.098Z",
+            "sysCode": "LA_000001",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf7b",
+            "globalPartyId": "685990a78391a2f8e5dfaf78",
+            "accountCode": "1001",
+            "accountName": "Savings",
+            "type": "ASSET",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": false,
+            "allowManualPost": false,
+            "currency": "EUR",
+            "description": "Full account",
+            "group": "OPERATIONS",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.594Z",
+            "updatedAt": "2025-06-23T17:36:40.103Z",
+            "sysCode": "LA_000002",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf81",
+            "globalPartyId": "685990a78391a2f8e5dfaf7e",
+            "accountCode": "1002",
+            "accountName": "Equity",
+            "type": "EQUITY",
+            "parentAccount": null,
+            "normalBalance": "CREDIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.651Z",
+            "updatedAt": "2025-06-23T17:36:39.651Z",
+            "sysCode": "LA_000003",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf88",
+            "globalPartyId": "685990a78391a2f8e5dfaf85",
+            "accountCode": "2000",
+            "accountName": "Liabilities",
+            "type": "LIABILITY",
+            "parentAccount": null,
+            "normalBalance": "CREDIT",
+            "isLeaf": false,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.748Z",
+            "updatedAt": "2025-06-23T17:36:39.748Z",
+            "sysCode": "LA_000004",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf8f",
+            "globalPartyId": "685990a78391a2f8e5dfaf8c",
+            "accountCode": "2001",
+            "accountName": "Short-Term Loans",
+            "type": "LIABILITY",
+            "parentAccount": "685990a78391a2f8e5dfaf88",
+            "normalBalance": "CREDIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.804Z",
+            "updatedAt": "2025-06-23T17:36:39.804Z",
+            "sysCode": "LA_000005",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfaf9a",
+            "globalPartyId": "685990a78391a2f8e5dfaf97",
+            "accountCode": "3000",
+            "accountName": "Alpha",
+            "type": "ASSET",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.936Z",
+            "updatedAt": "2025-06-23T17:36:39.936Z",
+            "sysCode": "LA_000006",
+            "__v": 0
+          },
+          {
+            "_id": "685990a78391a2f8e5dfafa0",
+            "globalPartyId": "685990a78391a2f8e5dfaf9d",
+            "accountCode": "3001",
+            "accountName": "Beta",
+            "type": "LIABILITY",
+            "parentAccount": null,
+            "normalBalance": "CREDIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:39.970Z",
+            "updatedAt": "2025-06-23T17:36:39.970Z",
+            "sysCode": "LA_000007",
+            "__v": 0
+          },
+          {
+            "_id": "685990a88391a2f8e5dfafa6",
+            "globalPartyId": "685990a78391a2f8e5dfafa3",
+            "accountCode": "3002",
+            "accountName": "Gamma",
+            "type": "EXPENSE",
+            "parentAccount": null,
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "INR",
+            "description": "",
+            "group": "",
+            "isArchived": false,
+            "active": false,
+            "createdAt": "2025-06-23T17:36:40.008Z",
+            "updatedAt": "2025-06-23T17:36:40.008Z",
+            "sysCode": "LA_000008",
+            "__v": 0
+          }
+        ]
+      }
+    }
+  }
+]

@@ -58,7 +58,7 @@ const UserGlobalSchema = new Schema(
     userRoles: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "UserRole",
+        ref: "UserRoles",
       },
     ],
     files: [

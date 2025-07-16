@@ -1,6 +1,7 @@
 // models/account.model.js
 
 import mongoose, { Schema, model } from "mongoose";
+import { LedgerAccountCounterModel } from "./counter.model.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub‐schema for nested accounts (if you want to embed children; optional)
@@ -22,7 +23,7 @@ const accountNodeSchema = new Schema(
 // ─────────────────────────────────────────────────────────────────────────────
 const accountSchema = new Schema(
   {
-    systemCode: {
+    sysCode: {
       type: String,
       required: false,
       /// auto generated number like Bank_001, Bank_002 etc.
@@ -38,7 +39,7 @@ const accountSchema = new Schema(
       type: String,
       required: [true, "Account code is required"],
       trim: true,
-      unique: true,
+      //unique: true,
       match: [
         /^[A-Za-z0-9\.\-]+$/,
         "Account code may only contain letters, numbers, dots, dashes",
@@ -120,7 +121,15 @@ const accountSchema = new Schema(
       trim: true,
       // e.g. "OPERATIONS", "FINANCE", "GLOBAL" (for multi-entity usage)
     },
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: "Companies",
+    },
     isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    active: {
       type: Boolean,
       default: false,
     },
@@ -161,7 +170,49 @@ accountSchema.pre("save", async function (next) {
       );
     }
   }
-  next();
+
+  try {
+    await this.validate();
+
+    // Increment counter within the transaction
+    const dbResponseNewCounter =
+      await LedgerAccountCounterModel.findOneAndUpdate(
+        { _id: "glAccCode" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+        //{ new: true, upsert: true, session }
+      );
+
+    console.log("Counter increment result:", dbResponseNewCounter);
+
+    if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
+      throw new Error("❌ Failed to generate bank code");
+    }
+    // Generate customer code
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(6, "0");
+    this.sysCode = `LA_${seqNumber}`;
+
+    next();
+  } catch (error) {
+    console.error("❌ Error caught during transaction:", error.stack);
+    // Decrement the counter in case of failure
+    try {
+      // const isCounterIncremented =
+      //   error.message &&
+      //   !error.message.startsWith("❌ Duplicate contact number");
+      //if (isCounterIncremented) {
+      await LedgerAccountCounterModel.findByIdAndUpdate(
+        { _id: "glAccCode" },
+        { $inc: { seq: -1 } }
+      );
+      // }
+    } catch (decrementError) {
+      console.error("❌ Error during counter decrement:", decrementError.stack);
+    }
+    next(error);
+  } finally {
+    console.log("ℹ️ Finally ledger Account counter closed");
+  }
 });
 
 export const AccountModel =

@@ -1,0 +1,47 @@
+{
+  "ts": 1752326765456,
+  "method": "GET",
+  "path": "/fms/api/v0/Configurations",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "count": 2,
+    "data": [
+      {
+        "name": "Model of the Nokia",
+        "description": "Site 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "N73",
+          "N6600"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "CFG_001"
+      },
+      {
+        "name": "Human Being State",
+        "description": "Human 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Vaat",
+          "Kaf",
+          "Pitt"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "CFG_002"
+      }
+    ]
+  }
+}

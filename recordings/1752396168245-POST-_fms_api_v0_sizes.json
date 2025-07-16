@@ -1,0 +1,38 @@
+{
+  "ts": 1752396168245,
+  "method": "POST",
+  "path": "/fms/api/v0/sizes",
+  "body": {
+    "name": "human sizes",
+    "type": "Virtual",
+    "description": "Sizes of the human 12th July 1425",
+    "values": [
+      "Satyug",
+      "Treta",
+      "Dwapar",
+      "Kalyug"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Size configuration created successfully.",
+    "data": {
+      "name": "human sizes",
+      "description": "Sizes of the human 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Satyug",
+        "Treta",
+        "Dwapar",
+        "Kalyug"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "SIZ_002"
+    }
+  }
+}

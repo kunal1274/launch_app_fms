@@ -1,7 +1,7 @@
 // models/bank.model.js
 
 import mongoose, { Schema, model } from "mongoose";
-import { BankCounterModel } from "./counter.model";
+import { BankCounterModel } from "./counter.model.js";
 
 const bankSchema = new Schema(
   {
@@ -59,9 +59,11 @@ const bankSchema = new Schema(
       ref: "Banks",
       default: null,
     },
+
     linkedCoaAccount: {
       type: Schema.Types.ObjectId,
       ref: "Accounts",
+      default: null,
       required: [
         true,
         "Every BankAccount must specify the corresponding leaf AccountModel _id",

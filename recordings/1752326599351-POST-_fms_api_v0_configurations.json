@@ -1,0 +1,36 @@
+{
+  "ts": 1752326599351,
+  "method": "POST",
+  "path": "/fms/api/v0/configurations",
+  "body": {
+    "name": "Human Being State",
+    "type": "Virtual",
+    "description": "Human 12th July 1425",
+    "values": [
+      "Vaat",
+      "Kaf",
+      "Pitt"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Configuration created.",
+    "data": {
+      "name": "Human Being State",
+      "description": "Human 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Vaat",
+        "Kaf",
+        "Pitt"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "CFG_002"
+    }
+  }
+}

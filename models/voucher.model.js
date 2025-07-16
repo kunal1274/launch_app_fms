@@ -40,6 +40,7 @@ const voucherLineSchema = new Schema({
         "LINE_AR",
         "FX",
         "DISCOUNT",
+        "JOURNAL",
       ],
       required: true,
     },

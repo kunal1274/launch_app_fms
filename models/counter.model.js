@@ -454,3 +454,63 @@ const salesInvoiceNumberCounterSchema = new Schema({
 export const SalesInvoiceNumberCounterModel =
   mongoose.models.SalesInvoiceNumberCounters ||
   model("SalesInvoiceNumberCounters", salesInvoiceNumberCounterSchema);
+
+const globalNumberingCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const GlobalNumberingModel =
+  mongoose.models.GlobalNumbers ||
+  model("GlobalNumbers", globalNumberingCounterSchema);
+
+const sharedNumberingCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const SharedNumberingModel =
+  mongoose.models.SharedNumbers ||
+  model("SharedNumbers", sharedNumberingCounterSchema);
+
+const localNumberingCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const LocalNumberingModel =
+  mongoose.models.LocalNumbers ||
+  model("LocalNumbers", localNumberingCounterSchema);
+
+const companyCounterSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+  },
+  seq: {
+    type: Number,
+    default: 0,
+  },
+});
+
+export const CompanyCounterModel =
+  mongoose.models.CompanyCounters ||
+  model("CompanyCounters", companyCounterSchema);

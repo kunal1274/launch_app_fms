@@ -1,0 +1,33 @@
+{
+  "ts": 1750934611064,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts/account-templates",
+  "body": {
+    "name": "StandardRevenue",
+    "defaults": {
+      "accType": "REVENUE",
+      "normalBalance": "CREDIT",
+      "isLeaf": false,
+      "allowManualPost": false,
+      "currency": "GBP",
+      "description": "std revenue",
+      "group": "FINANCE"
+    }
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "StandardRevenue",
+      "defaults": {
+        "accountType": "REVENUE",
+        "normalBalance": "CREDIT",
+        "isLeaf": false,
+        "allowManualPost": false,
+        "currency": "GBP",
+        "description": "std revenue",
+        "group": "FINANCE"
+      }
+    }
+  }
+}

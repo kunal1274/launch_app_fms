@@ -1,0 +1,31 @@
+{
+  "nodes": [
+    {
+      "id": "create-account-minimal",
+      "seq": 1,
+      "group": "CREATE",
+      "name": "Minimal create",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "currency": "INR",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      }
+    }
+  ]
+}

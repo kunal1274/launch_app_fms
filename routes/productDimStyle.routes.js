@@ -13,6 +13,7 @@ import {
   bulkCreateStyleConfigs,
   bulkUpdateStyleConfigs,
   bulkDeleteStyleConfigs,
+  appendStyleValues,
 } from "../controllers/productDimStyle.controller.js";
 
 const styleRouter = express.Router();
@@ -30,6 +31,7 @@ styleRouter.post("/", createStyleConfig);
 // Single-item & archive toggles
 styleRouter.get("/:styleId", getStyleConfigById);
 styleRouter.put("/:styleId", updateStyleConfigById);
+styleRouter.patch("/:styleId/values", appendStyleValues);
 styleRouter.delete("/:styleId", deleteStyleConfigById);
 styleRouter.patch("/:styleId/archive", archiveStyleConfigById);
 styleRouter.patch("/:styleId/unarchive", unarchiveStyleConfigById);

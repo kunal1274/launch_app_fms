@@ -757,6 +757,37 @@ class VoucherService {
     await voucher.save({ session });
     return voucher;
   }
+
+  /**
+   * Build a voucher from an existing GL Journal.
+   */
+  static async createJournalVoucher(glJournal, session) {
+    const voucherNo = await this.getNextVoucherNo(session);
+    const lines = glJournal.lines.map((l) => ({
+      accountCode: l.accountCode || l.extras.accountCode, // or lookup
+      debit: l.debit,
+      credit: l.credit,
+      currency: l.currency,
+      exchangeRate: l.exchangeRate,
+      // localAmount will be set by pre-save
+      subledger: {
+        sourceType: "JOURNAL",
+        txnId: glJournal._id,
+        lineNum: l.lineNum,
+      },
+      dims: l.dims,
+      extras: l.extras,
+    }));
+
+    const v = new VoucherModel({
+      voucherNo,
+      voucherDate: glJournal.journalDate,
+      sourceType: "JOURNAL",
+      sourceId: glJournal._id,
+      lines,
+    });
+    return v.save({ session });
+  }
 }
 
 export default VoucherService;

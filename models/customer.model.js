@@ -195,6 +195,7 @@ const customerSchema = new Schema(
     linkedCoaAccount: {
       type: Schema.Types.ObjectId,
       ref: "Accounts",
+      default: null,
       required: [
         false,
         "Every Customer Account must specify the corresponding leaf AccountModel _id",

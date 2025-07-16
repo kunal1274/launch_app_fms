@@ -1,0 +1,33 @@
+{
+  "ts": 1750856733927,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts/account-templates",
+  "body": {
+    "name": "StandardExpense1",
+    "defaults": {
+      "accountType": "EXPENSE",
+      "normalBalance": "DEBIT",
+      "isLeaf": true,
+      "allowManualPost": true,
+      "currency": "USD",
+      "description": "std expense",
+      "group": "OPERATIONS"
+    }
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "StandardExpense1",
+      "defaults": {
+        "accountType": "ASSET",
+        "normalBalance": "DEBIT",
+        "isLeaf": true,
+        "allowManualPost": true,
+        "currency": "USD",
+        "description": "std expense",
+        "group": "OPERATIONS"
+      }
+    }
+  }
+}

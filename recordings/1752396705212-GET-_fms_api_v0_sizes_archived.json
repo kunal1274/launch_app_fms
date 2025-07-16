@@ -1,0 +1,34 @@
+{
+  "ts": 1752396705212,
+  "method": "GET",
+  "path": "/fms/api/v0/sizes/archived",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": [
+      {
+        "name": "Size of the laptop and desktop",
+        "description": "Sizes of the laptop 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "12inches",
+          "14 inches",
+          "16 inches",
+          "19inches",
+          "21 inches",
+          "22 inches"
+        ],
+        "active": false,
+        "archived": true,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "SIZ_003"
+      }
+    ]
+  }
+}

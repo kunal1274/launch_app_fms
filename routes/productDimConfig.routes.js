@@ -12,6 +12,7 @@ import {
   bulkCreateConfigs,
   bulkUpdateConfigs,
   bulkDeleteConfigs,
+  appendConfigValues,
 } from "../controllers/productDimConfig.controller.js";
 const configRouter = express.Router();
 // bulk first
@@ -25,7 +26,9 @@ configRouter.post("/", createConfig);
 // single & toggles
 configRouter.get("/:configId", getConfigById);
 configRouter.put("/:configId", updateConfigById);
+configRouter.patch("/:configId/values", appendConfigValues); // ← new
 configRouter.delete("/:configId", deleteConfigById);
 configRouter.patch("/:configId/archive", archiveConfigById);
 configRouter.patch("/:configId/unarchive", unarchiveConfigById);
+
 export default configRouter;

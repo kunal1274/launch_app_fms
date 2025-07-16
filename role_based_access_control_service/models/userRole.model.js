@@ -5,7 +5,7 @@ const userRoleSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   permissions: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Permission",
+    ref: "Permissions",
     default: [],
   }, //["READ_CUSTOMER", "UPDATE_CUSTOMER"],
   scopes: {
@@ -14,4 +14,4 @@ const userRoleSchema = new mongoose.Schema({
   },
 });
 
-export const UserRoleModel = mongoose.model("UserRole", userRoleSchema);
+export const UserRoleModel = mongoose.model("UserRoles", userRoleSchema);

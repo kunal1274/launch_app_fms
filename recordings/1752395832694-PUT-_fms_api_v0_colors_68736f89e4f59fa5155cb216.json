@@ -1,0 +1,28 @@
+{
+  "ts": 1752395832694,
+  "method": "PUT",
+  "path": "/fms/api/v0/colors/68736f89e4f59fa5155cb216",
+  "body": {
+    "name": "Color Nokia"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Color Nokia",
+      "description": "Site 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Red",
+        "White",
+        "Green"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "COL_001"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "ts": 1752399050164,
+  "method": "POST",
+  "path": "/fms/api/v0/styles",
+  "body": {
+    "name": "Dress Style",
+    "type": "Virtual",
+    "description": "Sizes of the laptop 12th July 1425",
+    "values": [
+      "Japanese",
+      "Nepalese",
+      "Indian",
+      "American",
+      "Chinese",
+      "Australian",
+      "Vermese"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Style configuration created successfully.",
+    "data": {
+      "name": "Dress Style",
+      "description": "Sizes of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Japanese",
+        "Nepalese",
+        "Indian",
+        "American",
+        "Chinese",
+        "Australian",
+        "Vermese"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "STL_002"
+    }
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "ts": 1752307260287,
+  "method": "GET",
+  "path": "/fms/api/v0/items/metadata",
+  "body": {
+    "code": "349379730TUEY34",
+    "name": "Marvel Comics",
+    "description": "Marvel Comics for dhruv. We should think about creating movies on all Nagraj comics and dhruv comics",
+    "type": "Goods",
+    "unit": "mt",
+    "price": 345.89,
+    "active": false
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "sites": [
+        {
+          "name": "s-8thJun1425",
+          "description": "Site 8th June 1425",
+          "type": "Virtual",
+          "active": false,
+          "archived": false,
+          "groups": [],
+          "files": [],
+          "extras": {},
+          "code": "SITE_001"
+        }
+      ],
+      "warehouses": [
+        {
+          "active": true,
+          "archived": false,
+          "code": "WH_001",
+          "createdBy": "SystemWHCreation",
+          "description": "w 8 june 753",
+          "extras": {},
+          "files": [],
+          "groups": [],
+          "id": "68458f59e9f5405fb99de1a5",
+          "name": "w-8thJune954",
+          "site": {
+            "name": "s-8thJun1425",
+            "description": "Site 8th June 1425",
+            "type": "Virtual",
+            "active": false,
+            "code": "SITE_001"
+          },
+          "type": "Virtual",
+          "updatedBy": null
+        }
+      ],
+      "zones": [],
+      "racks": [],
+      "shelves": [],
+      "aisles": [],
+      "bins": [],
+      "configurations": [],
+      "colors": [],
+      "sizes": [],
+      "styles": [],
+      "versions": [],
+      "batches": [
+        {
+          "values": [],
+          "description": "General out and in dock warehouse",
+          "type": "Physical",
+          "active": false,
+          "archived": false,
+          "groups": [],
+          "files": [],
+          "extras": {},
+          "code": "BH_000000001"
+        },
+        {
+          "values": [
+            {
+              "num": "CH34353539",
+              "name": "test1",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-15T14:57:14.671Z",
+              "expDate": "2025-05-16T14:57:14.671Z"
+            },
+            {
+              "num": "CH34353533",
+              "name": "test2",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-15T14:57:14.672Z",
+              "expDate": "2025-05-16T14:57:14.672Z"
+            }
+          ],
+          "description": "General out and in dock warehouse",
+          "type": "Physical",
+          "active": false,
+          "archived": false,
+          "groups": [],
+          "files": [],
+          "extras": {},
+          "code": "BH_000000003"
+        },
+        {
+          "values": [
+            {
+              "num": "CH34353539",
+              "name": "test1",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-19T10:45:56.405Z",
+              "expDate": "2025-05-20T10:45:56.405Z"
+            },
+            {
+              "num": "CH34353533",
+              "name": "test2",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-19T10:45:56.408Z",
+              "expDate": "2025-05-20T10:45:56.408Z"
+            }
+          ],
+          "description": "General out and in dock warehouse",
+          "type": "Physical",
+          "active": false,
+          "archived": false,
+          "groups": [],
+          "files": [],
+          "extras": {},
+          "code": "BH_000000004"
+        }
+      ],
+      "serials": [
+        {
+          "values": [
+            {
+              "num": "SL34353539",
+              "name": "test1",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-15T14:58:36.117Z",
+              "expDate": "2025-05-16T14:58:36.117Z"
+            },
+            {
+              "num": "SL34323533",
+              "name": "test2",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-15T14:58:36.117Z",
+              "expDate": "2025-05-16T14:58:36.117Z"
+            }
+          ],
+          "description": "General out and in dock warehouse",
+          "type": "Physical",
+          "active": false,
+          "archived": false,
+          "groups": [],
+          "files": [],
+          "extras": {},
+          "code": "SL_000000001"
+        },
+        {
+          "values": [
+            {
+              "num": "SL34353539",
+              "name": "test1",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-15T15:05:44.531Z",
+              "expDate": "2025-05-16T15:05:44.531Z"
+            },
+            {
+              "num": "SL34323533",
+              "name": "test2",
+              "status": "Ready",
+              "serialTracking": false,
+              "serialNumbers": [],
+              "attributes": {},
+              "archived": false,
+              "mfgDate": "2025-05-15T15:05:44.531Z",
+              "expDate": "2025-05-16T15:05:44.531Z"
+            }
+          ],
+          "description": "General out and in dock warehouse",
+          "type": "Physical",
+          "active": false,
+          "archived": false,
+          "groups": [],
+          "files": [],
+          "extras": {},
+          "code": "SL_000000002"
+        }
+      ]
+    }
+  }
+}

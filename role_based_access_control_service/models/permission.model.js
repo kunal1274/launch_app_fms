@@ -8,4 +8,4 @@ const permissionSchema = new mongoose.Schema({
   area: { type: String, default: "Common" },
 });
 
-export const PermissionModel = mongoose.model("Permission", permissionSchema);
+export const PermissionModel = mongoose.model("Permissions", permissionSchema);

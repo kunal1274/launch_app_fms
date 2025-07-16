@@ -1,0 +1,160 @@
+{
+  "nodes": [
+    {
+      "id": "create-account-minimal",
+      "seq": 1,
+      "group": "CREATE",
+      "name": "Minimal create",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "currency": "INR",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      }
+    },
+
+    {
+      "id": "create-account-missing",
+      "seq": 2,
+      "group": "CREATE",
+      "name": "Missing required fields",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountName": "No Code"
+      },
+      "expectedStatus": 400
+    },
+
+    {
+      "id": "create-account-dup",
+      "seq": 3,
+      "group": "CREATE",
+      "name": "Duplicate accountCode",
+      "parents": ["create-account-minimal"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash Duplicate",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 409
+    },
+
+    {
+      "id": "get-all-flat",
+      "seq": 4,
+      "group": "READ",
+      "name": "Get all (flat)",
+      "parents": ["create-account-minimal"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [{ "accountCode": "1000" }]
+      }
+    },
+    {
+      "id": "get-one",
+      "seq": 5,
+      "group": "READ",
+      "name": "Get by ID",
+      "parents": ["create-account-minimal"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-account-minimal.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": { "accountCode": "1000" }
+      }
+    },
+
+    {
+      "id": "create-parent-nonleaf",
+      "seq": 6,
+      "group": "CREATE",
+      "name": "Create non-leaf parent",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2000",
+        "accountName": "Liabilities",
+        "type": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2000",
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "create-child",
+      "seq": 7,
+      "group": "CREATE",
+      "name": "Create child under non-leaf",
+      "parents": ["create-parent-nonleaf"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2001",
+        "accountName": "Short-Term Loans",
+        "type": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "parentAccount": "{{create-parent-nonleaf.data._id}}"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2001",
+          "parentAccount": "{{create-parent-nonleaf.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "get-hierarchy",
+      "seq": 8,
+      "group": "READ",
+      "name": "Get tree hierarchy",
+      "parents": ["create-parent-nonleaf", "create-child"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "1000"
+          },
+          {
+            "accountCode": "2000",
+            "children": [{ "accountCode": "2001" }]
+          }
+        ]
+      }
+    }
+  ]
+}

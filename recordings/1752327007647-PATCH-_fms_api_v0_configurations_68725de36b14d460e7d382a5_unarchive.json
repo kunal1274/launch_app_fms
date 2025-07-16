@@ -1,0 +1,28 @@
+{
+  "ts": 1752327007647,
+  "method": "PATCH",
+  "path": "/fms/api/v0/configurations/68725de36b14d460e7d382a5/unarchive",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Model of the Nokia",
+      "description": "Site 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "N73",
+        "N6600"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "CFG_001"
+    }
+  }
+}

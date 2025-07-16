@@ -1,0 +1,17 @@
+{
+  "ts": 1752401287251,
+  "method": "PATCH",
+  "path": "/fms/api/v0/versions/68737ec51db1202e937cf64d/values",
+  "body": {
+    "values": [
+      "phillipines",
+      "roman"
+    ]
+  },
+  "status": 500,
+  "response": {
+    "status": "failure",
+    "message": "Internal server error",
+    "error": "invalidateConfigCache is not defined"
+  }
+}

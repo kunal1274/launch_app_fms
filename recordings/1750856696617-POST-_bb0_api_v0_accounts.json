@@ -1,0 +1,23 @@
+{
+  "ts": 1750856696617,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts",
+  "body": {
+    "accountCode": "1005.A1",
+    "accountName": "Inventory Receipt Account",
+    "accType": "ASSET",
+    "parentAccount": null,
+    "normalBalance": "DEBIT",
+    "isLeaf": true,
+    "allowManualPost": false,
+    "currency": "INR",
+    "description": "This account is posted whenever there is any inventory balance will in or receipted ",
+    "group": "INVENTORY",
+    "active": true
+  },
+  "status": 409,
+  "response": {
+    "status": "failure",
+    "message": "Duplicate accountCode: 1005.A1 already exists."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "ts": 1750935869371,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts/account-templates",
+  "body": {
+    "name": "StandardRevenue",
+    "defaults": {
+      "accType": "REVENUE",
+      "normalBalance": "CREDIT",
+      "isLeaf": false,
+      "allowManualPost": false,
+      "currency": "GBP",
+      "description": "std revenue",
+      "group": "FINANCE"
+    }
+  },
+  "status": 409,
+  "response": {
+    "status": "failure",
+    "message": "Template name \"StandardRevenue\" already exists."
+  }
+}

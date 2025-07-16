@@ -1,0 +1,14 @@
+{
+  "ts": 1752399428455,
+  "method": "DELETE",
+  "path": "/fms/api/v0/styles/68737c7c812b6974bf3a5a43",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Deleted."
+  }
+}

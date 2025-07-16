@@ -1,0 +1,40 @@
+{
+  "ts": 1752396108196,
+  "method": "POST",
+  "path": "/fms/api/v0/sizes",
+  "body": {
+    "name": "human colors",
+    "type": "Virtual",
+    "description": "Colors of the human 12th July 1425",
+    "values": [
+      "Red",
+      "White",
+      "Green",
+      "Black",
+      "Brown"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Size configuration created successfully.",
+    "data": {
+      "name": "human colors",
+      "description": "Colors of the human 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Red",
+        "White",
+        "Green",
+        "Black",
+        "Brown"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "SIZ_001"
+    }
+  }
+}

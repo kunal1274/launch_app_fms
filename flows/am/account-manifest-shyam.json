@@ -1,0 +1,352 @@
+{
+  "nodes": [
+    {
+      "id": "get-all-flat",
+      "seq": 1,
+      "group": "READ ALL",
+      "name": "Get all (flat)",
+      "parents": [],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": []
+      }
+    },
+    {
+      "id": "create-account-minimal",
+      "seq": 2,
+      "group": "CREATE",
+      "name": "Minimal create",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "currency": "INR",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      }
+    },
+
+    {
+      "id": "create-account-missing",
+      "seq": 3,
+      "group": "CREATE",
+      "name": "Missing required fields",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountName": "No Code"
+      },
+      "expectedStatus": 400
+    },
+
+    {
+      "id": "create-account-dup",
+      "seq": 3,
+      "group": "CREATE",
+      "name": "Duplicate accountCode",
+      "parents": ["create-account-minimal"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash Duplicate",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 409
+    },
+
+    {
+      "id": "get-all-flat",
+      "seq": 4,
+      "group": "READ",
+      "name": "Get all (flat)",
+      "parents": ["create-account-minimal"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [{ "accountCode": "1000" }]
+      }
+    },
+    {
+      "id": "get-one",
+      "seq": 5,
+      "group": "READ",
+      "name": "Get by ID",
+      "parents": ["create-account-minimal"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-account-minimal.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": { "accountCode": "1000" }
+      }
+    },
+
+    {
+      "id": "create-parent-nonleaf",
+      "seq": 6,
+      "group": "CREATE",
+      "name": "Create non-leaf parent",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2000",
+        "accountName": "Liabilities",
+        "type": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2000",
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "create-child",
+      "seq": 7,
+      "group": "CREATE",
+      "name": "Create child under non-leaf",
+      "parents": ["create-parent-nonleaf"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2001",
+        "accountName": "Short-Term Loans",
+        "type": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "parentAccount": "{{create-parent-nonleaf.data._id}}"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2001",
+          "parentAccount": "{{create-parent-nonleaf.data._id}}"
+        }
+      }
+    },
+
+    {
+      "id": "bulk-create",
+      "seq": 2,
+      "group": "BULK",
+      "name": "Bulk create accounts",
+      "method": "POST",
+      "pathTemplate": "/api/v1/accounts/bulk",
+      "bodyTemplate": {
+        "data": [
+          {
+            "accountCode": "3000",
+            "accountName": "Sales",
+            "type": "REVENUE",
+            "normalBalance": "CREDIT"
+          },
+          {
+            "accountCode": "4000",
+            "accountName": "Expenses",
+            "type": "EXPENSE",
+            "normalBalance": "DEBIT"
+          },
+          {
+            "accountCode": "5000",
+            "accountName": "Equity",
+            "type": "EQUITY",
+            "normalBalance": "CREDIT"
+          }
+        ]
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "3000" },
+          { "accountCode": "4000" },
+          { "accountCode": "5000" }
+        ]
+      }
+    },
+
+    {
+      "id": "update-one",
+      "seq": 3,
+      "group": "UPDATE",
+      "name": "Single‐field update",
+      "parents": ["create-account-minimal"],
+      "method": "PUT",
+      "pathTemplate": "/api/v1/accounts/{{create-account-minimal.data._id}}",
+      "bodyTemplate": { "accountName": "Cash on Hand" },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": { "accountName": "Cash on Hand" }
+      }
+    },
+
+    {
+      "id": "bulk-update",
+      "seq": 4,
+      "group": "BULK",
+      "name": "Bulk update accounts",
+      "parents": ["create-account-minimal", "bulk-create"],
+      "method": "PUT",
+      "pathTemplate": "/api/v1/accounts/bulk",
+      "bodyTemplate": {
+        "data": [
+          {
+            "_id": "{{create-account-minimal.data._id}}",
+            "currency": "USD"
+          },
+          {
+            "_id": "{{bulk-create.data.0._id}}",
+            "accountName": "Updated Sales"
+          }
+        ]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [{ "currency": "USD" }, { "accountName": "Updated Sales" }]
+      }
+    },
+
+    {
+      "id": "delete-one",
+      "seq": 5,
+      "group": "DELETE",
+      "name": "Delete single account",
+      "parents": ["create-account-minimal"],
+      "method": "DELETE",
+      "pathTemplate": "/api/v1/accounts/{{create-account-minimal.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "✅ acct deleted."
+      }
+    },
+
+    {
+      "id": "archive-one",
+      "seq": 6,
+      "group": "ARCHIVE",
+      "name": "Archive single account",
+      "parents": ["bulk-create"],
+      "method": "PATCH",
+      "pathTemplate": "/api/v1/accounts/{{bulk-create.data.1._id}}/archive",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Account archived.",
+        "data": { "isArchived": true }
+      }
+    },
+
+    {
+      "id": "bulk-delete",
+      "seq": 7,
+      "group": "BULK",
+      "name": "Bulk‐delete (archive) accounts",
+      "parents": ["bulk-create"],
+      "method": "PATCH",
+      "pathTemplate": "/api/v1/accounts/bulk-delete",
+      "bodyTemplate": {
+        "ids": ["{{bulk-create.data.0._id}}", "{{bulk-create.data.2._id}}"]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Archived 2 account(s)."
+      }
+    },
+
+    {
+      "id": "unarchive-one",
+      "seq": 8,
+      "group": "ARCHIVE",
+      "name": "Unarchive single account",
+      "parents": ["archive-one"],
+      "method": "PATCH",
+      "pathTemplate": "/api/v1/accounts/{{archive-one.request.body.ids}}/unarchive",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Account unarchived.",
+        "data": { "isArchived": false }
+      }
+    },
+
+    {
+      "id": "bulk-delete-leaf",
+      "seq": 9,
+      "group": "BULK",
+      "name": "Bulk‐delete only leaf accounts",
+      "parents": ["bulk-create", "create-account-minimal"],
+      "method": "DELETE",
+      "pathTemplate": "/api/v1/accounts/bulk-leaf-delete",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Deleted 3 leaf account(s)."
+      }
+    },
+
+    {
+      "id": "bulk-delete-cascade",
+      "seq": 10,
+      "group": "BULK",
+      "name": "Bulk‐delete cascade all accounts",
+      "parents": ["bulk-create", "create-parent-nonleaf", "create-child"],
+      "method": "DELETE",
+      "pathTemplate": "/api/v1/accounts/bulk-cascade-delete",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Cascade-deleted 5 account(s)."
+      }
+    },
+    {
+      "id": "get-hierarchy",
+      "seq": 8,
+      "group": "READ",
+      "name": "Get tree hierarchy",
+      "parents": ["create-parent-nonleaf", "create-child"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "1000"
+          },
+          {
+            "accountCode": "2000",
+            "children": [{ "accountCode": "2001" }]
+          }
+        ]
+      }
+    }
+  ]
+}

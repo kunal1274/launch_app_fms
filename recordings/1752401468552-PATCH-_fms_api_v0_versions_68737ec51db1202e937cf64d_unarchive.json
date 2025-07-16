@@ -1,0 +1,35 @@
+{
+  "ts": 1752401468552,
+  "method": "PATCH",
+  "path": "/fms/api/v0/versions/68737ec51db1202e937cf64d/unarchive",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "versions of the dress",
+      "description": "Versions of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "phillipines",
+        "roman"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "VER_001"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "ts": 1750935959991,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts/account-templates/685d294e21b5e37caa7615e2/apply",
+  "body": {
+    "overrides": {
+      "accountCode": "9000",
+      "accountName": "ExpenseAcct"
+    }
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "data": {
+      "accountCode": "9000",
+      "accountName": "ExpenseAcct",
+      "accType": "REVENUE",
+      "parentAccount": null,
+      "normalBalance": "CREDIT",
+      "isLeaf": false,
+      "allowManualPost": false,
+      "currency": "GBP",
+      "description": "std revenue",
+      "group": "FINANCE",
+      "isArchived": false,
+      "active": false,
+      "sysCode": "LA_000009"
+    }
+  }
+}

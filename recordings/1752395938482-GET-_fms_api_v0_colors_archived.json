@@ -1,0 +1,33 @@
+{
+  "ts": 1752395938482,
+  "method": "GET",
+  "path": "/fms/api/v0/colors/archived",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": [
+      {
+        "name": "Color Nokia",
+        "description": "Site 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Red",
+          "White",
+          "Green",
+          "N76",
+          "N6700"
+        ],
+        "active": false,
+        "archived": true,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "COL_001"
+      }
+    ]
+  }
+}

@@ -78,6 +78,8 @@ import aisleRouter from "./routes/aisle.routes.js";
 
 import inventJournalRouter from "./routes/inventJournal.routes.js";
 import stockBalanceRouter from "./routes/inventStockBalance.routes.js";
+import ledgerAccountRouter from "./routes/account.routes.js";
+import { recordApiFlow } from "./middleware/recordApiFlow.js";
 
 // import redisClient from "./middleware/redisClient.js";
 
@@ -119,6 +121,8 @@ dbgServer("Index.js loaded, ENV port=%s", process.env.PORT);
 
 // // Middleware
 const AumMrigahApp = expressAumMrigah();
+
+if (process.env.NODE_ENV !== "test") AumMrigahApp.use(recordApiFlow); // Skip during tests
 
 // AFTER your API prefix: serve the static files under the same /bb/api/v3/uploads path
 dbgRoutesBB3("Mounting static routs-BB3 router on /uploads");
@@ -236,6 +240,9 @@ AumMrigahApp.get("/", (req, res) => {
 //     });
 //   }
 // );
+// GL Accounting Modules
+dbgRoutes("Mounting userRouter router on /fms/api/v0/accounts");
+AumMrigahApp.use("/fms/api/v0/accounts", ledgerAccountRouter);
 
 // // Main Functional Modules
 dbgRoutes("Mounting userRouter router on /fms/api/v0/users");

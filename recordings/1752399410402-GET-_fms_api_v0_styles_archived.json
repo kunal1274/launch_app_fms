@@ -1,0 +1,14 @@
+{
+  "ts": 1752399410402,
+  "method": "GET",
+  "path": "/fms/api/v0/styles/archived",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": []
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "nodes": [
+    {
+      "id": "create-minimal",
+      "seq": 1,
+      "group": "CREATE",
+      "name": "Create minimal account",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash",
+        "type": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "currency": "INR",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      }
+    },
+    {
+      "id": "create-all-fields",
+      "seq": 2,
+      "group": "CREATE",
+      "name": "Create with all fields",
+      "parents": ["create-minimal"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1001",
+        "accountName": "Savings",
+        "type": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-minimal.data._id}}",
+        "isLeaf": false,
+        "allowManualPost": false,
+        "currency": "USD",
+        "description": "Full account",
+        "group": "OPERATIONS",
+        "active": true
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1001",
+          "accountName": "Savings",
+          "type": "ASSET",
+          "normalBalance": "DEBIT",
+          "parentAccount": "{{create-minimal.data._id}}",
+          "isLeaf": false,
+          "allowManualPost": false,
+          "currency": "USD",
+          "description": "Full account",
+          "group": "OPERATIONS",
+          "active": true
+        }
+      }
+    },
+    {
+      "id": "syscode-sequence",
+      "seq": 3,
+      "group": "SEQUENCE",
+      "name": "SysCode increments",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1002",
+        "accountName": "Equity",
+        "type": "EQUITY",
+        "normalBalance": "CREDIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "sysCode": "LA_000003"
+        }
+      }
+    },
+    {
+      "id": "check-global-party",
+      "seq": 4,
+      "group": "READ",
+      "name": "GlobalPartyId generated",
+      "parents": ["create-minimal"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "globalPartyId": "{{create-minimal.data.globalPartyId}}"
+        }
+      }
+    },
+    {
+      "id": "create-missing",
+      "seq": 5,
+      "group": "NEGATIVE",
+      "name": "Missing mandatory fields",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountName": "No Code"
+      },
+      "expectedStatus": 400
+    }
+  ]
+}

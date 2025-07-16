@@ -1,0 +1,15 @@
+{
+  "ts": 1752325371503,
+  "method": "POST",
+  "path": "/fms/api/v0/configurations",
+  "body": {
+    "name": "Nokia3746",
+    "type": "Virtual",
+    "description": "Site 12th July 1425"
+  },
+  "status": 422,
+  "response": {
+    "status": "failure",
+    "message": "⚠️ name, type and non-empty values array are required."
+  }
+}

@@ -13,6 +13,7 @@ import {
   bulkCreateSizeConfigs,
   bulkUpdateSizeConfigs,
   bulkDeleteSizeConfigs,
+  appendSizeValues,
 } from "../controllers/productDimSize.controller.js";
 
 const sizeRouter = express.Router();
@@ -30,6 +31,7 @@ sizeRouter.post("/", createSizeConfig);
 // Single-item & archive toggles
 sizeRouter.get("/:sizeId", getSizeConfigById);
 sizeRouter.put("/:sizeId", updateSizeConfigById);
+sizeRouter.patch("/:sizeId/values", appendSizeValues);
 sizeRouter.delete("/:sizeId", deleteSizeConfigById);
 sizeRouter.patch("/:sizeId/archive", archiveSizeConfigById);
 sizeRouter.patch("/:sizeId/unarchive", unarchiveSizeConfigById);

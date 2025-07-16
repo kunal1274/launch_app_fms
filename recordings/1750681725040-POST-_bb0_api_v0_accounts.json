@@ -1,0 +1,39 @@
+{
+  "ts": 1750681725040,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts",
+  "body": {
+    "accountCode": "1001",
+    "accountName": "Savings",
+    "type": "ASSET",
+    "normalBalance": "DEBIT",
+    "parentAccount": null,
+    "isLeaf": false,
+    "allowManualPost": false,
+    "currency": "USD",
+    "description": "Full account",
+    "group": "OPERATIONS",
+    "active": true
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "Account created.",
+    "data": {
+      "globalPartyId": "6859487c7c077ad7d0a1c510",
+      "accountCode": "1001",
+      "accountName": "Savings",
+      "type": "ASSET",
+      "parentAccount": null,
+      "normalBalance": "DEBIT",
+      "isLeaf": false,
+      "allowManualPost": false,
+      "currency": "USD",
+      "description": "Full account",
+      "group": "OPERATIONS",
+      "isArchived": false,
+      "active": false,
+      "sysCode": "LA_000001"
+    }
+  }
+}

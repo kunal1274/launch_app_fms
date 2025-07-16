@@ -20,6 +20,10 @@ const invalidateVersionCache = async (key = "/fms/api/v0/versions") => {
   }
 };
 
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
 /** Create a new Product Dimension Version */
 export const createVersionConfig = async (req, res) => {
   try {
@@ -85,6 +89,62 @@ export const createVersionConfig = async (req, res) => {
       status: "failure",
       message: "Internal server error.",
       error: error.message,
+    });
+  }
+};
+
+/** ──────────────────────────────
+ *  Append new values (leave existing intact)
+ * ────────────────────────────── */
+export const appendVersionValues = async (req, res) => {
+  try {
+    const { versionId } = req.params;
+    const { values } = req.body;
+
+    if (!isValidObjectId(versionId)) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid version ID" });
+    }
+    if (!Array.isArray(values) || values.length === 0) {
+      return res.status(422).json({
+        status: "failure",
+        message: "⚠️ `values` must be a non-empty array of strings.",
+      });
+    }
+
+    // $addToSet avoids duplicates, $each lets us add multiple
+    const vsn = await ProductDimVersionModel.findByIdAndUpdate(
+      versionId,
+      {
+        $addToSet: { values: { $each: values } },
+        updatedBy: req.user?.username,
+      },
+      { new: true, runValidators: true }
+    );
+    if (!vsn) {
+      return res.status(404).json({ status: "failure", message: "Not found." });
+    }
+
+    await createAuditLog({
+      user: req.user?.username,
+      module: "ProductDimVersion",
+      action: "APPEND_VALUES",
+      recordId: vsn._id,
+      changes: { appended: values },
+    });
+    await invalidateVersionCache();
+
+    return res.status(200).json({ status: "success", data: vsn });
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      return res.status(422).json({ status: "failure", message: err.message });
+    }
+    logError("❌ Append values error", err);
+    return res.status(500).json({
+      status: "failure",
+      message: "Internal server error",
+      error: err.message,
     });
   }
 };

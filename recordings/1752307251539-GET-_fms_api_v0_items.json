@@ -1,0 +1,16 @@
+{
+  "ts": 1752307251539,
+  "method": "GET",
+  "path": "/fms/api/v0/items",
+  "body": {
+    "code": "349379730TUEY34",
+    "name": "Marvel Comics",
+    "description": "Marvel Comics for dhruv. We should think about creating movies on all Nagraj comics and dhruv comics",
+    "type": "Goods",
+    "unit": "mt",
+    "price": 345.89,
+    "active": false
+  },
+  "status": 200,
+  "response": "[object Object]{\"status\":\"success\",\"message\":\" All the items has been fetched successfully\",\"count\":5,\"data\":[{\"archived\":false,\"groups\":[],\"linkedCoaAccount\":null,\"_id\":\"67e2dfae2e9cf3ece270bef7\",\"itemNum\":\"DDS8\",\"name\":\"Daily Driver Service : 8 hours\",\"description\":\"The user can book the driver on daily basis for 8 hours but this has to be scheduled on daily basis\",\"type\":\"Services\",\"unit\":\"hr\",\"price\":\"293.00\",\"active\":false,\"files\":[],\"createdAt\":\"2025-03-25T16:54:06.802Z\",\"updatedAt\":\"2025-03-25T17:21:59.470Z\",\"code\":\"I_000001\",\"__v\":0,\"id\":\"67e2dfae2e9cf3ece270bef7\"},{\"archived\":false,\"groups\":[],\"linkedCoaAccount\":null,\"_id\":\"67e2e0c12e9cf3ece270bf07\",\"itemNum\":\"DDS4\",\"name\":\"Daily Driver Service : 4 hours\",\"description\":\"The user can book the driver on daily basis for 8 hours but this has to be scheduled on daily basis\",\"type\":\"Services\",\"unit\":\"hr\",\"price\":\"290.00\",\"active\":false,\"files\":[],\"createdAt\":\"2025-03-25T16:58:41.732Z\",\"updatedAt\":\"2025-03-25T16:58:41.732Z\",\"code\":\"I_000002\",\"__v\":0,\"id\":\"67e2e0c12e9cf3ece270bf07\"},{\"linkedCoaAccount\":null,\"_id\":\"68132eca4762f0944e650185\",\"itemNum\":\"SteelPipe\",\"name\":\"Steel Pipes\",\"description\":\"The steel pipe made out of casting iron\",\"type\":\"Services\",\"unit\":\"hr\",\"price\":\"390.00\",\"active\":false,\"archived\":false,\"groups\":[],\"files\":[],\"createdAt\":\"2025-05-01T08:20:26.961Z\",\"updatedAt\":\"2025-05-01T08:20:26.961Z\",\"code\":\"I_000003\",\"__v\":0,\"id\":\"68132eca4762f0944e650185\"},{\"linkedCoaAccount\":null,\"_id\":\"68260651932587a6678fdce6\",\"itemNum\":\"F-009\",\"name\":\"Daily Driver Servce : 8 hours\",\"description\":\"The user can book the driver on daily basis for 8 hours but this has to be scheduled on daily basis\",\"type\":\"Services\",\"unit\":\"hr\",\"price\":\"290.00\",\"active\":false,\"archived\":false,\"groups\":[],\"files\":[],\"createdAt\":\"2025-05-15T15:20:49.175Z\",\"updatedAt\":\"2025-05-15T15:20:49.175Z\",\"code\":\"I_000004\",\"__v\":0,\"id\":\"68260651932587a6678fdce6\"},{\"linkedCoaAccount\":null,\"_id\":\"682f03eb55699f31798c3a90\",\"itemNum\":\"DGDS-3\",\"name\":\"Daily Driver Servce : 3 hours\",\"description\":\"The user can book the driver on daily basis for 3 hours but this has to be scheduled on daily basis\",\"type\":\"Services\",\"unit\":\"hr\",\"price\":\"400.00\",\"active\":false,\"archived\":false,\"groups\":[],\"files\":[],\"createdAt\":\"2025-05-22T11:00:59.283Z\",\"updatedAt\":\"2025-05-22T11:00:59.283Z\",\"code\":\"I_000005\",\"__v\":0,\"id\":\"682f03eb55699f31798c3a90\"}]}"
+}

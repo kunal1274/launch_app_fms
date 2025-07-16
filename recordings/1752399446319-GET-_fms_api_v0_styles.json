@@ -1,0 +1,36 @@
+{
+  "ts": 1752399446319,
+  "method": "GET",
+  "path": "/fms/api/v0/styles",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "count": 1,
+    "data": [
+      {
+        "name": "Dress Style",
+        "description": "Sizes of the laptop 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Japanese",
+          "Nepalese",
+          "Indian",
+          "American",
+          "Chinese",
+          "Australian",
+          "Vermese"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "STL_002"
+      }
+    ]
+  }
+}

@@ -12,39 +12,50 @@ import {
   bulkDeleteAccounts,
   archiveAccountById,
   unarchiveAccountById,
+  bulkAllDeleteAccounts,
+  bulkAllDeleteAccountsCascade,
+  getTrialBalance,
+  getIncomeStatement,
+  getBalanceSheet,
+  getAccountLedger,
 } from "../controllers/account.controller.js";
 
-const router = express.Router();
-
-// 1. GET ALL ACCOUNTS
-//    Optional: ?includeArchived=true  ?hierarchy=true
-router.get("/", getAllAccounts);
-
-// 2. GET ONE ACCOUNT BY ID
-router.get("/:id", getAccountById);
-
-// 3. CREATE ONE ACCOUNT
-router.post("/", createAccount);
+const ledgerAccountRouter = express.Router();
 
 // 4. BULK CREATE ACCOUNTS
-router.post("/bulk", bulkCreateAccounts);
+ledgerAccountRouter.post("/bulk", bulkCreateAccounts);
+// 6. BULK UPDATE ACCOUNTS
+ledgerAccountRouter.patch("/bulk", bulkUpdateAccounts);
+// 8. BULK DELETE (archive) ACCOUNTS
+ledgerAccountRouter.delete("/bulk", bulkDeleteAccounts);
+ledgerAccountRouter.delete("/bulk-all", bulkAllDeleteAccounts);
+ledgerAccountRouter.delete("/bulk-all-cascade", bulkAllDeleteAccountsCascade);
+
+// 3. CREATE ONE ACCOUNT
+ledgerAccountRouter.post("/", createAccount);
+// 1. GET ALL ACCOUNTS
+//    Optional: ?includeArchived=true  ?hierarchy=true
+ledgerAccountRouter.get("/", getAllAccounts);
+
+// Financial reports
+ledgerAccountRouter.get("/trial-balance", getTrialBalance);
+ledgerAccountRouter.get("/income-statement", getIncomeStatement);
+ledgerAccountRouter.get("/balance-sheet", getBalanceSheet);
+ledgerAccountRouter.get("/account-ledger", getAccountLedger);
+
+// 2. GET ONE ACCOUNT BY ID
+ledgerAccountRouter.get("/:id", getAccountById);
 
 // 5. UPDATE ONE ACCOUNT BY ID
-router.patch("/:id", updateAccountById);
-
-// 6. BULK UPDATE ACCOUNTS
-router.patch("/bulk", bulkUpdateAccounts);
+ledgerAccountRouter.patch("/:id", updateAccountById);
 
 // 7. DELETE (archive) ONE ACCOUNT
-router.delete("/:id", deleteAccountById);
-
-// 8. BULK DELETE (archive) ACCOUNTS
-router.delete("/bulk", bulkDeleteAccounts);
+ledgerAccountRouter.delete("/:id", deleteAccountById);
 
 // 9. ARCHIVE ONE ACCOUNT (alias for delete)
-router.patch("/:id/archive", archiveAccountById);
+ledgerAccountRouter.patch("/:id/archive", archiveAccountById);
 
 // 10. UNARCHIVE ONE ACCOUNT
-router.patch("/:id/unarchive", unarchiveAccountById);
+ledgerAccountRouter.patch("/:id/unarchive", unarchiveAccountById);
 
-export default router;
+export default ledgerAccountRouter;

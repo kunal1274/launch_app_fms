@@ -1,0 +1,51 @@
+{
+  "ts": 1752396768702,
+  "method": "GET",
+  "path": "/fms/api/v0/sizes",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "count": 2,
+    "data": [
+      {
+        "name": "human colors",
+        "description": "Colors of the human 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Red",
+          "White",
+          "Green",
+          "Black",
+          "Brown"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "SIZ_001"
+      },
+      {
+        "name": "human sizes",
+        "description": "Sizes of the human 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Satyug",
+          "Treta",
+          "Dwapar",
+          "Kalyug"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "SIZ_002"
+      }
+    ]
+  }
+}

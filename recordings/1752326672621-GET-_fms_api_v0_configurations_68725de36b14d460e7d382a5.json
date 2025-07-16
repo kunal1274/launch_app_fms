@@ -1,0 +1,29 @@
+{
+  "ts": 1752326672621,
+  "method": "GET",
+  "path": "/fms/api/v0/configurations/68725de36b14d460e7d382a5",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Model of the Nokia",
+      "description": "Site 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Nokia 7644",
+        "Nokia 4748",
+        "Nokia 4647"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "CFG_001"
+    }
+  }
+}

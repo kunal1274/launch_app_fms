@@ -131,6 +131,15 @@ const itemSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Companies",
     },
+    linkedCoaAccount: {
+      type: Schema.Types.ObjectId,
+      ref: "Accounts",
+      default: null,
+      required: [
+        true,
+        "Every Item must specify the corresponding leaf AccountModel _id",
+      ],
+    },
     // New field for file uploads
     files: [
       {

@@ -1,0 +1,37 @@
+{
+  "ts": 1752401438742,
+  "method": "GET",
+  "path": "/fms/api/v0/versions/archived",
+  "body": {
+    "name": "GENERAL",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": [
+      {
+        "name": "versions of the dress",
+        "description": "Versions of the laptop 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5",
+          "V6",
+          "V7",
+          "phillipines",
+          "roman"
+        ],
+        "active": false,
+        "archived": true,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "VER_001"
+      }
+    ]
+  }
+}

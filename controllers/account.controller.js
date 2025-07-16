@@ -2,6 +2,12 @@
 
 import mongoose from "mongoose";
 import { AccountModel } from "../models/account.model.js";
+import redisClient from "../middleware/redisClient.js";
+import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
+import logger, { logStackError } from "../utility/logger.util.js";
+import { winstonLogger, logError } from "../utility/logError.utils.js";
+import { LedgerAccountCounterModel } from "../models/counter.model.js";
+import { GlobalPartyModel } from "../shared_service/models/globalParty.model.js";
 
 /**
  * Utility: validate MongoDB ObjectId
@@ -9,6 +15,18 @@ import { AccountModel } from "../models/account.model.js";
 function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
+
+// Helper: invalidate aisle cache
+const invalidateAccountCache = async (key = "/fms/api/v0/accounts") => {
+  try {
+    await redisClient.del(key);
+    logger.info(`Cache invalidated: ${key}`, {
+      context: "invalidateAccountCache",
+    });
+  } catch (err) {
+    logStackError("❌ Account cache invalidation failed", err);
+  }
+};
 
 /**
  * 1) GET ALL ACCOUNTS
@@ -110,6 +128,7 @@ export const createAccount = async (req, res) => {
   try {
     const {
       accountCode,
+      globalPartyId,
       accountName,
       type,
       parentAccount,
@@ -130,7 +149,47 @@ export const createAccount = async (req, res) => {
       });
     }
 
+    // 2) Prepare a variable to hold the final partyId
+    let partyId = null;
+
+    // 3) If no globalPartyId was passed, we create a new GlobalParty doc with partyType=["Customer"].
+    if (!globalPartyId) {
+      const newParty = await GlobalPartyModel.create({
+        name: accountCode, // or pass something else for .name
+        partyType: ["Account"], // force the array to have "Customer"
+      });
+      partyId = newParty._id;
+    } else {
+      // 4) If globalPartyId is provided, we find that doc
+      const existingParty = await GlobalPartyModel.findById(globalPartyId);
+      if (!existingParty) {
+        // Option A: Throw an error
+        // return res.status(404).send({
+        //   status: "failure",
+        //   message: `GlobalParty with ID ${globalPartyId} does not exist.`,
+        // });
+
+        // Option B: Or create a new GlobalParty doc with that _id (rarely recommended)
+        // But usually you'd want to fail if the globalPartyId doesn't exist
+        return res.status(404).json({
+          status: "failure",
+          message: `⚠️ GlobalParty ${globalPartyId} not found. (Cannot create Account referencing missing party.)`,
+        });
+      }
+
+      // 5) If found, ensure "Customer" is in the partyType array
+      if (!existingParty.partyType.includes("Account")) {
+        existingParty.partyType.push("Account");
+        await existingParty.save();
+      }
+
+      // We'll use the existingParty's _id
+      partyId = existingParty._id;
+    }
+
+    // console.log("account code", accountCode);
     const newAcct = new AccountModel({
+      globalPartyId: partyId,
       accountCode: accountCode.trim(),
       accountName: accountName.trim(),
       type,
@@ -143,23 +202,43 @@ export const createAccount = async (req, res) => {
       group: group || "",
     });
 
+    // console.log("new Acct ", newAcct);
+
     await newAcct.save();
     return res
       .status(201)
       .json({ status: "success", message: "Account created.", data: newAcct });
   } catch (error) {
+    console.error("❌ createAccount Error:", error);
+    try {
+      // const isCounterIncremented =
+      //   error.message &&
+      //   !error.message.startsWith("❌ Duplicate contact number");
+      //if (isCounterIncremented) {
+      await LedgerAccountCounterModel.findByIdAndUpdate(
+        { _id: "glAccCode" },
+        { $inc: { seq: -1 } }
+      );
+      // }
+    } catch (decrementError) {
+      console.error("❌ Error during counter decrement:", decrementError.stack);
+    }
     if (error.name === "ValidationError") {
       return res
         .status(422)
         .json({ status: "failure", message: error.message });
     }
+    // show exactly which key is duplicated
     if (error.code === 11000) {
+      console.error("❌ Duplicate key details:", error.keyValue);
       return res.status(409).json({
         status: "failure",
-        message: "Duplicate accountCode. That code already exists.",
+        message: `Duplicate ${Object.keys(error.keyValue)[0]}: ${
+          Object.values(error.keyValue)[0]
+        } already exists.`,
       });
     }
-    console.error("❌ createAccount Error:", error);
+
     return res
       .status(500)
       .json({ status: "failure", message: "Internal server error." });
@@ -336,7 +415,44 @@ export const bulkUpdateAccounts = async (req, res) => {
  * 7) DELETE ONE ACCOUNT (soft-delete → archive)
  *    We set isArchived = true
  */
+
+/** Delete an Aisle by ID */
 export const deleteAccountById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ status: "failure", message: "Invalid ID" });
+    }
+    const acct = await AccountModel.findByIdAndDelete(id);
+    if (!acct) {
+      return res
+        .status(404)
+        .json({ status: "failure", message: "⚠️ acct not found." });
+    }
+
+    await createAuditLog({
+      user: req.user?.username || "67ec2fb004d3cc3237b58772",
+      module: "GL",
+      action: "DELETE",
+      recordId: acct._id,
+    });
+
+    await invalidateAccountCache();
+    winstonLogger.info(`ℹ️ Deleted acct: ${id}`);
+    return res
+      .status(200)
+      .json({ status: "success", message: "✅ acct deleted." });
+  } catch (error) {
+    logError("❌ Delete Aisle Error", error);
+    return res.status(500).json({
+      status: "failure",
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
+export const archiveAccountById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
@@ -399,14 +515,6 @@ export const bulkDeleteAccounts = async (req, res) => {
 };
 
 /**
- * 9) ARCHIVE ONE (same as deleteAccountById)
- */
-export const archiveAccountById = async (req, res) => {
-  // alias for deleteAccountById
-  return deleteAccountById(req, res);
-};
-
-/**
  * 10) UNARCHIVE ONE (restore isArchived = false)
  */
 export const unarchiveAccountById = async (req, res) => {
@@ -433,5 +541,276 @@ export const unarchiveAccountById = async (req, res) => {
   } catch (error) {
     console.error("❌ unarchiveAccountById Error:", error);
     return res.status(500).json({ status: "failure", message: error.message });
+  }
+};
+
+/** 11) BULK-DELETE ONLY “LEAF” ACCOUNTS (skip any with children) */
+export const bulkAllDeleteAccounts = async (req, res) => {
+  try {
+    // find all parentAccount references
+    const parents = await AccountModel.distinct("parentAccount", {
+      parentAccount: { $ne: null },
+    });
+    // leaf = those _ids not in parents
+    const leaves = await AccountModel.find({
+      _id: { $nin: parents },
+      isArchived: false,
+    })
+      .select("_id accountCode accountName")
+      .lean();
+
+    if (!leaves.length) {
+      return res.status(200).json({
+        status: "success",
+        message: "No leaf accounts to delete.",
+      });
+    }
+
+    const leafIds = leaves.map((a) => a._id);
+    const del = await AccountModel.deleteMany({ _id: { $in: leafIds } });
+
+    // recompute counter to max remaining systemCode
+    const rem = await AccountModel.find({}, "systemCode").lean();
+    let max = 0;
+    rem.forEach(({ systemCode }) => {
+      const m = systemCode.match(/LA_(\d+)$/);
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    const reset = await LedgerAccountCounterModel.findOneAndUpdate(
+      { _id: "glAccCode" },
+      { seq: max },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: `Deleted ${del.deletedCount} leaf account(s).`,
+      deleted: leaves,
+      counter: reset.seq,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  }
+};
+
+/** 12) BULK-DELETE ALL ACCOUNTS (cascade) */
+export const bulkAllDeleteAccountsCascade = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const all = await AccountModel.find({}, "_id").session(session).lean();
+    const ids = all.map((a) => a._id);
+
+    if (!ids.length) {
+      await session.commitTransaction();
+      return res
+        .status(200)
+        .json({ status: "success", message: "No accounts to delete." });
+    }
+
+    await AccountModel.deleteMany({ _id: { $in: ids } }).session(session);
+    // reset counter to 0
+    const reset = await LedgerAccountCounterModel.findOneAndUpdate(
+      { _id: "glAccCode" },
+      { seq: 0 },
+      { new: true, upsert: true, session }
+    );
+
+    await session.commitTransaction();
+    return res.status(200).json({
+      status: "success",
+      message: `Cascade-deleted ${ids.length} account(s).`,
+      counter: reset.seq,
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    console.error(err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  } finally {
+    session.endSession();
+  }
+};
+
+/** 13) TRIAL BALANCE */
+export const getTrialBalance = async (req, res) => {
+  try {
+    const asOf = req.query.asOf ? new Date(req.query.asOf) : new Date();
+    const data = await GLJournalModel.aggregate([
+      { $match: { voucherDate: { $lte: asOf } } },
+      { $unwind: "$lines" },
+      {
+        $group: {
+          _id: "$lines.account",
+          debit: { $sum: "$lines.debit" },
+          credit: { $sum: "$lines.credit" },
+        },
+      },
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "_id",
+          foreignField: "_id",
+          as: "acct",
+        },
+      },
+      { $unwind: "$acct" },
+      {
+        $project: {
+          accountCode: "$acct.accountCode",
+          accountName: "$acct.accountName",
+          debit: 1,
+          credit: 1,
+          balance: { $subtract: ["$debit", "$credit"] },
+        },
+      },
+      { $sort: { accountCode: 1 } },
+    ]);
+    return res.json({ status: "success", data, count: data.length });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  }
+};
+
+/** 14) INCOME STATEMENT */
+export const getIncomeStatement = async (req, res) => {
+  try {
+    const start = req.query.start
+      ? new Date(req.query.start)
+      : new Date("1900-01-01");
+    const end = req.query.end ? new Date(req.query.end) : new Date();
+    const data = await GLJournalModel.aggregate([
+      { $match: { voucherDate: { $gte: start, $lte: end } } },
+      { $unwind: "$lines" },
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "lines.account",
+          foreignField: "_id",
+          as: "acct",
+        },
+      },
+      { $unwind: "$acct" },
+      { $match: { "acct.type": { $in: ["REVENUE", "EXPENSE"] } } },
+      {
+        $group: {
+          _id: "$acct.type",
+          debit: { $sum: "$lines.debit" },
+          credit: { $sum: "$lines.credit" },
+        },
+      },
+      {
+        $project: {
+          type: "$_id",
+          amount: { $subtract: ["$credit", "$debit"] },
+        },
+      },
+    ]);
+    return res.json({ status: "success", data });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  }
+};
+
+/** 15) BALANCE SHEET */
+export const getBalanceSheet = async (req, res) => {
+  try {
+    const asOf = req.query.asOf ? new Date(req.query.asOf) : new Date();
+    const agg = await GLJournalModel.aggregate([
+      { $match: { voucherDate: { $lte: asOf } } },
+      { $unwind: "$lines" },
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "lines.account",
+          foreignField: "_id",
+          as: "acct",
+        },
+      },
+      { $unwind: "$acct" },
+      { $match: { "acct.type": { $in: ["ASSET", "LIABILITY", "EQUITY"] } } },
+      {
+        $group: {
+          _id: "$acct.type",
+          debit: { $sum: "$lines.debit" },
+          credit: { $sum: "$lines.credit" },
+        },
+      },
+      {
+        $project: {
+          category: "$_id",
+          balance: {
+            $cond: [
+              { $in: ["$_id", ["ASSET"]] },
+              { $subtract: ["$debit", "$credit"] },
+              { $subtract: ["$credit", "$debit"] },
+            ],
+          },
+        },
+      },
+    ]);
+    return res.json({ status: "success", data: agg });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: "failure", message: err.message });
+  }
+};
+
+/** 16) LEDGER ACCOUNT TRANSACTIONS */
+export const getAccountLedger = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid account ID" });
+    }
+    const from = req.query.from
+      ? new Date(req.query.from)
+      : new Date("1900-01-01");
+    const to = req.query.to ? new Date(req.query.to) : new Date();
+
+    const raw = await GLJournalModel.aggregate([
+      {
+        $match: {
+          voucherDate: { $gte: from, $lte: to },
+          "lines.account": mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          voucherNo: 1,
+          voucherDate: 1,
+          line: "$lines",
+        },
+      },
+      { $unwind: "$line" },
+      { $match: { "line.account": mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          voucherNo: 1,
+          date: "$voucherDate",
+          debit: "$line.debit",
+          credit: "$line.credit",
+          local: "$line.localAmount",
+          subledger: "$line.subledger",
+        },
+      },
+      { $sort: { date: 1, voucherNo: 1 } },
+    ]);
+
+    // running balance
+    let run = 0;
+    const ledger = raw.map((r) => {
+      run += r.debit - r.credit;
+      return { ...r, balance: run };
+    });
+
+    return res.json({ status: "success", data: ledger });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: "failure", message: err.message });
   }
 };

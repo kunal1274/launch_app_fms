@@ -1,5 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import { dbgModels } from "../index.js";
+import { CompanyCounterModel } from "./counter.model.js";
 
 /**
  * Subschema for Bank Account Details.
@@ -100,6 +101,12 @@ const taxInfoSchema = new Schema(
  */
 const companySchema = new Schema(
   {
+    // auto generated on save
+    sysCode: {
+      type: String,
+      required: false,
+      unique: true,
+    },
     companyCode: {
       type: String,
       required: true,
@@ -267,23 +274,84 @@ const companySchema = new Schema(
  * Pre-save hook to normalize and validate fields.
  * For example, we ensure that email is lowercase and trim companyCode.
  */
-companySchema.pre("save", function (next) {
+companySchema.pre("save", async function (next) {
   // Ensure email is lowercase (this is already done by the schema 'lowercase' option)
-  if (this.email) {
-    this.email = this.email.toLowerCase().trim();
+  if (!this.isNew) {
+    if (this.email) {
+      this.email = this.email.toLowerCase().trim();
+    }
+    // Trim companyCode and companyName, etc.
+    if (this.companyCode) {
+      this.companyCode = this.companyCode.trim();
+      this.companyCode = this.companyCode.toUpperCase();
+    }
+    if (this.companyName) {
+      this.companyName = this.companyName.trim();
+    }
+    return next();
   }
-  // Trim companyCode and companyName, etc.
-  if (this.companyCode) {
-    this.companyCode = this.companyCode.trim();
-    this.companyCode = this.companyCode.toUpperCase();
+  try {
+    // Validate the document (schema-level validation)
+    await this.validate();
+
+    if (this.email) {
+      this.email = this.email.toLowerCase().trim();
+    }
+    // Trim companyCode and companyName, etc.
+    if (this.companyCode) {
+      this.companyCode = this.companyCode.trim();
+      this.companyCode = this.companyCode.toUpperCase();
+    }
+    if (this.companyName) {
+      this.companyName = this.companyName.trim();
+    }
+
+    // Increment counter within the transaction
+    const dbResponseNewCounter = await CompanyCounterModel.findOneAndUpdate(
+      { _id: "companyCode" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+      //{ new: true, upsert: true, session }
+    );
+
+    console.log("Counter increment result:", dbResponseNewCounter);
+
+    if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
+      throw new Error("❌ Failed to generate company code");
+    }
+
+    // Generate customer code
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    this.sysCode = `CMP_${seqNumber}`;
+
+    next();
+  } catch (error) {
+    console.error("❌ Error caught during transaction:", error.stack);
+
+    // Decrement the counter in case of failure
+    try {
+      // const isCounterIncremented =
+      //   error.message &&
+      //   !error.message.startsWith("❌ Duplicate contact number");
+      // if (isCounterIncremented) {
+      await CustomerCounterModel.findByIdAndUpdate(
+        { _id: "companyCode" },
+        { $inc: { seq: -1 } }
+      );
+      // }
+    } catch (decrementError) {
+      console.error("❌ Error during counter decrement:", decrementError.stack);
+    }
+
+    next(error);
+  } finally {
+    console.log("ℹ️ Finally company counter closed");
   }
-  if (this.companyName) {
-    this.companyName = this.companyName.trim();
-  }
+
   // Optionally, force companyCode to uppercase:
   // this.companyCode = this.companyCode.toUpperCase();
 
-  next();
+  //next();
 });
 
 /**
@@ -303,7 +371,7 @@ companySchema.pre("save", function (next) {
 // CompanySchema.index({ email: 1 });
 
 companySchema.pre(/^find/, function (next) {
-  this.populate("globalPartyId", "code active");
+  this.populate("globalPartyId", "sysCode active");
   next();
 });
 

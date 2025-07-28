@@ -9,12 +9,17 @@ import { BankModel } from "../models/bank.model.js";
 import { ItemModel } from "../models/item.model.js";
 import { CustomerModel } from "../models/customer.model.js";
 import { VendorModel } from "../models/vendor.model.js";
+import SubledgerService from "../services/subledgerTxn.service.js";
 
 /**
  * Helper: rounds a number to two decimals
  */
 function roundToTwo(num) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
+}
+
+function isValidId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
 }
 
 // const computedLines = GLLineService.compute(rawLines);
@@ -238,6 +243,8 @@ export const createGLJournal = async (req, res) => {
       // 10) push final line
       processed.push({
         lineNum: i + 1,
+        sequence: i + 1, // if you want to store sequence too
+        isHeader: !!ln.isHeader, // ← pull it from the incoming object
         remarks: ln.remarks || "",
         account,
         subledger,
@@ -303,28 +310,89 @@ export const postGLJournal = async (req, res) => {
     const { id } = req.params;
     if (!isValidId(id)) throw new Error("Invalid journal ID");
 
+    // 1) Load & flip to POSTED
     const journal = await GLJournalModel.findById(id).session(session);
     if (!journal) throw new Error("Journal not found");
     if (journal.status !== "DRAFT") throw new Error("Only DRAFT can be posted");
 
-    // change status → triggers pre‐save balance check
     journal.status = "POSTED";
     await journal.save({ session });
 
+    // 2) build & collect each subledger txn
+    const subTxns = []; // [{ lineNum, id }]
+
+    // 2) Create subledger txns for each line
+    for (let ln of journal.lines) {
+      // build common DTO
+      const base = {
+        sourceType: "JOURNAL",
+        sourceId: journal._id,
+        sourceLine: ln.lineNum,
+        amount: ln.debit > 0 ? ln.debit : -ln.credit, // normal debit is positive and credit is negative
+        currency: ln.currency,
+        exchangeRate: ln.exchangeRate,
+        dims: ln.dims,
+        extras: ln.extras,
+      };
+      const baseForReversal = {
+        sourceType: "JOURNAL_REVERSAL",
+        sourceId: journal._id,
+        sourceLine: ln.lineNum,
+        amount: ln.debit > 0 ? -ln.debit : ln.credit, // reversal -  debit is negative and credit is positive
+        currency: ln.currency,
+        exchangeRate: ln.exchangeRate,
+        dims: ln.dims,
+        extras: ln.extras,
+      };
+
+      let dto;
+      if (ln.customer) {
+        dto = { ...base, subledgerType: "AR", customer: ln.customer };
+      } else if (ln.vendor) {
+        dto = { ...base, subledgerType: "AP", supplier: ln.vendor };
+      } else if (ln.item) {
+        dto = { ...base, subledgerType: "INV", item: ln.item };
+      } else if (ln.bankAccount) {
+        dto = { ...base, subledgerType: "BANK", bankAccount: ln.bankAccount };
+      } else if (ln.account) {
+        // NEW: direct ledger subledger
+        dto = {
+          ...base,
+          subledgerType: "LEDGER",
+          ledgerAccount: ln.account,
+        };
+      } else {
+        // nothing to create
+        continue;
+      }
+
+      const sub = await SubledgerService.create(dto, session);
+      subTxns.push({ lineNum: ln.lineNum, id: sub._id });
+
+      // (optionally) tag the sub-txn with the journal's voucher later
+    }
+
+    // 3) Create the Financial Voucher
+    // await VoucherService.createJournalVoucher(journal, session);
+    // 3) call voucher creation, passing along sub-txn map
+    await VoucherService.createJournalVoucher(journal, session, subTxns);
+
+    // 4) Commit & respond
     await session.commitTransaction();
+    session.endSession();
     return res.json({ status: "success", data: journal });
   } catch (err) {
     await session.abortTransaction();
-    console.error(err);
-    return res.status(400).json({ status: "failure", message: err.message });
-  } finally {
     session.endSession();
+    console.error("❌ postGLJournal error:", err);
+    return res.status(400).json({ status: "failure", message: err.message });
   }
 };
 
 /**
  * 2) Get one by ID
  */
+/*
 export const getGLJournalById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -339,6 +407,7 @@ export const getGLJournalById = async (req, res) => {
     res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * List / search GL Journals. Supports pagination + filters.
@@ -355,6 +424,7 @@ export const getGLJournalById = async (req, res) => {
 /**
  * Get GL Journals with various filters.
  */
+/*
 export const getGLJournals = async (req, res) => {
   try {
     const {
@@ -421,10 +491,12 @@ export const getGLJournals = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * Get GL Journals with various filters, projecting only key fields.
  */
+/*
 export const getGLJournalsProjection = async (req, res) => {
   try {
     const {
@@ -505,10 +577,12 @@ export const getGLJournalsProjection = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * 5) Update DRAFT only
  */
+/*
 export const updateGLJournalById = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -541,10 +615,12 @@ export const updateGLJournalById = async (req, res) => {
     session.endSession();
   }
 };
+*/
 
 /**
  * 6) Archive = CANCELLED
  */
+/*
 export const archiveGLJournalById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -561,10 +637,12 @@ export const archiveGLJournalById = async (req, res) => {
     res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * 7) Unarchive = back to DRAFT
  */
+/*
 export const unarchiveGLJournalById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -581,10 +659,12 @@ export const unarchiveGLJournalById = async (req, res) => {
     res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * Change status of a GL Journal (enforces per‐journal statusTransitions)
  */
+/*
 export const changeStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -613,10 +693,12 @@ export const changeStatus = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * 8) Bulk export (JSON dump)
  */
+/*
 export const bulkExportGLJournals = async (req, res) => {
   try {
     const docs = await GLJournalModel.find().lean();
@@ -626,10 +708,12 @@ export const bulkExportGLJournals = async (req, res) => {
     res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * 9) Bulk import
  */
+/*
 export const bulkImportGLJournals = async (req, res) => {
   const arr = req.body;
   if (!Array.isArray(arr) || !arr.length)
@@ -643,10 +727,12 @@ export const bulkImportGLJournals = async (req, res) => {
     res.status(400).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  * 10) Bulk delete all
  */
+/*
 export const bulkDeleteAllGLJournals = async (req, res) => {
   try {
     const r = await GLJournalModel.deleteMany({});
@@ -656,11 +742,13 @@ export const bulkDeleteAllGLJournals = async (req, res) => {
     res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 // … your existing createGLJournal and getGLJournals here …
 
 /**
  *  Get the approval/audit history for one GL Journal
  */
+/*
 export const getGLJournalHistory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -685,11 +773,13 @@ export const getGLJournalHistory = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /**
  *  List all journals along with their workflow definitions
  *  (i.e. the stages, assigned users, statuses, etc.)
  */
+/*
 export const listGLJournalWorkflows = async (req, res) => {
   try {
     const docs = await GLJournalModel.find()
@@ -701,8 +791,10 @@ export const listGLJournalWorkflows = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /** 13) TRIAL BALANCE */
+/*
 export const getTrialBalance = async (req, res) => {
   try {
     const asOf = req.query.asOf ? new Date(req.query.asOf) : new Date();
@@ -743,8 +835,10 @@ export const getTrialBalance = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /** 14) INCOME STATEMENT */
+/*
 export const getIncomeStatement = async (req, res) => {
   try {
     const start = req.query.start
@@ -802,8 +896,10 @@ export const getIncomeStatement = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /** 15) BALANCE SHEET */
+/*
 export const getBalanceSheet = async (req, res) => {
   try {
     const asOf = req.query.asOf ? new Date(req.query.asOf) : new Date();
@@ -858,8 +954,10 @@ export const getBalanceSheet = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
 
 /** 16) LEDGER ACCOUNT TRANSACTIONS */
+/*
 export const getAccountLedger = async (req, res) => {
   try {
     const { accountId } = req.params;
@@ -920,6 +1018,10 @@ export const getAccountLedger = async (req, res) => {
     return res.status(500).json({ status: "failure", message: err.message });
   }
 };
+*/
+
+// Discarded code snippets for trial balance, income statement, balance sheet, and account ledger.
+// Not to Be used from here now onwards, use the above getTrialBalance, getIncomeStatement, getBalanceSheet, getAccountLedger
 
 /*
 const trialBalance = await GLJournalModel.aggregate([
@@ -1115,7 +1217,7 @@ const balanceSheet = await GLJournalModel.aggregate([
   { $sort: { accountCode: 1 } },
 ]);
 */
-
+/*
 export const getGLJournals1 = async (req, res) => {
   try {
     const {
@@ -1669,3 +1771,4 @@ export const createGLJournal3 = async (req, res) => {
     return res.status(400).json({ status: "failure", message: err.message });
   }
 };
+*/

@@ -1,0 +1,23 @@
+{
+  "ts": 1753628470301,
+  "method": "POST",
+  "path": "/fms/api/v0/gl-journal-templates",
+  "body": {
+    "name": "Daily Journals",
+    "description": "Daily Journals for Any kind of GL Journals combinations"
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Daily Journals",
+      "description": "Daily Journals for Any kind of GL Journals combinations",
+      "journalType": "STANDARD",
+      "allowHeader": true,
+      "mandatorySingleHeader": false,
+      "workflowRequired": false,
+      "statusTransitions": {},
+      "stages": []
+    }
+  }
+}

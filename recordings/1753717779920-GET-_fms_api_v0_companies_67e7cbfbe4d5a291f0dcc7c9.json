@@ -1,0 +1,88 @@
+{
+  "ts": 1753717779920,
+  "method": "GET",
+  "path": "/fms/api/v0/companies/67e7cbfbe4d5a291f0dcc7c9",
+  "body": {
+    "companyCode": "HYUIT",
+    "companyName": "STUART Solutions Private Limited",
+    "primaryGSTAddress": "Gurguragm sector 17c 122101",
+    "secondaryOfficeAddress": "",
+    "tertiaryShippingAddress": "",
+    "logoImage": "",
+    "email": "chyuithilait@gmail.com",
+    "contactNumber": 4949489585,
+    "website": "https://www.ratxen.com",
+    "bankDetails": [
+      {
+        "code": "HDFC1873",
+        "type": "Bank",
+        "bankNum": "04942349561873",
+        "name": "HDFC Bank Hyderabad",
+        "ifsc": "HDFC004484",
+        "swift": "HDFCIBERIIT",
+        "active": true
+      },
+      {
+        "code": "kunal1274",
+        "type": "UPI",
+        "bankNum": "kunal12765@okhdfcbank",
+        "name": "UPI for kunal",
+        "ifsc": "",
+        "swift": "",
+        "active": true
+      }
+    ],
+    "extras": {
+      "creditLimit": 454590,
+      "taxNo": "456343ERT",
+      "arrayTest": [
+        5,
+        6,
+        9,
+        10
+      ],
+      "objectTest": {
+        "key1": "value1",
+        "key2": "value2"
+      },
+      "arrayOfObjects": [
+        {
+          "rollNum": 45,
+          "class": "7A"
+        },
+        {
+          "rollNum": 19,
+          "class": "9C"
+        }
+      ]
+    }
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Company retrieved successfully.",
+    "data": {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "DEMO",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxen1@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e7cbfbe4d5a291f0dcc7c9",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    }
+  }
+}

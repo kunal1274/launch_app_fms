@@ -9,11 +9,12 @@ export default class SubledgerService {
    */
   static async create(dto, session = null) {
     const {
-      type,
+      subledgerType,
       sourceType,
       sourceId,
       sourceLine = 1,
       //   lineNum,
+      ledgerAccount,
       customer,
       supplier,
       bankAccount,
@@ -30,10 +31,12 @@ export default class SubledgerService {
 
     const doc = new SubledgerTransactionModel({
       txnDate: dto.txnDate || new Date(),
-      subledgerType: type,
+      //subledgerType: type,
+      subledgerType,
       sourceType,
       sourceId,
       sourceLine,
+      ledgerAccount,
       customer,
       supplier,
       bankAccount,
@@ -56,15 +59,17 @@ export default class SubledgerService {
     const query = {};
 
     // map incoming filters:
-    if (filters.type) query.subledgerType = filters.type;
+    if (filters.type) query.subledgerType = filters.subledgerType;
     if (filters.sourceType) query.sourceType = filters.sourceType;
     if (filters.sourceId && mongoose.isValidObjectId(filters.sourceId))
       query.sourceId = filters.sourceId;
-    ["customer", "supplier", "bankAccount", "item"].forEach((fld) => {
-      if (filters[fld] && mongoose.isValidObjectId(filters[fld])) {
-        query[fld] = filters[fld];
+    ["ledgerAccount", "customer", "supplier", "bankAccount", "item"].forEach(
+      (fld) => {
+        if (filters[fld] && mongoose.isValidObjectId(filters[fld])) {
+          query[fld] = filters[fld];
+        }
       }
-    });
+    );
     if (filters.startDate || filters.endDate) {
       query.txnDate = {};
       if (filters.startDate) query.txnDate.$gte = new Date(filters.startDate);

@@ -1,0 +1,31 @@
+{
+  "ts": 1753629613834,
+  "method": "POST",
+  "path": "/fms/api/v0/gl-journals",
+  "body": {
+    "templateId": "68863f36bbb82ca72bf42fe3",
+    "journalDate": "2025-07-27T00:00:00.000Z",
+    "reference": "Invoice #1234",
+    "lines": [
+      {
+        "account": "68516116dd58b67af3c29560",
+        "debit": 500,
+        "credit": 0,
+        "currency": "USD",
+        "exchangeRate": 75.5
+      },
+      {
+        "account": "68516bb12192ad0c309203ae",
+        "debit": 0,
+        "credit": 500,
+        "currency": "USD",
+        "exchangeRate": 75.5
+      }
+    ]
+  },
+  "status": 400,
+  "response": {
+    "status": "failure",
+    "message": "Schema hasn't been registered for model \"JournalTemplate\".\nUse mongoose.model(name, schema)"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "ts": 1753701604239,
+  "method": "POST",
+  "path": "/fms/api/v0/accounts",
+  "body": {
+    "accountCode": "1010",
+    "accountName": "Customer Balance Account Specific",
+    "type": "ASSET",
+    "parentAccount": null,
+    "normalBalance": "DEBIT",
+    "isLeaf": true,
+    "allowManualPost": true,
+    "currency": "INR",
+    "description": "This account is posted whenever there is any inventory balance will in or receipted ",
+    "group": "AR",
+    "active": true,
+    "company": "67e7cbfbe4d5a291f0dcc7c9"
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "Account created.",
+    "data": {
+      "globalPartyId": "68875ce4165e514a781810dd",
+      "accountCode": "1010",
+      "accountName": "Customer Balance Account Specific",
+      "type": "ASSET",
+      "parentAccount": null,
+      "normalBalance": "DEBIT",
+      "isLeaf": true,
+      "allowManualPost": true,
+      "currency": "INR",
+      "description": "This account is posted whenever there is any inventory balance will in or receipted",
+      "group": "AR",
+      "isArchived": false,
+      "active": false,
+      "sysCode": "LA_000006"
+    }
+  }
+}

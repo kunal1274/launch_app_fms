@@ -3,22 +3,40 @@ import mongoose, { Schema, model } from "mongoose";
 const subTxnSchema = new Schema(
   {
     txnDate: { type: Date, required: true, default: Date.now },
+    relatedVoucher: { type: String, required: false },
     // which “bucket” of subledger
     subledgerType: {
       type: String,
       required: true,
-      enum: ["AR", "AP", "TAX", "INV", "WHT", "CHARGES", "DISCOUNT", "BANK"],
+      enum: [
+        "AR",
+        "AP",
+        "TAX",
+        "INV",
+        "WHT",
+        "CHARGES",
+        "DISCOUNT",
+        "BANK",
+        "LEDGER",
+      ],
     },
     sourceType: {
       type: String,
       required: true,
-      enum: ["SALES", "PURCHASE", "JOURNAL", "BANK_TRANSFER"],
+      enum: [
+        "SALES",
+        "PURCHASE",
+        "JOURNAL",
+        "BANK_TRANSFER",
+        "JOURNAL_REVERSAL",
+      ],
     },
     sourceId: { type: Schema.Types.ObjectId, required: true },
     sourceLine: { type: Number, default: 1 },
     lineNum: { type: Number, required: true },
 
     // optional party link
+    ledgerAccount: { type: Schema.Types.ObjectId, ref: "Accounts" },
     customer: { type: Schema.Types.ObjectId, ref: "Customers" },
     supplier: { type: Schema.Types.ObjectId, ref: "Vendors" },
     bankAccount: { type: Schema.Types.ObjectId, ref: "BankAccounts" },

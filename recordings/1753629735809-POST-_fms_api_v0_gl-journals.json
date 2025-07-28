@@ -1,0 +1,31 @@
+{
+  "ts": 1753629735809,
+  "method": "POST",
+  "path": "/fms/api/v0/gl-journals",
+  "body": {
+    "templateId": "68863f36bbb82ca72bf42fe3",
+    "journalDate": "2025-07-27T00:00:00.000Z",
+    "reference": "Invoice #1234",
+    "lines": [
+      {
+        "account": "68516116dd58b67af3c29560",
+        "debit": 500,
+        "credit": 0,
+        "currency": "USD",
+        "exchangeRate": 75.5
+      },
+      {
+        "account": "68516bb12192ad0c309203ae",
+        "debit": 0,
+        "credit": 500,
+        "currency": "USD",
+        "exchangeRate": 75.5
+      }
+    ]
+  },
+  "status": 422,
+  "response": {
+    "status": "failure",
+    "message": "GLJournals validation failed: lines.0.assessableValue: Cast to Number failed for value \"NaN\" (type number) at path \"assessableValue\", lines.0.discountAmount: Cast to Number failed for value \"NaN\" (type number) at path \"discountAmount\", lines.0.chargesAmount: Cast to Number failed for value \"NaN\" (type number) at path \"chargesAmount\", lines.0.taxableValue: Cast to Number failed for value \"NaN\" (type number) at path \"taxableValue\", lines.0.cgst: Cast to Number failed for value \"NaN\" (type number) at path \"cgst\", lines.0.sgst: Cast to Number failed for value \"NaN\" (type number) at path \"sgst\", lines.0.igst: Cast to Number failed for value \"NaN\" (type number) at path \"igst\", lines.0.tdsAmount: Cast to Number failed for value \"NaN\" (type number) at path \"tdsAmount\", lines.1.assessableValue: Cast to Number failed for value \"NaN\" (type number) at path \"assessableValue\", lines.1.discountAmount: Cast to Number failed for value \"NaN\" (type number) at path \"discountAmount\", lines.1.chargesAmount: Cast to Number failed for value \"NaN\" (type number) at path \"chargesAmount\", lines.1.taxableValue: Cast to Number failed for value \"NaN\" (type number) at path \"taxableValue\", lines.1.cgst: Cast to Number failed for value \"NaN\" (type number) at path \"cgst\", lines.1.sgst: Cast to Number failed for value \"NaN\" (type number) at path \"sgst\", lines.1.igst: Cast to Number failed for value \"NaN\" (type number) at path \"igst\", lines.1.tdsAmount: Cast to Number failed for value \"NaN\" (type number) at path \"tdsAmount\", lines.0.qty: Path `qty` is required., lines.0.unitPrice: Path `unitPrice` is required., lines.1.qty: Path `qty` is required., lines.1.unitPrice: Path `unitPrice` is required."
+  }
+}

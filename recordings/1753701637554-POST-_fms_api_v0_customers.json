@@ -1,0 +1,47 @@
+{
+  "ts": 1753701637554,
+  "method": "POST",
+  "path": "/fms/api/v0/customers",
+  "body": {
+    "name": "RTX Industries Limited",
+    "businessType": "Manufacturing",
+    "contactNum": "9245345785",
+    "contactPersonName": "Kunal Kumar",
+    "contactPersonPhone": "4949794791",
+    "contactPersonEmail": "kueroeu@ghout.com",
+    "email": "kunal2134@ratxen.com",
+    "currency": "INR",
+    "creditLimit": 10000,
+    "registrationNum": "R10AAACR23F5K1Z",
+    "panNum": "AA23R5055K",
+    "tanNum": "reiu339953",
+    "address": "Reliance Industries Limited Maker Chambers - IV, Nariman Point Mumbai 400 021",
+    "paymentTerms": "COD",
+    "linkedCoaAccount": "68875ce4165e514a781810e0",
+    "bankDetails": [
+      {
+        "code": "HDFC1873",
+        "type": "Bank",
+        "bankAccNum": "04942349561873",
+        "accountHolderName": "Testing Holder Name",
+        "bankName": "HDFC Bank Hyderabad",
+        "ifsc": "HDFC004484",
+        "swift": "HDFCIBERIIT",
+        "active": true,
+        "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+      },
+      {
+        "code": "kunal1274",
+        "type": "UPI",
+        "bankNum": "kunal12765@okhdfcbank",
+        "name": "UPI for kunal",
+        "ifsc": "",
+        "swift": "",
+        "active": true
+      }
+    ],
+    "active": true
+  },
+  "status": 201,
+  "response": "[object Object]{\"status\":\"Success\",\"message\":\"✅ Customer created successfully with ID: 68875d05190db7bd174edb75.\",\"data\":{\"globalPartyId\":\"68875d05190db7bd174edb72\",\"businessType\":\"Manufacturing\",\"name\":\"RTX Industries Limited\",\"parentAccount\":null,\"contactNum\":\"9245345785\",\"email\":\"kunal2134@ratxen.com\",\"contactPersonName\":\"Kunal Kumar\",\"contactPersonPhone\":\"4949794791\",\"contactPersonEmail\":\"kueroeu@ghout.com\",\"currency\":\"INR\",\"paymentTerms\":\"COD\",\"creditLimit\":10000,\"registrationNum\":\"R10AAACR23F5K1Z\",\"panNum\":\"AA23R5055K\",\"tanNum\":\"reiu339953\",\"address\":\"Reliance Industries Limited Maker Chambers - IV, Nariman Point Mumbai 400 021\",\"ledgerGroup\":\"\",\"linkedCoaAccount\":\"68875ce4165e514a781810e0\",\"remarks\":\"\",\"active\":true,\"archived\":false,\"bankDetails\":[{\"code\":\"HDFC1873\",\"type\":\"Bank\",\"bankAccNum\":\"04942349561873\",\"bankName\":\"HDFC Bank Hyderabad\",\"accountHolderName\":\"Testing Holder Name\",\"ifsc\":\"HDFC004484\",\"swift\":\"HDFCIBERIIT\",\"active\":true,\"qrDetails\":\"erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe\",\"_id\":\"68875d05190db7bd174edb76\"},{\"code\":\"kunal1274\",\"type\":\"UPI\",\"ifsc\":\"\",\"swift\":\"\",\"active\":true,\"qrDetails\":\"\",\"_id\":\"68875d05190db7bd174edb77\"}],\"groups\":[],\"extras\":{},\"_id\":\"68875d05190db7bd174edb75\",\"files\":[],\"createdAt\":\"2025-07-28T11:20:37.428Z\",\"updatedAt\":\"2025-07-28T11:20:37.428Z\",\"code\":\"C_000028\",\"__v\":0}}"
+}

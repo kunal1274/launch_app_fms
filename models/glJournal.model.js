@@ -432,7 +432,7 @@ glJournalSchema.pre("validate", async function (next) {
   // 2) If a template was provided, pull its settings:
   if (this.template) {
     const tpl = await mongoose
-      .model("JournalTemplate")
+      .model("JournalTemplates")
       .findById(this.template)
       .lean();
     if (!tpl) {
@@ -563,19 +563,27 @@ glJournalSchema.pre("save", function (next) {
   });
 
   // c) QTY zero‐sum per group
-  const groups = {};
-  this.lines.forEach((ln) => {
-    const key = ln.parentLineNum ?? ln.lineNum;
-    groups[key] = (groups[key] || 0) + ln.qty;
-  });
-  for (let grp in groups) {
-    if (Math.round(groups[grp] * 100) / 100 !== 0) {
-      return next(new Error(`Group ${grp} qty‐sum(${groups[grp]}) ≠ 0`));
+  const headerExists = this.lines.some((l) => l.isHeader);
+  if (headerExists) {
+    const groups = {};
+    this.lines.forEach((ln) => {
+      const key = ln.parentLineNum ?? ln.lineNum;
+      groups[key] = (groups[key] || 0) + ln.qty;
+    });
+    for (let grp in groups) {
+      if (Math.round(groups[grp] * 100) / 100 !== 0) {
+        return next(new Error(`Group ${grp} qty‐sum(${groups[grp]}) ≠ 0`));
+      }
     }
   }
 
   next();
 });
+
+// glJournalSchema.pre(/^find/, function (next) {
+//   this.populate("account", "sysCode accountCode accountName");
+//   next();
+// });
 
 // // Optional: index to speed queries by date or creator
 // glJournalSchema.index({ journalDate: 1, createdBy: 1, globalJournalNum: 1 });

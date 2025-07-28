@@ -1,0 +1,43 @@
+{
+  "ts": 1753703180147,
+  "method": "POST",
+  "path": "/fms/api/v0/vendors",
+  "body": {
+    "name": "Electro steel",
+    "businessType": "Manufacturing",
+    "contactNum": "3639655100",
+    "email": "test@elecsteel.com",
+    "currency": "INR",
+    "creditLimit": 2000,
+    "registrationNum": "R10jHTACR555K1Z",
+    "panNum": "AAAC755HYK",
+    "tanNum": "TRURT786UI",
+    "address": "Electrosteel  Limited Maker Chambers - IV, Nariman Point Mumbai 400 021",
+    "paymentTerms": "Net30D",
+    "linkedCoaAccount": "688762cbcf15ef6461b19713",
+    "bankDetails": [
+      {
+        "code": "HDFC1873",
+        "type": "Bank",
+        "bankNum": "04942349561873",
+        "name": "HDFC Bank Hyderabad",
+        "ifsc": "HDFC004484",
+        "swift": "HDFCIBERIIT",
+        "active": true
+      },
+      {
+        "code": "kunal1274",
+        "type": "UPI",
+        "bankNum": "kunal12765@okhdfcbank",
+        "name": "UPI for kunal",
+        "ifsc": "",
+        "swift": "",
+        "active": true
+      }
+    ],
+    "active": true,
+    "globalPartyId": "6887630bdc85b4607a6f76a3"
+  },
+  "status": 409,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"A vendor with this contact Num already exists.\"}"
+}

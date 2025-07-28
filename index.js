@@ -80,6 +80,9 @@ import inventJournalRouter from "./routes/inventJournal.routes.js";
 import stockBalanceRouter from "./routes/inventStockBalance.routes.js";
 import ledgerAccountRouter from "./routes/account.routes.js";
 import { recordApiFlow } from "./middleware/recordApiFlow.js";
+import glJournalRouter from "./routes/glJournal.routes.js";
+import glJournalTemplateRouter from "./routes/journalTemplate.routes.js";
+import bankRouter from "./routes/bank.routes.js";
 
 // import redisClient from "./middleware/redisClient.js";
 
@@ -242,7 +245,10 @@ AumMrigahApp.get("/", (req, res) => {
 // );
 // GL Accounting Modules
 dbgRoutes("Mounting userRouter router on /fms/api/v0/accounts");
+AumMrigahApp.use("/fms/api/v0/banks", bankRouter);
 AumMrigahApp.use("/fms/api/v0/accounts", ledgerAccountRouter);
+AumMrigahApp.use("/fms/api/v0/gl-journals", glJournalRouter);
+AumMrigahApp.use("/fms/api/v0/gl-journal-templates", glJournalTemplateRouter);
 
 // // Main Functional Modules
 dbgRoutes("Mounting userRouter router on /fms/api/v0/users");

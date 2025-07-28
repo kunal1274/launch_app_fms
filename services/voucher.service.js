@@ -2,6 +2,7 @@
 
 import { VoucherModel } from "../models/voucher.model.js";
 import { FinancialVoucherCounterModel } from "../models/counter.model.js";
+import { SubledgerTransactionModel } from "../models/subledgerTxn.model.js";
 
 class VoucherService {
   static async getNextVoucherNo() {
@@ -20,6 +21,344 @@ class VoucherService {
   /**
    * Create a sales-order voucher, linking inventory, AR, tax, etc. txns
    */
+
+  static async createSalesVoucher(
+    { order, invTxns = [], arTxn, taxTxn, whtTxn, chargesTxn, discTxn },
+    session
+  ) {
+    const voucherNo = await this.getNextVoucherNo();
+    const currency = order.currency;
+    const rate = order.exchangeRate || 1;
+    const L = (amt) => Math.round(amt * rate * 100) / 100;
+
+    const lines = [];
+
+    //
+    // 1) INVENTORY / COGS entries
+    //
+    for (const tx of invTxns) {
+      const gross = tx.qty * tx.salesPrice; // e.g. 10×120 = 1,200
+      const cogs = tx.qty * tx.costPrice; // e.g. 10×50  = 500
+      lines.push({
+        accountCode: "INVENTORY",
+        debit: 0,
+        credit: cogs,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(-cogs),
+        dims: tx.dims,
+        subledger: {
+          sourceType: "INVENTORY",
+          txnId: tx._id,
+          lineNum: tx.sourceLine,
+        },
+      });
+      lines.push({
+        accountCode: "COGS",
+        debit: cogs,
+        credit: 0,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(cogs),
+        subledger: {
+          sourceType: "INVENTORY",
+          txnId: tx._id,
+          lineNum: tx.sourceLine,
+        },
+      });
+
+      // net sales revenue _before_ tax/discount/charges
+      const netRev =
+        tx.qty * tx.salesPrice -
+        (tx.extras.discountAmt || 0) +
+        (tx.extras.chargedAmt || 0);
+      lines.push({
+        accountCode: "SALES_REVENUE",
+        debit: 0,
+        credit: netRev,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(-netRev),
+        dims: tx.dims,
+        subledger: {
+          sourceType: "INVENTORY",
+          txnId: tx._id,
+          lineNum: tx.sourceLine,
+        },
+      });
+
+      // if you bill any line-level charges:
+      if (tx.extras.chargedAmt) {
+        lines.push({
+          accountCode: "CHARGES_REVENUE",
+          debit: 0,
+          credit: tx.extras.chargedAmt,
+          currency,
+          exchangeRate: rate,
+          localAmount: L(-tx.extras.chargedAmt),
+          subledger: {
+            sourceType: "INVENTORY",
+            txnId: tx._id,
+            lineNum: tx.sourceLine,
+          },
+        });
+      }
+
+      // if you allowed any line-level discount:
+      if (tx.extras.discountAmt) {
+        lines.push({
+          accountCode: "DISCOUNT_ALLOWED",
+          debit: tx.extras.discountAmt,
+          credit: 0,
+          currency,
+          exchangeRate: rate,
+          localAmount: L(tx.extras.discountAmt),
+          subledger: {
+            sourceType: "INVENTORY",
+            txnId: tx._id,
+            lineNum: tx.sourceLine,
+          },
+        });
+      }
+
+      // GST on that line:
+      const gstBase = netRev;
+      const gstAmt =
+        Math.round(gstBase * (tx.extras.gstPercent || 0) * 100) / 100;
+      if (gstAmt) {
+        lines.push({
+          accountCode: "GST_PAYABLE",
+          debit: 0,
+          credit: gstAmt,
+          currency,
+          exchangeRate: rate,
+          localAmount: L(-gstAmt),
+          subledger: {
+            sourceType: "INVENTORY",
+            txnId: tx._id,
+            lineNum: tx.sourceLine,
+          },
+        });
+      }
+    }
+
+    //
+    // 2) ACCOUNTS RECEIVABLE
+    //    * use the AR sub-ledger you already created in your controller
+    //
+    lines.push({
+      accountCode: "ACCOUNTS_RECEIVABLE",
+      debit: arTxn.amount,
+      credit: 0,
+      currency,
+      exchangeRate: rate,
+      localAmount: L(arTxn.amount),
+      subledger: { sourceType: "AR", txnId: arTxn._id, lineNum: 1 },
+    });
+
+    //
+    // 3) TAX at header level (if any)
+    //
+    if (taxTxn?.amount) {
+      lines.push({
+        accountCode: "TAX_PAYABLE",
+        debit: 0,
+        credit: taxTxn.amount,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(-taxTxn.amount),
+        subledger: { sourceType: "TAX", txnId: taxTxn._id, lineNum: 1 },
+      });
+    }
+
+    //
+    // 4) WHT/TDS (header)
+    //
+    if (whtTxn?.amount) {
+      // – debit TDS receivable
+      lines.push({
+        accountCode: "TDS_RECEIVABLE",
+        debit: whtTxn.amount,
+        credit: 0,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(whtTxn.amount),
+        subledger: { sourceType: "WHT", txnId: whtTxn._id, lineNum: 1 },
+      });
+      // – credit AR
+      lines.push({
+        accountCode: "ACCOUNTS_RECEIVABLE",
+        debit: 0,
+        credit: whtTxn.amount,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(-whtTxn.amount),
+        subledger: { sourceType: "WHT", txnId: whtTxn._id, lineNum: 1 },
+      });
+    }
+
+    //
+    // 5) Header‐level discount (if any)
+    //
+    if (discTxn?.amount) {
+      lines.push({
+        accountCode: "DISCOUNT_ALLOWED",
+        debit: discTxn.amount,
+        credit: 0,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(discTxn.amount),
+        subledger: { sourceType: "DISCOUNT", txnId: discTxn._id, lineNum: 1 },
+      });
+      lines.push({
+        accountCode: "ACCOUNTS_RECEIVABLE",
+        debit: 0,
+        credit: discTxn.amount,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(-discTxn.amount),
+        subledger: { sourceType: "DISCOUNT", txnId: discTxn._id, lineNum: 1 },
+      });
+    }
+
+    //
+    // 6) Header‐level charges (if any)
+    //
+    if (chargesTxn?.amount) {
+      lines.push({
+        accountCode: "CHARGES_EXPENSE",
+        debit: chargesTxn.amount,
+        credit: 0,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(chargesTxn.amount),
+        subledger: { sourceType: "CHARGES", txnId: chargesTxn._id, lineNum: 1 },
+      });
+      lines.push({
+        accountCode: "ACCOUNTS_RECEIVABLE",
+        debit: 0,
+        credit: chargesTxn.amount,
+        currency,
+        exchangeRate: rate,
+        localAmount: L(-chargesTxn.amount),
+        subledger: { sourceType: "CHARGES", txnId: chargesTxn._id, lineNum: 1 },
+      });
+    }
+
+    //
+    // 7) FX gain/loss balancing (optional)
+    //
+    const totalLocal = lines.reduce(
+      (sum, l) => sum + (l.debit - l.credit) * l.exchangeRate,
+      0
+    );
+    if (Math.abs(totalLocal) > 0.01) {
+      const isLoss = totalLocal > 0;
+      lines.push({
+        accountCode: isLoss ? "FX_LOSS" : "FX_GAIN",
+        debit: isLoss ? Math.abs(totalLocal) : 0,
+        credit: isLoss ? 0 : Math.abs(totalLocal),
+        currency,
+        exchangeRate: rate,
+        localAmount: -Math.round(totalLocal * 100) / 100,
+        subledger: { sourceType: "FX", txnId: order._id, lineNum: 1 },
+        extras: { note: "Auto FX balancing" },
+      });
+    }
+
+    //
+    // 8) Save
+    //
+    const voucher = new VoucherModel({
+      voucherNo,
+      voucherDate: order.invoiceDate,
+      sourceType: "SALES_INVOICE",
+      sourceId: order._id,
+      invoiceRef: {
+        invoiceId: order._id,
+        invoiceNum: order.invoiceNum,
+      },
+      lines,
+    });
+    await voucher.save({ session });
+    return voucher;
+  }
+
+  /**
+   * Build a voucher from an existing GL Journal.
+   */
+
+  // in VoucherService.createJournalVoucher:
+
+  static async createJournalVoucher(glJournal, session, subTxnRefs = []) {
+    const voucherNo = await this.getNextVoucherNo(session);
+
+    // make a map: lineNum → subledgerTxnId
+    const subMap = new Map(subTxnRefs.map((r) => [r.lineNum, r.id]));
+
+    // 1) pull in the accountCode strings
+    await glJournal.populate("lines.account");
+    // let sblCode;
+    const lines = glJournal.lines.map((l) => ({
+      accountCode: l.account.accountCode, // <--- now filled
+      // how to get conditional , // this can be customer or vendor or bank or ledger or item..
+      subledgerCode: l.customer
+        ? l.customer
+        : l.vendor
+        ? l.vendor
+        : l.item
+        ? l.item
+        : l.bankAccount
+        ? l.bankAccount
+        : l.account, // this can be customer or vendor or bank or ledger or item..
+      debit: l.debit,
+      credit: l.credit,
+      currency: l.currency,
+      exchangeRate: l.exchangeRate,
+      // localAmount will be handled by voucherSchema.pre("save")
+      // subledger: {
+      //   sourceType: "JOURNAL",
+      //   txnId: glJournal._id,
+      //   lineNum: l.lineNum,
+      // },
+      // now subledger.txnId points at the subledger transaction
+      subledger: {
+        sourceType: "JOURNAL",
+        txnId: subMap.get(l.lineNum),
+        lineNum: l.lineNum,
+      },
+      dims: l.dims,
+      extras: l.extras,
+    }));
+
+    // 2) build & save, including invoiceRef
+    const v = new VoucherModel({
+      voucherNo,
+      voucherDate: glJournal.journalDate,
+      sourceType: "JOURNAL",
+      sourceId: glJournal._id,
+      invoiceRef: {
+        invoiceId: glJournal._id,
+        invoiceNum: glJournal.globalJournalNum,
+      },
+      lines,
+    });
+
+    await v.save({ session });
+
+    const voucherId = v._id;
+    await SubledgerTransactionModel.updateMany(
+      { _id: { $in: Array.from(subMap.values()) } },
+      { $set: { relatedVoucher: voucherId } },
+      { session }
+    );
+    return v;
+  }
+}
+
+export default VoucherService;
+
+/*
   static async createSalesVoucher1(
     { order, invTxns, arTxn, taxTxn, whtTxn, chargesTxn },
     session
@@ -495,299 +834,32 @@ class VoucherService {
     await voucher.save({ session });
     return voucher;
   }
+*/
 
-  static async createSalesVoucher(
-    { order, invTxns = [], arTxn, taxTxn, whtTxn, chargesTxn, discTxn },
-    session
-  ) {
-    const voucherNo = await this.getNextVoucherNo();
-    const currency = order.currency;
-    const rate = order.exchangeRate || 1;
-    const L = (amt) => Math.round(amt * rate * 100) / 100;
+// static async createJournalVoucher(glJournal, session) {
+//     const voucherNo = await this.getNextVoucherNo(session);
+//     const lines = glJournal.lines.map((l) => ({
+//       accountCode: l.accountCode || l.extras.accountCode, // or lookup
+//       debit: l.debit,
+//       credit: l.credit,
+//       currency: l.currency,
+//       exchangeRate: l.exchangeRate,
+//       // localAmount will be set by pre-save
+//       subledger: {
+//         sourceType: "JOURNAL",
+//         txnId: glJournal._id,
+//         lineNum: l.lineNum,
+//       },
+//       dims: l.dims,
+//       extras: l.extras,
+//     }));
 
-    const lines = [];
-
-    //
-    // 1) INVENTORY / COGS entries
-    //
-    for (const tx of invTxns) {
-      const gross = tx.qty * tx.salesPrice; // e.g. 10×120 = 1,200
-      const cogs = tx.qty * tx.costPrice; // e.g. 10×50  = 500
-      lines.push({
-        accountCode: "INVENTORY",
-        debit: 0,
-        credit: cogs,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(-cogs),
-        dims: tx.dims,
-        subledger: {
-          sourceType: "INVENTORY",
-          txnId: tx._id,
-          lineNum: tx.sourceLine,
-        },
-      });
-      lines.push({
-        accountCode: "COGS",
-        debit: cogs,
-        credit: 0,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(cogs),
-        subledger: {
-          sourceType: "INVENTORY",
-          txnId: tx._id,
-          lineNum: tx.sourceLine,
-        },
-      });
-
-      // net sales revenue _before_ tax/discount/charges
-      const netRev =
-        tx.qty * tx.salesPrice -
-        (tx.extras.discountAmt || 0) +
-        (tx.extras.chargedAmt || 0);
-      lines.push({
-        accountCode: "SALES_REVENUE",
-        debit: 0,
-        credit: netRev,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(-netRev),
-        dims: tx.dims,
-        subledger: {
-          sourceType: "INVENTORY",
-          txnId: tx._id,
-          lineNum: tx.sourceLine,
-        },
-      });
-
-      // if you bill any line-level charges:
-      if (tx.extras.chargedAmt) {
-        lines.push({
-          accountCode: "CHARGES_REVENUE",
-          debit: 0,
-          credit: tx.extras.chargedAmt,
-          currency,
-          exchangeRate: rate,
-          localAmount: L(-tx.extras.chargedAmt),
-          subledger: {
-            sourceType: "INVENTORY",
-            txnId: tx._id,
-            lineNum: tx.sourceLine,
-          },
-        });
-      }
-
-      // if you allowed any line-level discount:
-      if (tx.extras.discountAmt) {
-        lines.push({
-          accountCode: "DISCOUNT_ALLOWED",
-          debit: tx.extras.discountAmt,
-          credit: 0,
-          currency,
-          exchangeRate: rate,
-          localAmount: L(tx.extras.discountAmt),
-          subledger: {
-            sourceType: "INVENTORY",
-            txnId: tx._id,
-            lineNum: tx.sourceLine,
-          },
-        });
-      }
-
-      // GST on that line:
-      const gstBase = netRev;
-      const gstAmt =
-        Math.round(gstBase * (tx.extras.gstPercent || 0) * 100) / 100;
-      if (gstAmt) {
-        lines.push({
-          accountCode: "GST_PAYABLE",
-          debit: 0,
-          credit: gstAmt,
-          currency,
-          exchangeRate: rate,
-          localAmount: L(-gstAmt),
-          subledger: {
-            sourceType: "INVENTORY",
-            txnId: tx._id,
-            lineNum: tx.sourceLine,
-          },
-        });
-      }
-    }
-
-    //
-    // 2) ACCOUNTS RECEIVABLE
-    //    * use the AR sub-ledger you already created in your controller
-    //
-    lines.push({
-      accountCode: "ACCOUNTS_RECEIVABLE",
-      debit: arTxn.amount,
-      credit: 0,
-      currency,
-      exchangeRate: rate,
-      localAmount: L(arTxn.amount),
-      subledger: { sourceType: "AR", txnId: arTxn._id, lineNum: 1 },
-    });
-
-    //
-    // 3) TAX at header level (if any)
-    //
-    if (taxTxn?.amount) {
-      lines.push({
-        accountCode: "TAX_PAYABLE",
-        debit: 0,
-        credit: taxTxn.amount,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(-taxTxn.amount),
-        subledger: { sourceType: "TAX", txnId: taxTxn._id, lineNum: 1 },
-      });
-    }
-
-    //
-    // 4) WHT/TDS (header)
-    //
-    if (whtTxn?.amount) {
-      // – debit TDS receivable
-      lines.push({
-        accountCode: "TDS_RECEIVABLE",
-        debit: whtTxn.amount,
-        credit: 0,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(whtTxn.amount),
-        subledger: { sourceType: "WHT", txnId: whtTxn._id, lineNum: 1 },
-      });
-      // – credit AR
-      lines.push({
-        accountCode: "ACCOUNTS_RECEIVABLE",
-        debit: 0,
-        credit: whtTxn.amount,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(-whtTxn.amount),
-        subledger: { sourceType: "WHT", txnId: whtTxn._id, lineNum: 1 },
-      });
-    }
-
-    //
-    // 5) Header‐level discount (if any)
-    //
-    if (discTxn?.amount) {
-      lines.push({
-        accountCode: "DISCOUNT_ALLOWED",
-        debit: discTxn.amount,
-        credit: 0,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(discTxn.amount),
-        subledger: { sourceType: "DISCOUNT", txnId: discTxn._id, lineNum: 1 },
-      });
-      lines.push({
-        accountCode: "ACCOUNTS_RECEIVABLE",
-        debit: 0,
-        credit: discTxn.amount,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(-discTxn.amount),
-        subledger: { sourceType: "DISCOUNT", txnId: discTxn._id, lineNum: 1 },
-      });
-    }
-
-    //
-    // 6) Header‐level charges (if any)
-    //
-    if (chargesTxn?.amount) {
-      lines.push({
-        accountCode: "CHARGES_EXPENSE",
-        debit: chargesTxn.amount,
-        credit: 0,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(chargesTxn.amount),
-        subledger: { sourceType: "CHARGES", txnId: chargesTxn._id, lineNum: 1 },
-      });
-      lines.push({
-        accountCode: "ACCOUNTS_RECEIVABLE",
-        debit: 0,
-        credit: chargesTxn.amount,
-        currency,
-        exchangeRate: rate,
-        localAmount: L(-chargesTxn.amount),
-        subledger: { sourceType: "CHARGES", txnId: chargesTxn._id, lineNum: 1 },
-      });
-    }
-
-    //
-    // 7) FX gain/loss balancing (optional)
-    //
-    const totalLocal = lines.reduce(
-      (sum, l) => sum + (l.debit - l.credit) * l.exchangeRate,
-      0
-    );
-    if (Math.abs(totalLocal) > 0.01) {
-      const isLoss = totalLocal > 0;
-      lines.push({
-        accountCode: isLoss ? "FX_LOSS" : "FX_GAIN",
-        debit: isLoss ? Math.abs(totalLocal) : 0,
-        credit: isLoss ? 0 : Math.abs(totalLocal),
-        currency,
-        exchangeRate: rate,
-        localAmount: -Math.round(totalLocal * 100) / 100,
-        subledger: { sourceType: "FX", txnId: order._id, lineNum: 1 },
-        extras: { note: "Auto FX balancing" },
-      });
-    }
-
-    //
-    // 8) Save
-    //
-    const voucher = new VoucherModel({
-      voucherNo,
-      voucherDate: order.invoiceDate,
-      sourceType: "SALES_INVOICE",
-      sourceId: order._id,
-      invoiceRef: {
-        invoiceId: order._id,
-        invoiceNum: order.invoiceNum,
-      },
-      lines,
-    });
-    await voucher.save({ session });
-    return voucher;
-  }
-
-  /**
-   * Build a voucher from an existing GL Journal.
-   */
-  static async createJournalVoucher(glJournal, session) {
-    const voucherNo = await this.getNextVoucherNo(session);
-    const lines = glJournal.lines.map((l) => ({
-      accountCode: l.accountCode || l.extras.accountCode, // or lookup
-      debit: l.debit,
-      credit: l.credit,
-      currency: l.currency,
-      exchangeRate: l.exchangeRate,
-      // localAmount will be set by pre-save
-      subledger: {
-        sourceType: "JOURNAL",
-        txnId: glJournal._id,
-        lineNum: l.lineNum,
-      },
-      dims: l.dims,
-      extras: l.extras,
-    }));
-
-    const v = new VoucherModel({
-      voucherNo,
-      voucherDate: glJournal.journalDate,
-      sourceType: "JOURNAL",
-      sourceId: glJournal._id,
-      lines,
-    });
-    return v.save({ session });
-  }
-}
-
-export default VoucherService;
+//     const v = new VoucherModel({
+//       voucherNo,
+//       voucherDate: glJournal.journalDate,
+//       sourceType: "JOURNAL",
+//       sourceId: glJournal._id,
+//       lines,
+//     });
+//     return v.save({ session });
+//   }

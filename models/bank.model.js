@@ -5,7 +5,7 @@ import { BankCounterModel } from "./counter.model.js";
 
 const bankSchema = new Schema(
   {
-    systemCode: {
+    sysCode: {
       type: String,
       required: false,
       /// auto generated number like Bank_001, Bank_002 etc.
@@ -30,7 +30,7 @@ const bankSchema = new Schema(
           "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
       },
     },
-    type: {
+    bankType: {
       type: String,
       required: true,
       enum: {
@@ -220,7 +220,7 @@ bankSchema.pre("save", async function (next) {
     }
     // Generate customer code
     const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
-    this.systemCode = `BK_${seqNumber}`;
+    this.sysCode = `BK_${seqNumber}`;
 
     next();
   } catch (error) {

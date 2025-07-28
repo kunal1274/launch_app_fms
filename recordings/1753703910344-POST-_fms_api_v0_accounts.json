@@ -1,0 +1,40 @@
+{
+  "ts": 1753703910344,
+  "method": "POST",
+  "path": "/fms/api/v0/accounts",
+  "body": {
+    "accountCode": "3010",
+    "accountName": "Inventory Balance Account",
+    "type": "ASSET",
+    "parentAccount": null,
+    "normalBalance": "CREDIT",
+    "isLeaf": true,
+    "allowManualPost": true,
+    "currency": "INR",
+    "description": "This account is posted whenever there is any inventory balance will in or receipted ",
+    "group": "INVENTORY",
+    "active": true,
+    "company": "67e7cbfbe4d5a291f0dcc7c9"
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "Account created.",
+    "data": {
+      "globalPartyId": "688765e6c909e656cf28826e",
+      "accountCode": "3010",
+      "accountName": "Inventory Balance Account",
+      "type": "ASSET",
+      "parentAccount": null,
+      "normalBalance": "CREDIT",
+      "isLeaf": true,
+      "allowManualPost": true,
+      "currency": "INR",
+      "description": "This account is posted whenever there is any inventory balance will in or receipted",
+      "group": "INVENTORY",
+      "isArchived": false,
+      "active": false,
+      "sysCode": "LA_000008"
+    }
+  }
+}

@@ -22,6 +22,7 @@ const templateSchema = new Schema(
       type: String,
       required: true,
       enum: ["STANDARD", "REVERSAL", "ADJUSTMENT", "PERIOD_CLOSE"],
+      default: "STANDARD",
     },
     allowHeader: { type: Boolean, default: true },
     mandatorySingleHeader: { type: Boolean, default: false },

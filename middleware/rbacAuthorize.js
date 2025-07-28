@@ -1,7 +1,7 @@
 // middleware/authorize.js
 
-import { PermissionModel } from "../role_based_access_control_service/models/permission.model";
-import { UserRoleModel } from "../role_based_access_control_service/models/userRole.model";
+import { PermissionModel } from "../role_based_access_control_service/models/permission.model.js";
+import { UserRoleModel } from "../role_based_access_control_service/models/userRole.model.js";
 
 /**
  * require a permission key (e.g. "TEMPLATE_CREATE")

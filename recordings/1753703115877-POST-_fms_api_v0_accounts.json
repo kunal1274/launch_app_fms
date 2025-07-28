@@ -1,0 +1,40 @@
+{
+  "ts": 1753703115877,
+  "method": "POST",
+  "path": "/fms/api/v0/accounts",
+  "body": {
+    "accountCode": "2010",
+    "accountName": "Vendor Balance Account",
+    "type": "LIABILITY",
+    "parentAccount": null,
+    "normalBalance": "CREDIT",
+    "isLeaf": true,
+    "allowManualPost": true,
+    "currency": "INR",
+    "description": "This account is posted whenever there is any inventory balance will in or receipted ",
+    "group": "AP",
+    "active": true,
+    "company": "67e7cbfbe4d5a291f0dcc7c9"
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "Account created.",
+    "data": {
+      "globalPartyId": "688762cbcf15ef6461b19710",
+      "accountCode": "2010",
+      "accountName": "Vendor Balance Account",
+      "type": "LIABILITY",
+      "parentAccount": null,
+      "normalBalance": "CREDIT",
+      "isLeaf": true,
+      "allowManualPost": true,
+      "currency": "INR",
+      "description": "This account is posted whenever there is any inventory balance will in or receipted",
+      "group": "AP",
+      "isArchived": false,
+      "active": false,
+      "sysCode": "LA_000007"
+    }
+  }
+}

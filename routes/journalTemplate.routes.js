@@ -32,13 +32,13 @@ export async function authenticate(req, res, next) {
   }
 }
 
-const router = express.Router();
+const glJournalTemplateRouter = express.Router();
 
 // // POST   /templates
-// router.post("/", T.createTemplate);
+glJournalTemplateRouter.post("/", T.createTemplate);
 
 // // GET    /templates
-// router.get("/", T.listTemplates);
+glJournalTemplateRouter.get("/", T.listTemplates);
 
 // // GET    /templates/:id
 // router.get("/:id", T.getTemplateById);
@@ -50,36 +50,36 @@ const router = express.Router();
 // router.delete("/:id", T.deleteTemplate);
 
 // all routes require authentication first
-router.use(authenticate);
+// glJournalTemplateRouter.use(authenticate);
 
 // LIST
-router.get("/", authorize("TEMPLATE_VIEW"), T.listTemplates);
+//glJournalTemplateRouter.get("/", authorize("TEMPLATE_VIEW"), T.listTemplates);
 
 // VIEW ONE
-router.get(
-  "/:id",
-  loadJournalTemplateOwner,
-  authorize("TEMPLATE_VIEW_OWN"), // if you only have VIEW_OWN, we assume own‐only
-  T.getTemplate
-);
+// glJournalTemplateRouter.get(
+//   "/:id",
+//   loadJournalTemplateOwner,
+//   authorize("TEMPLATE_VIEW_OWN"), // if you only have VIEW_OWN, we assume own‐only
+//   T.getTemplate
+// );
 
 // CREATE
-router.post("/", authorize("TEMPLATE_CREATE"), T.createTemplate);
+//router.post("/", authorize("TEMPLATE_CREATE"), T.createTemplate);
 
 // UPDATE
-router.patch(
-  "/:id",
-  loadJournalTemplateOwner,
-  authorize("TEMPLATE_UPDATE_OWN"), // could be TEMPLATE_UPDATE for global
-  T.updateTemplate
-);
+// glJournalTemplateRouter.patch(
+//   "/:id",
+//   loadJournalTemplateOwner,
+//   authorize("TEMPLATE_UPDATE_OWN"), // could be TEMPLATE_UPDATE for global
+//   T.updateTemplate
+// );
 
 // DELETE
-router.delete(
-  "/:id",
-  loadJournalTemplateOwner,
-  authorize("TEMPLATE_DELETE_OWN"),
-  T.deleteTemplate
-);
+// glJournalTemplateRouter.delete(
+//   "/:id",
+//   loadJournalTemplateOwner,
+//   authorize("TEMPLATE_DELETE_OWN"),
+//   T.deleteTemplate
+// );
 
-export default router;
+export default glJournalTemplateRouter;

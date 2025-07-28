@@ -1,0 +1,39 @@
+{
+  "ts": 1753701515301,
+  "method": "GET",
+  "path": "/fms/api/v0/accounts/68875b2291fd1a6dcf8e1ab1",
+  "body": {
+    "accountCode": "1002-A-B001",
+    "accountName": "Inventory Receipt Account",
+    "type": "ASSET",
+    "parentAccount": null,
+    "normalBalance": "DEBIT",
+    "isLeaf": true,
+    "allowManualPost": true,
+    "currency": "INR",
+    "description": "This account is posted whenever there is any inventory balance will in or receipted ",
+    "group": "INVENTORY",
+    "active": true,
+    "company": "67e7cbfbe4d5a291f0dcc7c9"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "globalPartyId": "68875b2291fd1a6dcf8e1aae",
+      "accountCode": "1019",
+      "accountName": "Customer Balance Account",
+      "type": "ASSET",
+      "parentAccount": null,
+      "normalBalance": "DEBIT",
+      "isLeaf": true,
+      "allowManualPost": true,
+      "currency": "INR",
+      "description": "This account is posted whenever there is any inventory balance will in or receipted",
+      "group": "AR",
+      "isArchived": false,
+      "active": false,
+      "sysCode": "LA_000005"
+    }
+  }
+}

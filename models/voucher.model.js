@@ -4,6 +4,7 @@ import mongoose, { Schema, model } from "mongoose";
 // Sub-schema for each GL line
 const voucherLineSchema = new Schema({
   accountCode: { type: String, required: true },
+  subledgerCode: { type: String, required: true },
   debit: { type: Number, default: 0 },
   credit: { type: Number, default: 0 },
   currency: { type: String, required: true },
@@ -41,6 +42,7 @@ const voucherLineSchema = new Schema({
         "FX",
         "DISCOUNT",
         "JOURNAL",
+        "LEDGER",
       ],
       required: true,
     },

@@ -290,7 +290,12 @@ class VoucherService {
 
   // in VoucherService.createJournalVoucher:
 
-  static async createJournalVoucher(glJournal, session, subTxnRefs = []) {
+  static async createJournalVoucher(
+    glJournal,
+    session,
+    subTxnRefs = [],
+    paramPostingEventType = "NONE"
+  ) {
     const voucherNo = await this.getNextVoucherNo(session);
 
     // make a map: lineNum → subledgerTxnId
@@ -334,6 +339,7 @@ class VoucherService {
     // 2) build & save, including invoiceRef
     const v = new VoucherModel({
       voucherNo,
+      postingEventType: paramPostingEventType,
       voucherDate: glJournal.journalDate,
       sourceType: "JOURNAL",
       sourceId: glJournal._id,
@@ -346,12 +352,40 @@ class VoucherService {
 
     await v.save({ session });
 
-    const voucherId = v._id;
+    // 3a) back-stamp all the new sub-txns with this voucher
+    const allSubIds = Array.from(subMap.values());
     await SubledgerTransactionModel.updateMany(
-      { _id: { $in: Array.from(subMap.values()) } },
-      { $set: { relatedVoucher: voucherId } },
+      { _id: { $in: allSubIds } },
+      {
+        $set: {
+          relatedVoucher: v.voucherNo,
+          currentVoucher: v.voucherNo,
+        },
+      },
       { session }
     );
+
+    // 3b) **new**: for each of those sub-txns, if it has a previousTxnId, set that prior
+    // sub-txn’s nextVoucher to this voucher
+    for (let subId of allSubIds) {
+      const sub = await SubledgerTransactionModel.findById(subId).session(
+        session
+      );
+      if (sub?.previousTxnId) {
+        await SubledgerTransactionModel.findByIdAndUpdate(
+          sub.previousTxnId,
+          { nextVoucher: v.voucherNo },
+          { session }
+        );
+      }
+    }
+
+    // const voucherId = v._id;
+    // await SubledgerTransactionModel.updateMany(
+    //   { _id: { $in: Array.from(subMap.values()) } },
+    //   { $set: { relatedVoucher: voucherId } },
+    //   { session }
+    // );
     return v;
   }
 }

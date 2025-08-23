@@ -14,6 +14,7 @@ import {
   // getTrialBalance,
   // listGLJournalWorkflows,
   postGLJournal,
+  postGLJournalFinancial,
 } from "../controllers/glJournal.controller.js";
 
 const glJournalRouter = express.Router();
@@ -25,6 +26,7 @@ const glJournalRouter = express.Router();
  */
 glJournalRouter.post("/", createGLJournal);
 glJournalRouter.post("/:id/post", postGLJournal);
+glJournalRouter.post("/:id/post-financial", postGLJournalFinancial);
 /**
  * @route   GET /api/v1/gl-journals
  * @desc    List / filter GL Journals (paginated)

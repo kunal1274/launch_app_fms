@@ -55,6 +55,48 @@ const voucherLineSchema = new Schema({
 const voucherSchema = new Schema(
   {
     voucherNo: { type: String, required: true, unique: true },
+    previousVoucherNo: { type: String, default: null },
+    nextVoucherNo: { type: String, default: null },
+    relatedVoucherNo: { type: String, default: null },
+    previousPostingEventType: {
+      type: String,
+      required: true,
+      enum: [
+        "NONE",
+        "POSITIONAL",
+        "PHYSICAL",
+        "MANAGEMENT",
+        "FINANCIAL",
+        "AUDIT",
+      ],
+      default: "NONE",
+    },
+    postingEventType: {
+      type: String,
+      required: true,
+      enum: [
+        "NONE",
+        "POSITIONAL",
+        "PHYSICAL",
+        "MANAGEMENT",
+        "FINANCIAL",
+        "AUDIT",
+      ],
+      default: "NONE",
+    },
+    nextPostingEventType: {
+      type: String,
+      required: true,
+      enum: [
+        "NONE",
+        "POSITIONAL",
+        "PHYSICAL",
+        "MANAGEMENT",
+        "FINANCIAL",
+        "AUDIT",
+      ],
+      default: "NONE",
+    },
     voucherDate: { type: Date, required: true, default: Date.now },
     sourceType: {
       type: String,

@@ -1,0 +1,60 @@
+{
+  "ts": 1753787172604,
+  "method": "POST",
+  "path": "/fms/api/v0/gl-journals/6888a6dffce2b955a2d26d78/post-financial?event=FINANCIAL",
+  "body": {
+    "templateId": "68863f36bbb82ca72bf42fe3",
+    "journalDate": "2025-07-27T00:00:00.000Z",
+    "reference": "Invoice #134",
+    "lines": [
+      {
+        "customer": "68875b7c52836f0a870ff3fe",
+        "isHeader": true,
+        "debit": 1600,
+        "credit": 0,
+        "currency": "USD",
+        "exchangeRate": 75.5,
+        "qty": 2,
+        "unitPrice": 1600,
+        "assessableValue": 1600,
+        "gstPercent": 0,
+        "tdsPercent": 0,
+        "discountPercent": 0,
+        "chargePercent": 0
+      },
+      {
+        "account": "68516bb12192ad0c309203ae",
+        "debit": 0,
+        "credit": 500,
+        "currency": "USD",
+        "exchangeRate": 75.5,
+        "qty": -1,
+        "unitPrice": 500,
+        "assessableValue": 500,
+        "gstPercent": 0,
+        "tdsPercent": 0,
+        "discountPercent": 0,
+        "chargePercent": 0
+      },
+      {
+        "account": "68516bb12192ad0c309203ae",
+        "debit": 0,
+        "credit": 1100,
+        "currency": "USD",
+        "exchangeRate": 75.5,
+        "qty": -1,
+        "unitPrice": 1100,
+        "assessableValue": 1100,
+        "gstPercent": 0,
+        "tdsPercent": 0,
+        "discountPercent": 0,
+        "chargePercent": 0
+      }
+    ]
+  },
+  "status": 400,
+  "response": {
+    "status": "failure",
+    "message": "SubledgerTransactions validation failed: extras: Cast to Map failed for value \"{\n  '$__parent': {\n    subledger: { sourceType: null },\n    lineNum: 1,\n    sequence: 1,\n    isHeader: true,\n    remarks: '',\n    account: new ObjectId('68875b2291fd1a6dcf8e1ab1'),\n    qty: 2,\n    secondaryQty: 0,\n    unitPrice: 1600,\n    secondaryUnitPrice: 0,\n    assessableValue: 1600,\n    gstPercent: 0,\n    tdsPercent: 0,\n    discountPercent: 0,\n    chargePercent: 0,\n    discountAmount: 0,\n    chargesAmount: 0,\n    taxableValue: 1600,\n    cgst: 0,\n    sgst: 0,\n    igst: 0,\n    tdsAmount: 0,\n    debit: 1600,\n    credit: 0,\n    currency: 'USD',\n    exchangeRate: 75.5,\n    localAmount: 120800,\n    customer: new ObjectId('68875b7c52836f0a870ff3fe'),\n    active: false,\n    archived: false,\n    status: 'DRAFT',\n    extras: Map(0) {},\n    _id: new ObjectId('6888a6dffce2b955a2d26d79'),\n    files: [],\n    parentLineNum: null\n  },\n  '$__path': 'extras',\n  '$__schemaType': SchemaMixed {\n    path: 'extras.$*',\n    instance: 'Mixed',\n    validators: [],\n    getters: [],\n    setters: [],\n    _presplitPath: [ 'extras', '$*' ],\n    options: SchemaTypeOptions { type: [Function] },\n    _index: null,\n    '$parentSchemaDocArray': SchemaDocumentArray {\n      schemaOptions: {},\n      casterConstructor: [Function],\n      caster: [Function],\n      '$embeddedSchemaType': [SchemaDocumentArrayElement],\n      '$isMongooseArray': true,\n      path: 'lines',\n      instance: 'Array',\n      validators: [Array],\n      getters: [],\n      setters: [],\n      _presplitPath: [Array],\n      options: [SchemaDocumentArrayOptions],\n      _index: null,\n      isRequired: true,\n      requiredValidator: [Function (anonymous)],\n      originalRequiredValue: true,\n      defaultValue: [Function (anonymous)],\n      schema: [Schema],\n      '$isMongooseDocumentArray': true,\n      Constructor: [Function],\n      [Symbol(mongoose#schemaType)]: true\n    },\n    [Symbol(mongoose#schemaType)]: true,\n    [Symbol(mongoose:schema_mixed)]: true\n  },\n  previousEventType: 'MANAGEMENT'\n}\" (type Object) at path \"extras\""
+  }
+}

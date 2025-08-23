@@ -347,18 +347,39 @@ export const postGLJournal = async (req, res) => {
 
       let dto;
       if (ln.customer) {
-        dto = { ...base, subledgerType: "AR", customer: ln.customer };
+        dto = {
+          ...base,
+          subledgerType: "AR",
+          postingEventType: "MANAGEMENT",
+          customer: ln.customer,
+        };
       } else if (ln.vendor) {
-        dto = { ...base, subledgerType: "AP", supplier: ln.vendor };
+        dto = {
+          ...base,
+          subledgerType: "AP",
+          postingEventType: "MANAGEMENT",
+          supplier: ln.vendor,
+        };
       } else if (ln.item) {
-        dto = { ...base, subledgerType: "INV", item: ln.item };
+        dto = {
+          ...base,
+          subledgerType: "INV",
+          postingEventType: "MANAGEMENT",
+          item: ln.item,
+        };
       } else if (ln.bankAccount) {
-        dto = { ...base, subledgerType: "BANK", bankAccount: ln.bankAccount };
+        dto = {
+          ...base,
+          subledgerType: "BANK",
+          postingEventType: "MANAGEMENT",
+          bankAccount: ln.bankAccount,
+        };
       } else if (ln.account) {
         // NEW: direct ledger subledger
         dto = {
           ...base,
           subledgerType: "LEDGER",
+          postingEventType: "MANAGEMENT",
           ledgerAccount: ln.account,
         };
       } else {
@@ -375,7 +396,12 @@ export const postGLJournal = async (req, res) => {
     // 3) Create the Financial Voucher
     // await VoucherService.createJournalVoucher(journal, session);
     // 3) call voucher creation, passing along sub-txn map
-    await VoucherService.createJournalVoucher(journal, session, subTxns);
+    await VoucherService.createJournalVoucher(
+      journal,
+      session,
+      subTxns,
+      "MANAGEMENT"
+    );
 
     // 4) Commit & respond
     await session.commitTransaction();
@@ -386,6 +412,115 @@ export const postGLJournal = async (req, res) => {
     session.endSession();
     console.error("❌ postGLJournal error:", err);
     return res.status(400).json({ status: "failure", message: err.message });
+  }
+};
+
+export const postGLJournalFinancial = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { id } = req.params;
+    const eventType = req.query.event || "MANAGEMENT"; // or req.body.event
+    if (!isValidId(id)) throw new Error("Invalid journal ID");
+
+    // 1) Load & flip to POSTED
+    const journal = await GLJournalModel.findById(id).session(session);
+    if (!journal) throw new Error("Journal not found");
+    // if (journal.status !== "DRAFT") throw new Error("Only DRAFT can be posted");
+    journal.status = "POSTED";
+    await journal.save({ session });
+
+    // 2) Build all subledger transactions
+    const subTxns = [];
+    for (let ln of journal.lines) {
+      // base payload for both reversal & forward
+      const amount = ln.debit > 0 ? ln.debit : -ln.credit;
+      const cleanExtras = JSON.parse(JSON.stringify(ln.extras || {}));
+      const common = {
+        sourceType: "JOURNAL",
+        sourceId: journal._id,
+        sourceLine: ln.lineNum,
+        currency: ln.currency,
+        exchangeRate: ln.exchangeRate,
+        dims: ln.dims,
+        //extras: ln.extras,
+        extras: cleanExtras,
+      };
+
+      // helper to pick the right subledgerType & key
+      const pick = () => {
+        if (ln.customer)
+          return { subledgerType: "AR", key: "customer", val: ln.customer };
+        if (ln.vendor)
+          return { subledgerType: "AP", key: "supplier", val: ln.vendor };
+        if (ln.item) return { subledgerType: "INV", key: "item", val: ln.item };
+        if (ln.bankAccount)
+          return {
+            subledgerType: "BANK",
+            key: "bankAccount",
+            val: ln.bankAccount,
+          };
+        /* else */ return {
+          subledgerType: "LEDGER",
+          key: "ledgerAccount",
+          val: ln.account,
+        };
+      };
+      const { subledgerType, key, val } = pick();
+
+      if (eventType === "FINANCIAL") {
+        // 2a) reversal of MANAGEMENT
+        const revDto = {
+          ...common,
+          amount: -amount, // flip sign
+          subledgerType,
+          postingEventType: "FINANCIAL",
+          extras: { ...common.extras, previousEventType: "MANAGEMENT" },
+        };
+        revDto[key] = val;
+        const rev = await SubledgerService.create(revDto, session);
+        subTxns.push({ lineNum: ln.lineNum, id: rev._id });
+
+        // 2b) forward FINANCIAL
+        const fwdDto = {
+          ...common,
+          amount,
+          subledgerType,
+          postingEventType: "FINANCIAL",
+        };
+        fwdDto[key] = val;
+        const fwd = await SubledgerService.create(fwdDto, session);
+        subTxns.push({ lineNum: ln.lineNum, id: fwd._id });
+      } else {
+        // normal MANAGEMENT posting
+        const dto = {
+          ...common,
+          amount,
+          subledgerType,
+          postingEventType: "MANAGEMENT",
+        };
+        dto[key] = val;
+        const s = await SubledgerService.create(dto, session);
+        subTxns.push({ lineNum: ln.lineNum, id: s._id });
+      }
+    }
+
+    // 3) Create voucher passing all the sub-txn references + eventType
+    await VoucherService.createJournalVoucher(
+      journal,
+      session,
+      subTxns,
+      eventType
+    );
+
+    // 4) Commit
+    await session.commitTransaction();
+    return res.json({ status: "success", data: journal });
+  } catch (err) {
+    await session.abortTransaction();
+    return res.status(400).json({ status: "failure", message: err.message });
+  } finally {
+    session.endSession();
   }
 };
 

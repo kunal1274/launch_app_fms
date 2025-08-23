@@ -3,7 +3,57 @@ import mongoose, { Schema, model } from "mongoose";
 const subTxnSchema = new Schema(
   {
     txnDate: { type: Date, required: true, default: Date.now },
+    // ── NEW: link back to the previous / next / related subledger txn
+    previousTxnId: {
+      type: Schema.Types.ObjectId,
+      ref: "SubledgerTransactions",
+    },
+    nextTxnId: { type: Schema.Types.ObjectId, ref: "SubledgerTransactions" },
+    relatedTxnId: { type: Schema.Types.ObjectId, ref: "SubledgerTransactions" },
+
+    // ── NEW: link back to the previous / next / related voucher
+    previousVoucher: { type: String, required: false },
+    nextVoucher: { type: String, required: false },
+    currentVoucher: { type: String, required: false },
     relatedVoucher: { type: String, required: false },
+    // ── NEW: track posting event types
+    previousPostingEventType: {
+      type: String,
+      enum: [
+        "NONE",
+        "POSITIONAL",
+        "PHYSICAL",
+        "MANAGEMENT",
+        "FINANCIAL",
+        "AUDIT",
+      ],
+      default: "NONE",
+    },
+    postingEventType: {
+      type: String,
+      required: true,
+      enum: [
+        "NONE",
+        "POSITIONAL",
+        "PHYSICAL",
+        "MANAGEMENT",
+        "FINANCIAL",
+        "AUDIT",
+      ],
+      default: "NONE",
+    },
+    nextPostingEventType: {
+      type: String,
+      enum: [
+        "NONE",
+        "POSITIONAL",
+        "PHYSICAL",
+        "MANAGEMENT",
+        "FINANCIAL",
+        "AUDIT",
+      ],
+      default: "NONE",
+    },
     // which “bucket” of subledger
     subledgerType: {
       type: String,

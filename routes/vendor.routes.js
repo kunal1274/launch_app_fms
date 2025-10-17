@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  attachGroupToVendor,
   createVendor,
   deleteAllVendors,
   deleteVendor,
@@ -15,6 +16,7 @@ vendorRouter.get("/", getVendors);
 vendorRouter.get("/:vendorId", getVendor);
 vendorRouter.put("/:vendorId", updateVendor);
 vendorRouter.delete("/:vendorId", deleteVendor);
-vendorRouter.delete("/bulk-delete", deleteAllVendors);
+vendorRouter.delete("/", deleteAllVendors);
+vendorRouter.post("/attach-groups", attachGroupToVendor);
 
 export { vendorRouter };

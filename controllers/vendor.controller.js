@@ -4,6 +4,7 @@ import { VendorCounterModel } from "../models/counter.model.js";
 import ce from "../utility/ce.utils.js";
 import cl from "../utility/cl.utils.js";
 import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
+import { GlobalGroupModel } from "../shared_service/models/globalGroup.model.js";
 
 // Helper function for error logging
 const logError = (context, error) => {
@@ -21,7 +22,7 @@ export const createVendor = async (req, res) => {
       // Adjust for required fields
       return res.status(422).send({
         status: "failure",
-        message: "Vendor name and contact num are required.",
+        message: "⚠️ Vendor name and contact num are required.",
       });
     }
 
@@ -45,8 +46,8 @@ export const createVendor = async (req, res) => {
 
     return res.status(201).send({
       status: "Success",
-      message: `The vendor has been created successfully with vendor code : ${
-        dbResponse._id
+      message: `✅ The vendor has been created successfully with vendor code : ${
+        dbResponse.code
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
         "en-US",
         { timeZone: "Asia/Kolkata" }
@@ -68,7 +69,7 @@ export const createVendor = async (req, res) => {
       logError("Vendor Creation - Validation Error", error);
       return res.status(422).send({
         status: "failure",
-        message: "Validation error during vendor creation.",
+        message: "❌ Validation error during vendor creation.",
         error: error.message || error,
       });
     }
@@ -78,7 +79,7 @@ export const createVendor = async (req, res) => {
       logError("Vendor Creation - Duplicate Error", error);
       return res.status(409).send({
         status: "failure",
-        message: "A vendor with this contact Num already exists.",
+        message: "❌ A vendor with this contact Num already exists.",
       });
     }
 
@@ -87,7 +88,7 @@ export const createVendor = async (req, res) => {
       logError("Vendor Creation - Network Error", error);
       return res.status(503).send({
         status: "failure",
-        message: "Service temporarily unavailable. Please try again later.",
+        message: "❌ Service temporarily unavailable. Please try again later.",
       });
     }
 
@@ -95,7 +96,7 @@ export const createVendor = async (req, res) => {
     logError("Vendor Creation - Unknown Error", error);
     return res.status(500).send({
       status: "failure",
-      message: "An unexpected error occurred. Please try again.",
+      message: "❌ An unexpected error occurred. Please try again.",
       error: error.message || error,
     });
   }
@@ -106,14 +107,14 @@ export const getVendors = async (req, res) => {
     const dbResponse = await VendorModel.find({});
     return res.status(200).send({
       status: "success",
-      message: " All the vendors has been fetched successfully",
+      message: "✅ All the vendors have been fetched successfully",
       count: dbResponse.length,
       data: dbResponse,
     });
   } catch (error) {
     return res.status(400).send({
       status: "failure",
-      message: " There is an error while trying to fetch all the custoemrs",
+      message: "❌ There is an error while trying to fetch all the vendors",
       error: error,
     });
   }
@@ -126,19 +127,19 @@ export const getVendor = async (req, res) => {
     if (!dbResponse) {
       return res.status(404).send({
         status: "failure",
-        message: `The vendor ${vendorId} has been deleted or does not exist `,
+        message: `⚠️ The vendor ${vendorId} has been deleted or does not exist`,
       });
     }
     return res.status(200).send({
       status: "success",
-      message: `The vendor record ${vendorId} has been fetched successfully.`,
+      message: `✅ The vendor record ${vendorId} has been fetched successfully.`,
       data: dbResponse,
     });
   } catch (error) {
     ce(`Error fetching vendor with ID ${vendorId}:`, error);
     return res.status(500).send({
       status: "failure",
-      message: `The error has been caught while fetching the vendor record `,
+      message: `❌ The error has been caught while fetching the vendor record`,
       error: error.message || error,
     });
   }
@@ -232,6 +233,107 @@ export const deleteAllVendors = async (req, res) => {
       status: "failure",
       message: "Error while deleting all vendors or resetting the sequence.",
       error: error.message,
+    });
+  }
+};
+
+/**
+ * Attach a specified group to a specific vendor
+ */
+export const attachGroupToVendor = async (req, res) => {
+  try {
+    // 1) Read input from the request
+    const { vendorId, groupId } = req.body;
+
+    if (!vendorId || !groupId) {
+      return res.status(400).json({
+        status: "failure",
+        message: "⚠️ Both 'vendorId' and 'groupId' are required.",
+      });
+    }
+
+    // 2) Find the group doc
+    const groupDoc = await GlobalGroupModel.findById(groupId);
+    if (!groupDoc) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Group with ID ${groupId} not found.`,
+      });
+    }
+
+    // 3) Find the vendor doc
+    const vendorDoc = await VendorModel.findById(vendorId);
+    if (!vendorDoc) {
+      return res.status(404).json({
+        status: "failure",
+        message: `⚠️ Vendor with ID ${vendorId} not found.`,
+      });
+    }
+
+    // 4) Check if group is released for "Vendor" module
+    if (!groupDoc.releaseModules.includes("Vendor")) {
+      return res.status(400).json({
+        status: "failure",
+        message: `⚠️ Group ${groupDoc.code} is NOT released for 'Vendor' module.`,
+      });
+    }
+
+    // 5) Check if group is released to the same company
+    let isCompanyAllowed = false;
+    const vendorCompanyId = vendorDoc.company?.toString();
+    if (!vendorCompanyId) {
+      return res.status(400).json({
+        status: "failure",
+        message: `⚠️ Vendor ${vendorId} does not have a company assigned.`,
+      });
+    }
+
+    // Check if group is released for this company
+    for (const c of groupDoc.releaseCompanies) {
+      if (c.toString() === vendorCompanyId) {
+        isCompanyAllowed = true;
+        break;
+      }
+    }
+
+    if (!isCompanyAllowed) {
+      return res.status(400).json({
+        status: "failure",
+        message: `⚠️ Group ${groupDoc.code} is not released for the company of this Vendor.`,
+      });
+    }
+
+    // 6) Attach the group to the vendor's "groups" array if not already present
+    if (!vendorDoc.groups) {
+      vendorDoc.groups = [];
+    }
+
+    const alreadyAttached = vendorDoc.groups.some(
+      (g) => g.toString() === groupDoc._id.toString()
+    );
+    if (alreadyAttached) {
+      return res.status(200).json({
+        status: "success",
+        message: `ℹ️ Group ${groupDoc.code} is already attached to Vendor ${vendorId}.`,
+        data: vendorDoc,
+      });
+    }
+
+    vendorDoc.groups.push(groupDoc._id);
+    await vendorDoc.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: `✅ Group ${groupDoc.code} attached to Vendor ${vendorDoc.code} successfully.`,
+      data: vendorDoc,
+    });
+  } catch (error) {
+    console.error("❌ Error in attachGroupToVendor:", error);
+
+    return res.status(500).json({
+      status: "failure",
+      message: "❌ An unexpected error occurred while attaching the group.",
+      error: error.message || error,
     });
   }
 };

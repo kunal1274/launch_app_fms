@@ -189,7 +189,7 @@ export const createItem = async (req, res) => {
     if (!itemBody.itemNum || !itemBody.name) {
       return res.status(422).send({
         status: "failure",
-        message: " Item code and Item Name are the required fields.",
+        message: "⚠️ Item code and Item Name are the required fields.",
       });
     }
 
@@ -211,8 +211,8 @@ export const createItem = async (req, res) => {
 
     return res.status(201).send({
       status: "success",
-      message: `Item master has been created successfully with id : ${
-        dbResponseNewItem._id
+      message: `✅ Item master has been created successfully with code : ${
+        dbResponseNewItem.code
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
         "en-US",
         { timeZone: "Asia/Kolkata" }
@@ -225,17 +225,17 @@ export const createItem = async (req, res) => {
       logError("Item Creation - Validation Error", error);
       return res.status(422).send({
         status: "failure",
-        message: "Validation error during item creation.",
+        message: "❌ Validation error during item creation.",
         error: error.message || error,
       });
     }
 
     // MongoDB Duplicate Key Error (e.g., email uniqueness constraint)
     if (error.code === 11000) {
-      logError("item Creation - Duplicate Error", error);
+      logError("Item Creation - Duplicate Error", error);
       return res.status(409).send({
         status: "failure",
-        message: "An item with the same code already exists.",
+        message: "❌ An item with the same code already exists.",
       });
     }
 
@@ -400,14 +400,19 @@ export const uploadFilesAgainstItem = async (req, res) => {
     winstonLogger.info(req.body);
 
     if (!files || files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+      return res.status(400).json({ 
+        status: "failure",
+        message: "⚠️ No files uploaded" 
+      });
     }
 
     // Prepare file metadata
     const uploadedFiles = files.map((file) => ({
       fileName: file.originalname,
+      fileOriginalName: file.originalname,
       fileType: file.mimetype,
       fileUrl: `/uploads/items/${file.filename}`, // Path to access the file
+      fileUploadedAt: new Date()
     }));
 
     // Update the item with the file metadata
@@ -418,12 +423,246 @@ export const uploadFilesAgainstItem = async (req, res) => {
     );
 
     if (!item) {
-      return res.status(404).json({ message: "Item not found" });
+      return res.status(404).json({ 
+        status: "failure",
+        message: "⚠️ Item not found" 
+      });
     }
 
-    res.status(200).json({ message: "Files uploaded successfully", item });
+    res.status(200).json({ 
+      status: "success",
+      message: "✅ Files uploaded successfully", 
+      data: item 
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ 
+      status: "failure",
+      message: "❌ Internal server error" 
+    });
+  }
+};
+
+/**
+ * Search items with filters and pagination
+ */
+export const searchItems = async (req, res) => {
+  try {
+    const {
+      search,
+      type,
+      category,
+      minPrice,
+      maxPrice,
+      unit,
+      active,
+      page = 1,
+      limit = 10,
+      sortBy = 'name',
+      sortOrder = 'asc'
+    } = req.query;
+
+    // Build filter object
+    const filter = {};
+    
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { itemNum: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (type) filter.type = type;
+    if (category) filter.category = category;
+    if (unit) filter.unit = unit;
+    if (active !== undefined) filter.active = active === 'true';
+    
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = parseFloat(minPrice);
+      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Build sort object
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+    // Execute query
+    const [items, totalCount] = await Promise.all([
+      ItemModel.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate(['site', 'warehouse', 'zone', 'location', 'aisle', 'rack', 'shelf', 'bin']),
+      ItemModel.countDocuments(filter)
+    ]);
+
+    const totalPages = Math.ceil(totalCount / parseInt(limit));
+
+    res.status(200).json({
+      status: "success",
+      message: "✅ Items searched successfully",
+      data: items,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalCount,
+        limit: parseInt(limit),
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error("Error searching items:", error);
+    res.status(500).json({
+      status: "failure",
+      message: "❌ Error searching items",
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Bulk create items
+ */
+export const bulkCreateItems = async (req, res) => {
+  try {
+    const { items } = req.body;
+    
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        status: "failure",
+        message: "⚠️ Items array is required and must not be empty"
+      });
+    }
+
+    // Validate each item
+    const validationErrors = [];
+    for (let i = 0; i < items.length; i++) {
+      if (!items[i].itemNum || !items[i].name) {
+        validationErrors.push(`Item ${i + 1}: itemNum and name are required`);
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      return res.status(422).json({
+        status: "failure",
+        message: "❌ Validation errors found",
+        errors: validationErrors
+      });
+    }
+
+    const createdItems = await ItemModel.insertMany(items);
+
+    res.status(201).json({
+      status: "success",
+      message: `✅ ${createdItems.length} items created successfully`,
+      data: createdItems
+    });
+  } catch (error) {
+    console.error("Error in bulk create items:", error);
+    res.status(500).json({
+      status: "failure",
+      message: "❌ Error creating items in bulk",
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Bulk update items
+ */
+export const bulkUpdateItems = async (req, res) => {
+  try {
+    const { updates } = req.body;
+    
+    if (!updates || !Array.isArray(updates) || updates.length === 0) {
+      return res.status(400).json({
+        status: "failure",
+        message: "⚠️ Updates array is required and must not be empty"
+      });
+    }
+
+    const results = [];
+    for (const update of updates) {
+      const { itemId, ...updateData } = update;
+      
+      if (!itemId) {
+        results.push({ itemId: 'unknown', status: 'failed', error: 'Item ID is required' });
+        continue;
+      }
+
+      try {
+        const updatedItem = await ItemModel.findByIdAndUpdate(
+          itemId,
+          { $set: updateData },
+          { new: true, runValidators: true }
+        );
+        
+        if (updatedItem) {
+          results.push({ itemId, status: 'success', data: updatedItem });
+        } else {
+          results.push({ itemId, status: 'failed', error: 'Item not found' });
+        }
+      } catch (error) {
+        results.push({ itemId, status: 'failed', error: error.message });
+      }
+    }
+
+    const successCount = results.filter(r => r.status === 'success').length;
+    const failureCount = results.filter(r => r.status === 'failed').length;
+
+    res.status(200).json({
+      status: "success",
+      message: `✅ Bulk update completed: ${successCount} successful, ${failureCount} failed`,
+      data: results
+    });
+  } catch (error) {
+    console.error("Error in bulk update items:", error);
+    res.status(500).json({
+      status: "failure",
+      message: "❌ Error updating items in bulk",
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Bulk delete items
+ */
+export const bulkDeleteItems = async (req, res) => {
+  try {
+    const { itemIds } = req.body;
+    
+    if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+      return res.status(400).json({
+        status: "failure",
+        message: "⚠️ Item IDs array is required and must not be empty"
+      });
+    }
+
+    const deleteResult = await ItemModel.deleteMany({
+      _id: { $in: itemIds }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: `✅ ${deleteResult.deletedCount} items deleted successfully`,
+      data: {
+        deletedCount: deleteResult.deletedCount,
+        requestedCount: itemIds.length
+      }
+    });
+  } catch (error) {
+    console.error("Error in bulk delete items:", error);
+    res.status(500).json({
+      status: "failure",
+      message: "❌ Error deleting items in bulk",
+      error: error.message
+    });
   }
 };

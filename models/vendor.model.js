@@ -28,9 +28,10 @@ const vendorSchema = new Schema(
           "Distributor",
           "Retailer",
           "Wholesaler",
+          "Others",
         ],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
+          "⚠️ {VALUE} is not a valid business type. Use among these only Individual, Manufacturing, Service Provider, Trading, Distributor, Retailer, Wholesaler, or Others.",
       },
       default: "Trading",
     },
@@ -167,12 +168,12 @@ const vendorSchema = new Schema(
     address: {
       type: String,
       required: false,
-      default: "false",
+      default: "",
     },
     remarks: {
       type: String,
       required: false,
-      default: "false",
+      default: "",
     },
     active: {
       type: Boolean,
@@ -195,8 +196,8 @@ const vendorSchema = new Schema(
       ref: "Accounts",
       default: null,
       required: [
-        true,
-        "Every Vendor must specify the corresponding leaf AccountModel _id",
+        false,
+        "Every Vendor should specify the corresponding leaf AccountModel _id",
       ],
     },
     bankDetails: [

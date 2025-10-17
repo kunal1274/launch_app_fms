@@ -39,11 +39,11 @@ const itemSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["ea", "qty", "mt", "kgs", "lbs", "hr", "min"],
+        values: ["ea", "pcs", "qty", "mt", "kgs", "lbs", "hr", "min", "box", "dozen", "gallon", "liter", "sqft", "sqm", "cft", "cm"],
         message:
-          "⚠️ {VALUE} is not a valid unit . Use among these only'ea','qty','mt','kgs'.'lbs',hr','min'.",
+          "⚠️ {VALUE} is not a valid unit. Use among these only: ea, pcs, qty, mt, kgs, lbs, hr, min, box, dozen, gallon, liter, sqft, sqm, cft, cm.",
       },
-      default: "mt",
+      default: "pcs",
     },
     price: {
       type: Number,
@@ -53,6 +53,40 @@ const itemSchema = new Schema(
         return Math.round(v * 100) / 100; // round off during save
       },
       get: (v) => v.toFixed(2), // Format when retrieving
+    },
+    costPrice: {
+      type: Number,
+      required: true,
+      default: 0.0,
+      set: function (v) {
+        return Math.round(v * 100) / 100;
+      },
+      get: (v) => v.toFixed(2),
+    },
+    minPrice: {
+      type: Number,
+      required: false,
+      default: 0.0,
+      set: function (v) {
+        return Math.round(v * 100) / 100;
+      },
+    },
+    maxPrice: {
+      type: Number,
+      required: false,
+      default: 0.0,
+      set: function (v) {
+        return Math.round(v * 100) / 100;
+      },
+    },
+    category: {
+      type: String,
+      required: false,
+      enum: {
+        values: ["Raw Material", "Finished Goods", "Semi-Finished", "Consumables", "Tools", "Equipment", "Services"],
+        message: "⚠️ {VALUE} is not a valid category.",
+      },
+      default: "Finished Goods",
     },
     site: {
       type: Schema.Types.ObjectId,
@@ -136,8 +170,8 @@ const itemSchema = new Schema(
       ref: "Accounts",
       default: null,
       required: [
-        true,
-        "Every Item must specify the corresponding leaf AccountModel _id",
+        false,
+        "Every Item should specify the corresponding leaf AccountModel _id",
       ],
     },
     // New field for file uploads
@@ -162,11 +196,22 @@ const itemSchema = new Schema(
 );
 
 itemSchema.pre("save", async function (next) {
-  if (!this.isNew) {
-    return next();
-  }
-
   try {
+    // Validate price ranges
+    if (this.minPrice > this.costPrice) {
+      throw new Error("❌ Minimum price cannot be greater than cost price");
+    }
+    if (this.costPrice > this.price) {
+      throw new Error("❌ Cost price cannot be greater than selling price");
+    }
+    if (this.price > this.maxPrice && this.maxPrice > 0) {
+      throw new Error("❌ Selling price cannot be greater than maximum price");
+    }
+
+    if (!this.isNew) {
+      return next();
+    }
+
     // Validate the document (schema-level validation)
     await this.validate();
 

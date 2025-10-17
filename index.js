@@ -83,6 +83,7 @@ import { recordApiFlow } from "./middleware/recordApiFlow.js";
 import glJournalRouter from "./routes/glJournal.routes.js";
 import glJournalTemplateRouter from "./routes/journalTemplate.routes.js";
 import bankRouter from "./routes/bank.routes.js";
+import subledgerRouter from "./routes/subledgerTxn.routes.js";
 
 // import redisClient from "./middleware/redisClient.js";
 
@@ -249,6 +250,7 @@ AumMrigahApp.use("/fms/api/v0/banks", bankRouter);
 AumMrigahApp.use("/fms/api/v0/accounts", ledgerAccountRouter);
 AumMrigahApp.use("/fms/api/v0/gl-journals", glJournalRouter);
 AumMrigahApp.use("/fms/api/v0/gl-journal-templates", glJournalTemplateRouter);
+AumMrigahApp.use("/fms/api/v0/subledgers", subledgerRouter);
 
 // // Main Functional Modules
 dbgRoutes("Mounting userRouter router on /fms/api/v0/users");

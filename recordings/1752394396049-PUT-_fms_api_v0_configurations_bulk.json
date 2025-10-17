@@ -1,0 +1,113 @@
+{
+  "ts": 1752394396049,
+  "method": "PUT",
+  "path": "/fms/api/v0/configurations/bulk",
+  "body": [
+    {
+      "_id": "68725de36b14d460e7d382a5",
+      "update": {
+        "name": "Nokia Configurations",
+        "type": "Virtual",
+        "description": "Nokia Configurations 12th July 1425",
+        "values": [
+          "Q1-Nokia",
+          "Q2-N43",
+          "Q3-N6474",
+          "Q4-N65",
+          "Q5-N770"
+        ]
+      }
+    },
+    {
+      "_id": "687261c6d5b200a8e90f840e",
+      "update": {
+        "name": "Human Main Behavior",
+        "type": "Virtual",
+        "description": "Human Main Behavior 12th July 1425",
+        "values": [
+          "S1-Vatt",
+          "S2-Kaff",
+          "S3-Pitt"
+        ]
+      }
+    },
+    {
+      "_id": "687361e0bb35ae87a3168355",
+      "update": {
+        "name": "MajorQ",
+        "type": "Virtual",
+        "description": "Major Q 12th July 1425",
+        "values": [
+          "Q1-Blackhole",
+          "Q2-Negative",
+          "Q3-Decimal",
+          "Q4-Space",
+          "Q5-Time",
+          "Q6-Structure",
+          "Q7-Group"
+        ]
+      }
+    }
+  ],
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "Updated 3",
+    "data": [
+      {
+        "name": "Nokia Configurations",
+        "description": "Nokia Configurations 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Q1-Nokia",
+          "Q2-N43",
+          "Q3-N6474",
+          "Q4-N65",
+          "Q5-N770"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "CFG_001"
+      },
+      {
+        "name": "Human Main Behavior",
+        "description": "Human Main Behavior 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "S1-Vatt",
+          "S2-Kaff",
+          "S3-Pitt"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "CFG_002"
+      },
+      {
+        "code": "CFG_003",
+        "name": "MajorQ",
+        "description": "Major Q 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Q1-Blackhole",
+          "Q2-Negative",
+          "Q3-Decimal",
+          "Q4-Space",
+          "Q5-Time",
+          "Q6-Structure",
+          "Q7-Group"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      }
+    ]
+  }
+}

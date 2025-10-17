@@ -1,0 +1,40 @@
+{
+  "ts": 1752399575955,
+  "method": "POST",
+  "path": "/fms/api/v0/versions",
+  "body": {
+    "name": "Laptop Versions",
+    "type": "Virtual",
+    "description": "Versions of the laptop 12th July 1425",
+    "values": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V57"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Version configuration created successfully.",
+    "data": {
+      "name": "Laptop Versions",
+      "description": "Versions of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V57"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "VER_002"
+    }
+  }
+}

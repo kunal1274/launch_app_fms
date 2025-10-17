@@ -1,0 +1,30 @@
+{
+  "ts": 1752399169416,
+  "method": "PUT",
+  "path": "/fms/api/v0/styles/68737c7c812b6974bf3a5a43",
+  "body": {
+    "name": "Size of the laptop and desktop"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Size of the laptop and desktop",
+      "description": "Sizes of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Japanese",
+        "Nepalese",
+        "Indian",
+        "American",
+        "Chinese"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "STL_001"
+    }
+  }
+}

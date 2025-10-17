@@ -1,0 +1,18 @@
+{
+  "ts": 1753705797984,
+  "method": "POST",
+  "path": "/fms/api/v0/banks",
+  "body": {
+    "accountCode": "HDFC47849",
+    "bankName": "HDFC ",
+    "accountHolderName": "Kunal Kumar",
+    "address": "Electrosteel  Limited Maker Chambers - IV, Nariman Point Mumbai 400 021",
+    "linkedCoaAccount": "688762cbcf15ef6461b19713",
+    "active": true
+  },
+  "status": 400,
+  "response": {
+    "status": "failure",
+    "message": "Fields `type`, `linkedCoaAccount` (ObjectId), and `currency` are required."
+  }
+}

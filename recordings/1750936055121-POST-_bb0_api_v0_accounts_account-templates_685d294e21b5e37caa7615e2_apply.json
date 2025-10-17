@@ -1,0 +1,16 @@
+{
+  "ts": 1750936055121,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts/account-templates/685d294e21b5e37caa7615e2/apply",
+  "body": {
+    "overrides": {
+      "accountCode": "9001",
+      "accountName": "RevenueAcct"
+    }
+  },
+  "status": 400,
+  "response": {
+    "status": "failure",
+    "message": "E11000 duplicate key error collection: fms-cloud-local-dev-db.bb0_accounts index: globalPartyId_1 dup key: { globalPartyId: null }"
+  }
+}

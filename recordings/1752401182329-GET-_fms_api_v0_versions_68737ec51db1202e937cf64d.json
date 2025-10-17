@@ -1,0 +1,33 @@
+{
+  "ts": 1752401182329,
+  "method": "GET",
+  "path": "/fms/api/v0/versions/68737ec51db1202e937cf64d",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Dress Versions",
+      "description": "Versions of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "VER_001"
+    }
+  }
+}

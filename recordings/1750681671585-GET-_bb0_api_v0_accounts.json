@@ -1,0 +1,89 @@
+{
+  "ts": 1750681671585,
+  "method": "GET",
+  "path": "/bb0/api/v0/accounts",
+  "body": {
+    "accountCode": "1002-A-B001",
+    "accountName": "Inventory Receipt Account",
+    "type": "ASSET",
+    "parentAccount": null,
+    "normalBalance": "DEBIT",
+    "isLeaf": true,
+    "allowManualPost": true,
+    "currency": "INR",
+    "description": "This account is posted whenever there is any inventory balance will in or receipted ",
+    "group": "INVENTORY",
+    "active": true,
+    "company": "67e7cbfbe4d5a291f0dcc7c9"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": [
+      {
+        "globalPartyId": "68590cb2509b3c2e05cd6233",
+        "accountCode": "1000",
+        "accountName": "Inventory Receipt Account",
+        "type": "ASSET",
+        "parentAccount": null,
+        "normalBalance": "DEBIT",
+        "isLeaf": true,
+        "allowManualPost": true,
+        "currency": "INR",
+        "description": "This account is posted whenever there is any inventory balance will in or receipted",
+        "group": "INVENTORY",
+        "isArchived": false,
+        "active": false,
+        "sysCode": "LA_000002"
+      },
+      {
+        "globalPartyId": "68590d7f4448b167cbcb4ac5",
+        "accountCode": "1000.q",
+        "accountName": "Inventory Receipt Account",
+        "type": "ASSET",
+        "parentAccount": null,
+        "normalBalance": "DEBIT",
+        "isLeaf": true,
+        "allowManualPost": true,
+        "currency": "INR",
+        "description": "This account is posted whenever there is any inventory balance will in or receipted",
+        "group": "INVENTORY",
+        "isArchived": false,
+        "active": false,
+        "sysCode": "LA_000003"
+      },
+      {
+        "globalPartyId": "68590d8deb79e06c619b7356",
+        "accountCode": "10001",
+        "accountName": "Inventory Receipt Account",
+        "type": "ASSET",
+        "parentAccount": null,
+        "normalBalance": "DEBIT",
+        "isLeaf": true,
+        "allowManualPost": true,
+        "currency": "INR",
+        "description": "This account is posted whenever there is any inventory balance will in or receipted",
+        "group": "INVENTORY",
+        "isArchived": false,
+        "active": false,
+        "sysCode": "LA_000004"
+      },
+      {
+        "globalPartyId": "685906d6d30e6dd6223cdca1",
+        "accountCode": "3490",
+        "accountName": "Inventory Receipt Account",
+        "type": "ASSET",
+        "parentAccount": null,
+        "normalBalance": "DEBIT",
+        "isLeaf": true,
+        "allowManualPost": true,
+        "currency": "INR",
+        "description": "This account is posted whenever there is any inventory balance will in or receipted",
+        "group": "INVENTORY",
+        "isArchived": false,
+        "active": false,
+        "sysCode": "LA_000001"
+      }
+    ]
+  }
+}

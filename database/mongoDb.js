@@ -1,4 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config(); // Loads .env into process.env
 import mongoose from "mongoose";
+import { SalesOrderModel } from "../models/salesorder.model.js";
 
 const connectToDb = async () => {
   const uriWithEnv = `mongodb+srv://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.PROJECT_NAME}.pnctyau.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=${process.env.APP_NAME}`;
@@ -20,6 +23,12 @@ const connectToDb = async () => {
         dbName: connection.name,
       });
     }
+
+    // // Drop the duplicate index on invoiceNum
+    // await SalesOrderModel.collection.dropIndex("invoiceNum_1");
+
+    // console.log("Index invoiceNum_1 dropped successfully");
+    // process.exit(0);
   } catch (error) {
     console.error({
       message: `The error has been caught while connecting to the mongo db : ${error}`,

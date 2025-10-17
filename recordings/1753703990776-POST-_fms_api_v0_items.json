@@ -1,0 +1,20 @@
+{
+  "ts": 1753703990776,
+  "method": "POST",
+  "path": "/fms/api/v0/items",
+  "body": {
+    "itemNum": "DGDS-9",
+    "name": "Daily Driver Servce : 9 hours",
+    "description": "The user can book the driver on daily basis for 3 hours but this has to be scheduled on daily basis",
+    "type": "Services",
+    "linkedCoaAccount": "688765e6c909e656cf288271",
+    "unit": "hr",
+    "price": 900,
+    "purchPrice": 900,
+    "salesPrice": 1200,
+    "invPrice": 1100,
+    "active": false
+  },
+  "status": 201,
+  "response": "[object Object]{\"status\":\"success\",\"message\":\"Item master has been created successfully with id : 68876636db4391a12d40640f at 2025-07-28T11:59:50.772Z equivalent to IST 7/28/2025, 5:29:50 PM\",\"data\":{\"itemNum\":\"DGDS-9\",\"name\":\"Daily Driver Servce : 9 hours\",\"description\":\"The user can book the driver on daily basis for 3 hours but this has to be scheduled on daily basis\",\"type\":\"Services\",\"unit\":\"hr\",\"price\":\"900.00\",\"active\":false,\"archived\":false,\"groups\":[],\"linkedCoaAccount\":\"688765e6c909e656cf288271\",\"_id\":\"68876636db4391a12d40640f\",\"files\":[],\"createdAt\":\"2025-07-28T11:59:50.591Z\",\"updatedAt\":\"2025-07-28T11:59:50.591Z\",\"code\":\"I_000006\",\"__v\":0,\"id\":\"68876636db4391a12d40640f\"}}"
+}

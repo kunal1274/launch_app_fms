@@ -1,0 +1,28 @@
+{
+  "ts": 1752307272140,
+  "method": "GET",
+  "path": "/fms/api/v0/sites",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Sites retrieved successfully.",
+    "count": 1,
+    "data": [
+      {
+        "name": "s-8thJun1425",
+        "description": "Site 8th June 1425",
+        "type": "Virtual",
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "SITE_001"
+      }
+    ]
+  }
+}

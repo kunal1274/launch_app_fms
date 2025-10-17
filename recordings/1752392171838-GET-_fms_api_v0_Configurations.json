@@ -1,0 +1,103 @@
+{
+  "ts": 1752392171838,
+  "method": "GET",
+  "path": "/fms/api/v0/Configurations",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "count": 5,
+    "data": [
+      {
+        "name": "Model of the Nokia",
+        "description": "Site 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "N73",
+          "N6600",
+          "N76",
+          "N6700"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "CFG_001"
+      },
+      {
+        "name": "Human Being State",
+        "description": "Human 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Vaat",
+          "Kaf",
+          "Pitt"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "files": [],
+        "extras": {},
+        "code": "CFG_002"
+      },
+      {
+        "code": "CFG_003",
+        "name": "MajorQ",
+        "description": "Major Q 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Q1-Blackhole",
+          "Q2-Negative",
+          "Q3-Decimal",
+          "Q4-Space",
+          "Q5-Time"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      },
+      {
+        "code": "CFG_004",
+        "name": "Rakshas",
+        "description": "Human 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "TheBAD",
+          "TheGOOD",
+          "TheNEUTRAL"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      },
+      {
+        "code": "CFG_005",
+        "name": "Space",
+        "description": "Space 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "S1-position and break down",
+          "S2-space distance",
+          "S3-Space Dimensions",
+          "S4-Space converted to Time",
+          "S5-Space Converted to Negative",
+          "S6-Space Converted to Decimals",
+          "S7-Space Converted to Bhram"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      }
+    ]
+  }
+}

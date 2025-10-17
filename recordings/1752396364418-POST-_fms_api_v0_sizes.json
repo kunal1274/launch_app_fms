@@ -1,0 +1,38 @@
+{
+  "ts": 1752396364418,
+  "method": "POST",
+  "path": "/fms/api/v0/sizes",
+  "body": {
+    "name": "Laptop Sizes",
+    "type": "Virtual",
+    "description": "Sizes of the laptop 12th July 1425",
+    "values": [
+      "12inches",
+      "14 inches",
+      "16 inches",
+      "19inches"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Size configuration created successfully.",
+    "data": {
+      "name": "Laptop Sizes",
+      "description": "Sizes of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "12inches",
+        "14 inches",
+        "16 inches",
+        "19inches"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "SIZ_003"
+    }
+  }
+}

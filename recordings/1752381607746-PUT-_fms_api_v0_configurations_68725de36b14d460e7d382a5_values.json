@@ -1,0 +1,13 @@
+{
+  "ts": 1752381607746,
+  "method": "PUT",
+  "path": "/fms/api/v0/configurations/68725de36b14d460e7d382a5/values",
+  "body": {
+    "values": [
+      "N76",
+      "N6700"
+    ]
+  },
+  "status": 400,
+  "response": "This is final and invalid path coming from node js backend launch-app-fms"
+}

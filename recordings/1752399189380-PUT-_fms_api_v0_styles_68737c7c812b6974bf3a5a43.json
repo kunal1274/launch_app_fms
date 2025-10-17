@@ -1,0 +1,30 @@
+{
+  "ts": 1752399189380,
+  "method": "PUT",
+  "path": "/fms/api/v0/styles/68737c7c812b6974bf3a5a43",
+  "body": {
+    "name": "Style of the laptop"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Style of the laptop",
+      "description": "Sizes of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Japanese",
+        "Nepalese",
+        "Indian",
+        "American",
+        "Chinese"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "STL_001"
+    }
+  }
+}

@@ -1,0 +1,1403 @@
+{
+  "nodes": [
+    {
+      "id": "get-all-empty",
+      "seq": 1,
+      "group": "READ",
+      "name": "Get all on empty DB",
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": []
+      }
+    },
+    {
+      "id": "create-minimal",
+      "seq": 2,
+      "group": "CREATE",
+      "name": "Create minimal account",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1000",
+        "accountName": "Cash",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1000",
+          "accountName": "Cash",
+          "accType": "ASSET",
+          "normalBalance": "DEBIT",
+          "currency": "INR",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      }
+    },
+    {
+      "id": "create-all-fields",
+      "seq": 3,
+      "group": "CREATE",
+      "name": "Create with all fields",
+      "parents": ["create-minimal"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1001",
+        "accountName": "Savings",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "isLeaf": false,
+        "allowManualPost": false,
+        "currency": "USD",
+        "description": "Full account",
+        "group": "OPERATIONS"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "1001",
+          "accountName": "Savings",
+          "accType": "ASSET",
+          "normalBalance": "DEBIT",
+          "isLeaf": false,
+          "allowManualPost": false,
+          "currency": "USD",
+          "description": "Full account",
+          "group": "OPERATIONS"
+        }
+      }
+    },
+    {
+      "id": "syscode-sequence",
+      "seq": 4,
+      "group": "SEQUENCE",
+      "name": "SysCode increments",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "1002",
+        "accountName": "Equity",
+        "accType": "EQUITY",
+        "normalBalance": "CREDIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "sysCode": "LA_000003"
+        }
+      }
+    },
+    {
+      "id": "check-global-party",
+      "seq": 5,
+      "group": "READ",
+      "name": "GlobalPartyId generated",
+      "parents": ["create-minimal"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "globalPartyId": "{{create-minimal.data.globalPartyId}}"
+        }
+      }
+    },
+    {
+      "id": "create-missing",
+      "seq": 6,
+      "group": "NEGATIVE",
+      "name": "Missing mandatory fields",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountName": "No Code"
+      },
+      "expectedStatus": 400
+    },
+    {
+      "id": "create-no-leaf",
+      "seq": 7,
+      "group": "CREATE",
+      "name": "Create non-leaf only",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2000",
+        "accountName": "Liabilities",
+        "accType": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2000",
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "create-child-success",
+      "seq": 8,
+      "group": "CREATE",
+      "name": "Create child under non-leaf",
+      "parents": ["create-no-leaf"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2001",
+        "accountName": "Short-Term Loans",
+        "accType": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "parentAccount": "{{create-no-leaf.data._id}}"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2001",
+          "parentAccount": "{{create-no-leaf.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "create-child-parent-notfound",
+      "seq": 9,
+      "group": "NEGATIVE",
+      "name": "Child w/ missing parent",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2002",
+        "accountName": "Phantom",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "507f1f77bcf86cd799439011"
+      },
+      "expectedStatus": 404
+    },
+    {
+      "id": "create-child-parent-isLeaf",
+      "seq": 10,
+      "group": "NEGATIVE",
+      "name": "Child under leaf parent",
+      "parents": ["create-minimal"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "2003",
+        "accountName": "Bad Child",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-minimal.data._id}}"
+      },
+      "expectedStatus": 422
+    },
+    {
+      "id": "get-all",
+      "seq": 11,
+      "group": "READ",
+      "name": "Get all accounts",
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1000" },
+          { "accountCode": "1001" },
+          { "accountCode": "1002" },
+          { "accountCode": "2000" },
+          { "accountCode": "2001" }
+        ]
+      }
+    },
+    {
+      "id": "get-one",
+      "seq": 12,
+      "group": "READ",
+      "name": "Get one by ID",
+      "parents": ["create-no-leaf"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-no-leaf.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "2000"
+        }
+      }
+    },
+    {
+      "id": "bulk-create-accounts",
+      "seq": 13,
+      "group": "BULK",
+      "name": "Bulk create accounts",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/bulk",
+      "bodyTemplate": {
+        "data": [
+          {
+            "accountCode": "3000",
+            "accountName": "Alpha",
+            "accType": "ASSET",
+            "normalBalance": "DEBIT"
+          },
+          {
+            "accountCode": "3001",
+            "accountName": "Beta",
+            "accType": "LIABILITY",
+            "normalBalance": "CREDIT"
+          },
+          {
+            "accountCode": "3002",
+            "accountName": "Gamma",
+            "accType": "EXPENSE",
+            "normalBalance": "DEBIT"
+          }
+        ]
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" }
+        ]
+      }
+    },
+    {
+      "id": "update-account",
+      "seq": 14,
+      "group": "UPDATE",
+      "name": "Update account + parent",
+      "parents": ["create-minimal", "create-no-leaf"],
+      "method": "PUT",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}",
+      "bodyTemplate": {
+        "accountName": "Cash Updated",
+        "parentAccount": "{{create-no-leaf.data._id}}"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountName": "Cash Updated",
+          "parentAccount": "{{create-no-leaf.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "update-account-bad-parent",
+      "seq": 15,
+      "group": "NEGATIVE",
+      "name": "Update w/ missing parent",
+      "method": "PUT",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}",
+      "bodyTemplate": {
+        "parentAccount": "507f1f77bcf86cd799439011"
+      },
+      "expectedStatus": 404
+    },
+    {
+      "id": "bulk-update-accounts",
+      "seq": 16,
+      "group": "BULK",
+      "name": "Bulk update accounts",
+      "method": "PATCH",
+      "pathTemplate": "/bb0/api/v0/accounts/bulk",
+      "bodyTemplate": {
+        "data": [
+          {
+            "_id": "{{create-minimal.data._id}}",
+            "accountName": "Cash Multi"
+          },
+          {
+            "_id": "{{create-all-fields.data._id}}",
+            "currency": "EUR"
+          }
+        ]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "_id": "{{create-minimal.data._id}}", "accountName": "Cash Multi" },
+          { "_id": "{{create-all-fields.data._id}}", "currency": "EUR" }
+        ]
+      }
+    },
+    {
+      "id": "get-all-flat-after-bulk",
+      "seq": 17,
+      "group": "READ",
+      "name": "Get all accounts after bulk",
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1000" },
+          { "accountCode": "1001" },
+          { "accountCode": "1002" },
+          { "accountCode": "2000" },
+          { "accountCode": "2001" },
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" }
+        ]
+      }
+    },
+    {
+      "id": "create-2lvl-parent",
+      "seq": 18,
+      "group": "CREATE",
+      "name": "Create 2-lvl parent",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "4000",
+        "accountName": "Parent2",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "4000",
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "create-2lvl-child1",
+      "seq": 19,
+      "group": "CREATE",
+      "name": "Create 2-lvl child #1",
+      "parents": ["create-2lvl-parent"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "4001",
+        "accountName": "Child2-1",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-2lvl-parent.data._id}}",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "4001",
+          "parentAccount": "{{create-2lvl-parent.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "create-2lvl-child2",
+      "seq": 20,
+      "group": "CREATE",
+      "name": "Create 2-lvl child #2",
+      "parents": ["create-2lvl-child1"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "4002",
+        "accountName": "Child2-2",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-2lvl-child1.data._id}}"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "4002",
+          "parentAccount": "{{create-2lvl-child1.data._id}}"
+        }
+      }
+    },
+
+    {
+      "id": "create-3lvl-parent",
+      "seq": 21,
+      "group": "CREATE",
+      "name": "Create 3-lvl parent",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "5000",
+        "accountName": "Parent3",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "5000",
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "create-3lvl-child1",
+      "seq": 22,
+      "group": "CREATE",
+      "name": "Create 3-lvl child #1",
+      "parents": ["create-3lvl-parent"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "5001",
+        "accountName": "Child3-1",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-3lvl-parent.data._id}}",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "5001",
+          "parentAccount": "{{create-3lvl-parent.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "create-3lvl-child2",
+      "seq": 23,
+      "group": "CREATE",
+      "name": "Create 3-lvl child #2",
+      "parents": ["create-3lvl-child1"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "5002",
+        "accountName": "Child3-2",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-3lvl-child1.data._id}}",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "5002",
+          "parentAccount": "{{create-3lvl-child1.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "create-3lvl-child3",
+      "seq": 24,
+      "group": "CREATE",
+      "name": "Create 3-lvl child #3",
+      "parents": ["create-3lvl-child2"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "5003",
+        "accountName": "Child3-3",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT",
+        "parentAccount": "{{create-3lvl-child2.data._id}}"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "5003",
+          "parentAccount": "{{create-3lvl-child2.data._id}}"
+        }
+      }
+    },
+
+    {
+      "id": "get-hierarchy",
+      "seq": 25,
+      "group": "READ",
+      "name": "Fetch full hierarchy tree",
+      "parents": ["create-2lvl-child2", "create-3lvl-child3"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "1000"
+          },
+          {
+            "accountCode": "1001"
+          },
+          {
+            "accountCode": "1002"
+          },
+          {
+            "accountCode": "2000"
+          },
+          {
+            "accountCode": "2001"
+          },
+          {
+            "accountCode": "3000"
+          },
+          {
+            "accountCode": "3001"
+          },
+          {
+            "accountCode": "3002"
+          },
+          {
+            "accountCode": "4000",
+            "children": [
+              {
+                "accountCode": "4001",
+                "children": [
+                  {
+                    "accountCode": "4002",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "accountCode": "5000",
+            "children": [
+              {
+                "accountCode": "5001",
+                "children": [
+                  {
+                    "accountCode": "5002",
+                    "children": [
+                      {
+                        "accountCode": "5003",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "get-all-flat-after-hierarchy",
+      "seq": 26,
+      "group": "READ",
+      "name": "Get flat after hierarchy",
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1000" },
+          { "accountCode": "1001" },
+          { "accountCode": "1002" },
+          { "accountCode": "2000" },
+          { "accountCode": "2001" },
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" },
+          { "accountCode": "4000" },
+          { "accountCode": "4001" },
+          { "accountCode": "4002" },
+          { "accountCode": "5000" },
+          { "accountCode": "5001" },
+          { "accountCode": "5002" },
+          { "accountCode": "5003" }
+        ]
+      }
+    },
+    {
+      "id": "archive-one",
+      "seq": 27,
+      "group": "ARCHIVE",
+      "name": "Archive one account",
+      "parents": ["get-all-flat-after-bulk"],
+      "method": "PATCH",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}/archive",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Account archived.",
+        "data": { "isArchived": true }
+      }
+    },
+    {
+      "id": "get-all-after-archive",
+      "seq": 28,
+      "group": "READ",
+      "name": "Get all flat after archive",
+      "parents": ["archive-one"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1001" },
+          { "accountCode": "1002" },
+          { "accountCode": "2000" },
+          { "accountCode": "2001" },
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" }
+        ]
+      }
+    },
+    {
+      "id": "unarchive-one",
+      "seq": 29,
+      "group": "UNARCHIVE",
+      "name": "Unarchive one account",
+      "parents": ["archive-one"],
+      "method": "PATCH",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}/unarchive",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Account unarchived.",
+        "data": { "isArchived": false }
+      }
+    },
+    {
+      "id": "get-all-after-unarchive",
+      "seq": 30,
+      "group": "READ",
+      "name": "Get all flat after unarchive",
+      "parents": ["unarchive-one"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1000" },
+          { "accountCode": "1001" },
+          { "accountCode": "1002" },
+          { "accountCode": "2000" },
+          { "accountCode": "2001" },
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" }
+        ]
+      }
+    },
+    {
+      "id": "hard-delete-one",
+      "seq": 31,
+      "group": "DELETE",
+      "name": "Hard delete one account",
+      "parents": ["get-all-after-unarchive"],
+      "method": "DELETE",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-minimal.data._id}}",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "✅ acct deleted."
+      }
+    },
+    {
+      "id": "get-all-after-hard-delete",
+      "seq": 32,
+      "group": "READ",
+      "name": "Get all flat after hard delete",
+      "parents": ["hard-delete-one"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1001" },
+          { "accountCode": "1002" },
+          { "accountCode": "2000" },
+          { "accountCode": "2001" },
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" }
+        ]
+      }
+    },
+    {
+      "id": "bulk-soft-delete",
+      "seq": 33,
+      "group": "BULK",
+      "name": "Bulk soft-delete accounts or archived",
+      "parents": ["get-all-after-hard-delete"],
+      "method": "PATCH",
+      "pathTemplate": "/bb0/api/v0/accounts/bulk-archive",
+      "bodyTemplate": {
+        "ids": ["{{create-all-fields.data._id}}", "{{create-no-leaf.data._id}}"]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Archived 2 account(s)."
+      }
+    },
+    {
+      "id": "get-all-after-bulk-soft",
+      "seq": 34,
+      "group": "READ",
+      "name": "Get all flat after bulk soft-delete",
+      "parents": ["bulk-soft-delete"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "1002" },
+          { "accountCode": "2001" },
+          { "accountCode": "3000" },
+          { "accountCode": "3001" },
+          { "accountCode": "3002" }
+        ]
+      }
+    },
+    {
+      "id": "bulk-leaf-delete",
+      "seq": 35,
+      "group": "BULK",
+      "name": "Bulk hard-delete leaf accounts",
+      "parents": ["get-all-after-bulk-soft"],
+      "method": "DELETE",
+      "pathTemplate": "/bb0/api/v0/accounts/bulk-leaf-delete",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Deleted 5 leaf account(s).",
+        "deleted": [
+          {
+            "_id": "{{syscode-sequence.data._id}}",
+            "accountCode": "1002",
+            "accountName": "Equity"
+          },
+          {
+            "_id": "{{create-child-success.data._id}}",
+            "accountCode": "2001",
+            "accountName": "Short-Term Loans"
+          },
+          {
+            "_id": "{{bulk-create-accounts.data.0._id}}",
+            "accountCode": "3000",
+            "accountName": "Alpha"
+          },
+          {
+            "_id": "{{bulk-create-accounts.data.1._id}}",
+            "accountCode": "3001",
+            "accountName": "Beta"
+          },
+          {
+            "_id": "{{bulk-create-accounts.data.2._id}}",
+            "accountCode": "3002",
+            "accountName": "Gamma"
+          }
+        ],
+        "counter": 0
+      }
+    },
+    {
+      "id": "get-all-after-bulk-leaf",
+      "seq": 36,
+      "group": "READ",
+      "name": "Get all flat after leaf-delete",
+      "parents": ["bulk-leaf-delete"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": []
+      }
+    },
+    {
+      "id": "bulk-cascade-delete",
+      "seq": 37,
+      "group": "BULK",
+      "name": "Bulk cascade-delete all accounts",
+      "parents": ["get-all-after-bulk-leaf"],
+      "method": "DELETE",
+      "pathTemplate": "/bb0/api/v0/accounts/bulk-cascade-delete",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "message": "Cascade-deleted 0 account(s).",
+        "counter": 0
+      }
+    },
+    {
+      "id": "get-all-after-cascade-delete",
+      "seq": 38,
+      "group": "READ",
+      "name": "Get all flat after cascade-delete",
+      "parents": ["bulk-cascade-delete"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": []
+      }
+    },
+    {
+      "id": "get-hierarchy-final",
+      "seq": 39,
+      "group": "READ",
+      "name": "Get hierarchy on empty DB",
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": []
+      }
+    },
+
+    {
+      "id": "create-2nd-parent",
+      "seq": 40,
+      "group": "CREATE",
+      "name": "2nd-round: create parent",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "7000",
+        "accountName": "Liabilities",
+        "accType": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": { "accountCode": "7000", "isLeaf": false }
+      }
+    },
+    {
+      "id": "create-2nd-child1",
+      "seq": 41,
+      "group": "CREATE",
+      "name": "2nd-round: create child1",
+      "parents": ["create-2nd-parent"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "7001",
+        "accountName": "Sub-Liab-1",
+        "accType": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "parentAccount": "{{create-2nd-parent.data._id}}",
+        "isLeaf": false
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "7001",
+          "parentAccount": "{{create-2nd-parent.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "create-2nd-child2",
+      "seq": 42,
+      "group": "CREATE",
+      "name": "2nd-round: create child2",
+      "parents": ["create-2nd-child1"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "7002",
+        "accountName": "Leaf-Liab",
+        "accType": "LIABILITY",
+        "normalBalance": "CREDIT",
+        "parentAccount": "{{create-2nd-child1.data._id}}"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "7002",
+          "parentAccount": "{{create-2nd-child1.data._id}}"
+        }
+      }
+    },
+
+    {
+      "id": "get-flat-2nd-seed",
+      "seq": 43,
+      "group": "READ",
+      "name": "Flat list after 2nd-round seed",
+      "parents": ["create-2nd-child2"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "7000" },
+          { "accountCode": "7001" },
+          { "accountCode": "7002" }
+        ]
+      }
+    },
+    {
+      "id": "get-hierarchy-2nd-seed",
+      "seq": 44,
+      "group": "READ",
+      "name": "Hierarchy after 2nd-round seed",
+      "parents": ["get-flat-2nd-seed"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "7000",
+            "children": [
+              {
+                "accountCode": "7001",
+                "children": [{ "accountCode": "7002", "children": [] }]
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "dup-parent-2nd",
+      "seq": 45,
+      "group": "CREATE",
+      "name": "Duplicate level-1 (7000)",
+      "parents": ["get-hierarchy-2nd-seed"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-2nd-parent.data._id}}/duplicate",
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "7000-copy-1",
+          "parentAccount": null,
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "rep-parent-2nd",
+      "seq": 46,
+      "group": "CREATE",
+      "name": "Replicate level-1 ×2",
+      "parents": ["dup-parent-2nd"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-2nd-parent.data._id}}/replicate",
+      "bodyTemplate": { "count": 2 },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "7000-copy-2" },
+          { "accountCode": "7000-copy-3" }
+        ]
+      }
+    },
+    {
+      "id": "get-flat-after-level1-dups",
+      "seq": 47,
+      "group": "READ",
+      "name": "Flat after level-1 dup/rep",
+      "parents": ["rep-parent-2nd"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "7000" },
+          { "accountCode": "7000-copy-1" },
+          { "accountCode": "7000-copy-2" },
+          { "accountCode": "7000-copy-3" }
+        ]
+      }
+    },
+    {
+      "id": "get-hier-after-level1-dups",
+      "seq": 48,
+      "group": "READ",
+      "name": "Hierarchy after level-1 dup/rep",
+      "parents": ["rep-parent-2nd"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "7000",
+            "children": [
+              {
+                "accountCode": "7001",
+                "children": [{ "accountCode": "7002", "children": [] }]
+              }
+            ]
+          },
+          { "accountCode": "7000-copy-1", "children": [] },
+          { "accountCode": "7000-copy-2", "children": [] },
+          { "accountCode": "7000-copy-3", "children": [] }
+        ]
+      }
+    },
+
+    {
+      "id": "dup-child1-2nd",
+      "seq": 49,
+      "group": "CREATE",
+      "name": "Duplicate level-2 (7001)",
+      "parents": ["get-hier-after-level1-dups"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-2nd-child1.data._id}}/duplicate",
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "7001-copy-1",
+          "parentAccount": "{{create-2nd-parent.data._id}}",
+          "isLeaf": false
+        }
+      }
+    },
+    {
+      "id": "rep-child1-2nd",
+      "seq": 50,
+      "group": "CREATE",
+      "name": "Replicate level-2 ×2",
+      "parents": ["dup-child1-2nd"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-2nd-child1.data._id}}/replicate",
+      "bodyTemplate": { "count": 2 },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "7001-copy-2" },
+          { "accountCode": "7001-copy-3" }
+        ]
+      }
+    },
+    {
+      "id": "get-hier-after-level2-dups",
+      "seq": 51,
+      "group": "READ",
+      "name": "Hierarchy after level-2 dup/rep",
+      "parents": ["rep-child1-2nd"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "7000",
+            "children": [
+              {
+                "accountCode": "7001",
+                "children": [
+                  { "accountCode": "7002", "children": [] },
+                  { "accountCode": "7001-copy-1", "children": [] },
+                  { "accountCode": "7001-copy-2", "children": [] },
+                  { "accountCode": "7001-copy-3", "children": [] }
+                ]
+              }
+            ]
+          },
+
+          { "accountCode": "7000-copy-1", "children": [] },
+          { "accountCode": "7000-copy-2", "children": [] },
+          { "accountCode": "7000-copy-3", "children": [] }
+        ]
+      }
+    },
+
+    {
+      "id": "dup-child2-2nd",
+      "seq": 52,
+      "group": "CREATE",
+      "name": "Duplicate level-3 (7002)",
+      "parents": ["get-hier-after-level2-dups"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-2nd-child2.data._id}}/duplicate",
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "7002-copy-1",
+          "parentAccount": "{{create-2nd-child1.data._id}}"
+        }
+      }
+    },
+    {
+      "id": "rep-child2-2nd",
+      "seq": 53,
+      "group": "CREATE",
+      "name": "Replicate level-3 ×2",
+      "parents": ["dup-child2-2nd"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/{{create-2nd-child2.data._id}}/replicate",
+      "bodyTemplate": { "count": 2 },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          { "accountCode": "7002-copy-2" },
+          { "accountCode": "7002-copy-3" }
+        ]
+      }
+    },
+    {
+      "id": "get-hier-after-level3-dups",
+      "seq": 54,
+      "group": "READ",
+      "name": "Hierarchy after level-3 dup/rep",
+      "parents": ["rep-child2-2nd"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts?hierarchy=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [
+          {
+            "accountCode": "7000",
+            "children": [
+              {
+                "accountCode": "7001",
+                "children": [
+                  {
+                    "accountCode": "7002",
+                    "children": [
+                      { "accountCode": "7002-copy-1" },
+                      { "accountCode": "7002-copy-2" },
+                      { "accountCode": "7002-copy-3" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "accountCode": "7000-copy-1", "children": [] },
+          { "accountCode": "7000-copy-2", "children": [] },
+          { "accountCode": "7000-copy-3", "children": [] }
+        ]
+      }
+    },
+
+    {
+      "id": "create-template-expense",
+      "seq": 55,
+      "group": "TEMPLATE",
+      "name": "Create a standard EXPENSE template",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/account-templates",
+      "bodyTemplate": {
+        "name": "StandardExpense",
+        "defaults": {
+          "accType": "EXPENSE",
+          "normalBalance": "DEBIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "USD",
+          "description": "std expense",
+          "group": "OPERATIONS"
+        }
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "name": "StandardExpense",
+          "defaults": {
+            "accType": "EXPENSE",
+            "normalBalance": "DEBIT",
+            "isLeaf": true,
+            "allowManualPost": true,
+            "currency": "USD",
+            "description": "std expense",
+            "group": "OPERATIONS"
+          }
+        }
+      }
+    },
+    {
+      "id": "create-template-expense-dup",
+      "seq": 56,
+      "group": "TEMPLATE",
+      "name": "Duplicate template name",
+      "parents": ["create-template-expense"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/account-templates",
+      "bodyTemplate": {
+        "name": "StandardExpense",
+        "defaults": {
+          "accType": "EXPENSE",
+          "normalBalance": "DEBIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "USD",
+          "description": "std expense",
+          "group": "OPERATIONS"
+        }
+      },
+      "expectedStatus": 409
+    },
+    {
+      "id": "create-template-revenue",
+      "seq": 57,
+      "group": "TEMPLATE",
+      "name": "Create a standard REVENUE template",
+      "parents": ["create-template-expense"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/account-templates",
+      "bodyTemplate": {
+        "name": "StandardRevenue",
+        "defaults": {
+          "accType": "REVENUE",
+          "normalBalance": "CREDIT",
+          "isLeaf": false,
+          "allowManualPost": false,
+          "currency": "GBP",
+          "description": "std revenue",
+          "group": "FINANCE"
+        }
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "name": "StandardRevenue",
+          "defaults": {
+            "accType": "REVENUE",
+            "normalBalance": "CREDIT",
+            "isLeaf": false,
+            "allowManualPost": false,
+            "currency": "GBP",
+            "description": "std revenue",
+            "group": "FINANCE"
+          }
+        }
+      }
+    },
+    {
+      "id": "apply-template-expense",
+      "seq": 58,
+      "group": "CREATE",
+      "name": "Apply EXPENSE template",
+      "parents": ["create-template-expense"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/account-templates/{{create-template-expense.data._id}}/apply",
+      "bodyTemplate": {
+        "overrides": {
+          "accountCode": "9000",
+          "accountName": "ExpenseAcct"
+        }
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "9000",
+          "accountName": "ExpenseAcct",
+          "accType": "EXPENSE",
+          "normalBalance": "DEBIT",
+          "currency": "USD",
+          "isLeaf": true,
+          "allowManualPost": true
+        }
+      }
+    },
+    {
+      "id": "apply-template-revenue",
+      "seq": 59,
+      "group": "CREATE",
+      "name": "Apply REVENUE template",
+      "parents": ["create-template-revenue"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/account-templates/{{create-template-revenue.data._id}}/apply",
+      "bodyTemplate": {
+        "overrides": {
+          "accountCode": "9001",
+          "accountName": "RevenueAcct"
+        }
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "9001",
+          "accountName": "RevenueAcct",
+          "accType": "REVENUE",
+          "normalBalance": "CREDIT",
+          "currency": "GBP",
+          "isLeaf": false,
+          "allowManualPost": false
+        }
+      }
+    },
+    {
+      "id": "apply-template-expense-code-dup",
+      "seq": 60,
+      "group": "NEGATIVE",
+      "name": "Re-apply EXPENSE template with same code",
+      "parents": ["apply-template-expense"],
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts/account-templates/{{create-template-expense.data._id}}/apply",
+      "bodyTemplate": {
+        "overrides": {
+          "accountCode": "9000",
+          "accountName": "ExpenseAcctDup"
+        }
+      },
+      "expectedStatus": 409
+    },
+    {
+      "id": "get-all-post-templates",
+      "seq": 61,
+      "group": "READ",
+      "name": "Get all flat accounts after templates",
+      "parents": ["apply-template-expense", "apply-template-revenue"],
+      "method": "GET",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "success",
+        "data": [{ "accountCode": "9000" }, { "accountCode": "9001" }]
+      }
+    }
+  ]
+}

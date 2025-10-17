@@ -1,0 +1,11 @@
+{
+  "ts": 1752326623669,
+  "method": "GET",
+  "path": "/fms/api/v0/Configs",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 400,
+  "response": "This is final and invalid path coming from node js backend launch-app-fms"
+}

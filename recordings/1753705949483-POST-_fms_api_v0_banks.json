@@ -1,0 +1,41 @@
+{
+  "ts": 1753705949483,
+  "method": "POST",
+  "path": "/fms/api/v0/banks",
+  "body": {
+    "accountCode": "HDFC47849",
+    "bankName": "HDFC ",
+    "bankType": "Bank",
+    "currency": "INR",
+    "accountHolderName": "Kunal Kumar",
+    "address": "Electrosteel  Limited Maker Chambers - IV, Nariman Point Mumbai 400 021",
+    "linkedCoaAccount": "688762cbcf15ef6461b19713",
+    "active": true
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "Bank created.",
+    "data": {
+      "sysCode": "BK_001",
+      "accountCode": "HDFC47849",
+      "bankType": "Bank",
+      "address": "",
+      "parentAccount": null,
+      "linkedCoaAccount": "688762cbcf15ef6461b19713",
+      "upi": "",
+      "bankName": "HDFC ",
+      "accountHolderName": "Kunal Kumar",
+      "ifsc": "",
+      "swift": "",
+      "active": true,
+      "qrDetails": "",
+      "digitalSignature": "",
+      "isLeaf": true,
+      "currency": "INR",
+      "description": "",
+      "ledgerGroup": "",
+      "isArchived": false
+    }
+  }
+}

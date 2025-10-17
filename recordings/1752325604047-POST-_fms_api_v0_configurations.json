@@ -1,0 +1,36 @@
+{
+  "ts": 1752325604047,
+  "method": "POST",
+  "path": "/fms/api/v0/configurations",
+  "body": {
+    "name": "Model of the Nokia",
+    "type": "Virtual",
+    "description": "Site 12th July 1425",
+    "values": [
+      "Nokia 7644",
+      "Nokia 4748",
+      "Nokia 4647"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Configuration created.",
+    "data": {
+      "name": "Model of the Nokia",
+      "description": "Site 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Nokia 7644",
+        "Nokia 4748",
+        "Nokia 4647"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "CFG_001"
+    }
+  }
+}

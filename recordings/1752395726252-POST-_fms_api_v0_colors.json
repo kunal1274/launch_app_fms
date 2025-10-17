@@ -1,0 +1,40 @@
+{
+  "ts": 1752395726252,
+  "method": "POST",
+  "path": "/fms/api/v0/colors",
+  "body": {
+    "name": "human colors",
+    "type": "Virtual",
+    "description": "Colors of the human 12th July 1425",
+    "values": [
+      "Red",
+      "White",
+      "Green",
+      "Black",
+      "Brown"
+    ]
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "✅ Color configuration created successfully.",
+    "data": {
+      "name": "human colors",
+      "description": "Colors of the human 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Red",
+        "White",
+        "Green",
+        "Black",
+        "Brown"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "COL_002"
+    }
+  }
+}

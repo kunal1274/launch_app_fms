@@ -1,0 +1,47 @@
+{
+  "ts": 1753701229902,
+  "method": "POST",
+  "path": "/fms/api/v0/customers",
+  "body": {
+    "name": "DGDS Industries Limited",
+    "businessType": "Manufacturing",
+    "contactNum": "9232165785",
+    "contactPersonName": "Kunal Kumar",
+    "contactPersonPhone": "4949794791",
+    "contactPersonEmail": "kueroeu@ghout.com",
+    "email": "kunal2134@ratxen.com",
+    "currency": "INR",
+    "creditLimit": 10000,
+    "registrationNum": "R10AAACR23F5K1Z",
+    "panNum": "AA23R5055K",
+    "tanNum": "reiu339953",
+    "address": "Reliance Industries Limited Maker Chambers - IV, Nariman Point Mumbai 400 021",
+    "paymentTerms": "COD",
+    "linkedCoaAccount": "68875b2291fd1a6dcf8e1ab1",
+    "bankDetails": [
+      {
+        "code": "HDFC1873",
+        "type": "Bank",
+        "bankAccNum": "04942349561873",
+        "accountHolderName": "Testing Holder Name",
+        "bankName": "HDFC Bank Hyderabad",
+        "ifsc": "HDFC004484",
+        "swift": "HDFCIBERIIT",
+        "active": true,
+        "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+      },
+      {
+        "code": "kunal1274",
+        "type": "UPI",
+        "bankNum": "kunal12765@okhdfcbank",
+        "name": "UPI for kunal",
+        "ifsc": "",
+        "swift": "",
+        "active": true
+      }
+    ],
+    "active": true
+  },
+  "status": 500,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"❌ An unexpected error occurred. Please try again.\",\"error\":\"❌ Duplicate contact number: 9232165785\"}"
+}

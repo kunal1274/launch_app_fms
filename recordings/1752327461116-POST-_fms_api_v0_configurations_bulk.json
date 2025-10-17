@@ -1,0 +1,107 @@
+{
+  "ts": 1752327461116,
+  "method": "POST",
+  "path": "/fms/api/v0/configurations/bulk",
+  "body": [
+    {
+      "name": "MajorQ",
+      "type": "Virtual",
+      "description": "Major Q 12th July 1425",
+      "values": [
+        "Q1-Blackhole",
+        "Q2-Negative",
+        "Q3-Decimal",
+        "Q4-Space",
+        "Q5-Time"
+      ],
+      "code": "CFG_003"
+    },
+    {
+      "name": "Rakshas",
+      "type": "Virtual",
+      "description": "Human 12th July 1425",
+      "values": [
+        "TheBAD",
+        "TheGOOD",
+        "TheNEUTRAL"
+      ],
+      "code": "CFG_004"
+    },
+    {
+      "name": "Space",
+      "type": "Virtual",
+      "description": "Space 12th July 1425",
+      "values": [
+        "S1-position and break down",
+        "S2-space distance",
+        "S3-Space Dimensions",
+        "S4-Space converted to Time",
+        "S5-Space Converted to Negative",
+        "S6-Space Converted to Decimals",
+        "S7-Space Converted to Bhram"
+      ],
+      "code": "CFG_005"
+    }
+  ],
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": "Created 3",
+    "data": [
+      {
+        "code": "CFG_003",
+        "name": "MajorQ",
+        "description": "Major Q 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "Q1-Blackhole",
+          "Q2-Negative",
+          "Q3-Decimal",
+          "Q4-Space",
+          "Q5-Time"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      },
+      {
+        "code": "CFG_004",
+        "name": "Rakshas",
+        "description": "Human 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "TheBAD",
+          "TheGOOD",
+          "TheNEUTRAL"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      },
+      {
+        "code": "CFG_005",
+        "name": "Space",
+        "description": "Space 12th July 1425",
+        "type": "Virtual",
+        "values": [
+          "S1-position and break down",
+          "S2-space distance",
+          "S3-Space Dimensions",
+          "S4-Space converted to Time",
+          "S5-Space Converted to Negative",
+          "S6-Space Converted to Decimals",
+          "S7-Space Converted to Bhram"
+        ],
+        "active": false,
+        "archived": false,
+        "groups": [],
+        "extras": {},
+        "files": []
+      }
+    ]
+  }
+}

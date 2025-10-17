@@ -1,0 +1,11 @@
+{
+  "ts": 1753628153838,
+  "method": "POST",
+  "path": "/fms/api/v0/gl-journal-templates",
+  "body": {
+    "name": "Daily Journals",
+    "description": "Daily Journals for Any kind of GL Journals combinations"
+  },
+  "status": 400,
+  "response": "This is final and invalid path coming from node js backend launch-app-fms"
+}

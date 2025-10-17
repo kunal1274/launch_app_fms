@@ -1,0 +1,130 @@
+{
+  "nodes": [
+    {
+      "id": "seed-account-cash",
+      "seq": 1,
+      "group": "SETUP",
+      "name": "Seed Cash account",
+      "description": "Create a leaf ASSET account for Cash (to post debits against).",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "A1",
+        "accountName": "Cash",
+        "accType": "ASSET",
+        "normalBalance": "DEBIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "A1",
+          "accType": "ASSET",
+          "normalBalance": "DEBIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR"
+        }
+      }
+    },
+    {
+      "id": "seed-account-sales",
+      "seq": 2,
+      "group": "SETUP",
+      "name": "Seed Sales account",
+      "description": "Create a leaf REVENUE account for Sales (to post credits against).",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/accounts",
+      "bodyTemplate": {
+        "accountCode": "A2",
+        "accountName": "Sales",
+        "accType": "REVENUE",
+        "normalBalance": "CREDIT"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "accountCode": "A2",
+          "accType": "REVENUE",
+          "normalBalance": "CREDIT",
+          "isLeaf": true,
+          "allowManualPost": true,
+          "currency": "INR"
+        }
+      }
+    },
+    {
+      "id": "create-glj-minimal",
+      "seq": 3,
+      "group": "CREATE",
+      "name": "Create minimal GL Journal",
+      "description": "Happy-path: balanced, two-line DRAFT journal (Cash debit / Sales credit).",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/gl-journals",
+      "bodyTemplate": {
+        "lines": [
+          {
+            "account": "{{seed-account-cash.data._id}}",
+            "debit": 100,
+            "credit": 0,
+            "currency": "INR",
+            "exchangeRate": 1
+          },
+          {
+            "account": "{{seed-account-sales.data._id}}",
+            "debit": 0,
+            "credit": 100,
+            "currency": "INR",
+            "exchangeRate": 1
+          }
+        ]
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "status": "success",
+        "data": {
+          "status": "DRAFT",
+          "lines": [
+            { "lineNum": 1, "debit": 100, "credit": 0, "localAmount": 100 },
+            { "lineNum": 2, "debit": 0, "credit": 100, "localAmount": -100 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "create-glj-missing-lines",
+      "seq": 4,
+      "group": "NEGATIVE",
+      "name": "Create GL Journal missing lines",
+      "description": "Negative: no `lines` array → validation failure.",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/gl-journals",
+      "bodyTemplate": {
+        "reference": "NoLines"
+      },
+      "expectedStatus": 400
+    },
+    {
+      "id": "create-glj-unbalanced",
+      "seq": 5,
+      "group": "NEGATIVE",
+      "name": "Create unbalanced GL Journal",
+      "description": "Negative: single-line (debit ≠ credit) → unbalanced error.",
+      "method": "POST",
+      "pathTemplate": "/bb0/api/v0/gl-journals",
+      "bodyTemplate": {
+        "lines": [
+          {
+            "account": "{{seed-account-cash.data._id}}",
+            "debit": 100,
+            "credit": 0,
+            "currency": "INR",
+            "exchangeRate": 1
+          }
+        ]
+      },
+      "expectedStatus": 422
+    }
+  ]
+}

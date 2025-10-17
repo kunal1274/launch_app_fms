@@ -1,0 +1,23 @@
+{
+  "ts": 1750679148295,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts",
+  "body": {
+    "accountCode": "1001",
+    "accountName": "Savings",
+    "type": "ASSET",
+    "normalBalance": "DEBIT",
+    "parentAccount": "68590d8deb79e06c619b7359",
+    "isLeaf": false,
+    "allowManualPost": false,
+    "currency": "USD",
+    "description": "Full account",
+    "group": "OPERATIONS",
+    "active": true
+  },
+  "status": 500,
+  "response": {
+    "status": "failure",
+    "message": "Internal server error."
+  }
+}

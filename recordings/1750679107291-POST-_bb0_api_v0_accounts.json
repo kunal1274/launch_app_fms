@@ -1,0 +1,23 @@
+{
+  "ts": 1750679107291,
+  "method": "POST",
+  "path": "/bb0/api/v0/accounts",
+  "body": {
+    "accountCode": "1001",
+    "accountName": "Savings",
+    "type": "ASSET",
+    "normalBalance": "DEBIT",
+    "parentAccount": "{{create-minimal.data._id}}",
+    "isLeaf": false,
+    "allowManualPost": false,
+    "currency": "USD",
+    "description": "Full account",
+    "group": "OPERATIONS",
+    "active": true
+  },
+  "status": 422,
+  "response": {
+    "status": "failure",
+    "message": "BB0_Accounts validation failed: parentAccount: Cast to ObjectId failed for value \"{{create-minimal.data._id}}\" (type string) at path \"parentAccount\" because of \"BSONError\""
+  }
+}

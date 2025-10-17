@@ -1,0 +1,31 @@
+{
+  "ts": 1752399132938,
+  "method": "GET",
+  "path": "/fms/api/v0/styles/68737c7c812b6974bf3a5a43",
+  "body": {
+    "name": "General",
+    "description": "General out and in dock warehouse"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "data": {
+      "name": "Laptop Style",
+      "description": "Sizes of the laptop 12th July 1425",
+      "type": "Virtual",
+      "values": [
+        "Japanese",
+        "Nepalese",
+        "Indian",
+        "American",
+        "Chinese"
+      ],
+      "active": false,
+      "archived": false,
+      "groups": [],
+      "files": [],
+      "extras": {},
+      "code": "STL_001"
+    }
+  }
+}

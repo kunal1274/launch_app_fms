@@ -1,0 +1,43 @@
+{
+  "ts": 1753703190730,
+  "method": "POST",
+  "path": "/fms/api/v0/vendors",
+  "body": {
+    "name": "Electro steel",
+    "businessType": "Manufacturing",
+    "contactNum": "2639655100",
+    "email": "test@elecsteel.com",
+    "currency": "INR",
+    "creditLimit": 2000,
+    "registrationNum": "R10jHTACR555K1Z",
+    "panNum": "AAAC755HYK",
+    "tanNum": "TRURT786UI",
+    "address": "Electrosteel  Limited Maker Chambers - IV, Nariman Point Mumbai 400 021",
+    "paymentTerms": "Net30D",
+    "linkedCoaAccount": "688762cbcf15ef6461b19713",
+    "bankDetails": [
+      {
+        "code": "HDFC1873",
+        "type": "Bank",
+        "bankNum": "04942349561873",
+        "name": "HDFC Bank Hyderabad",
+        "ifsc": "HDFC004484",
+        "swift": "HDFCIBERIIT",
+        "active": true
+      },
+      {
+        "code": "kunal1274",
+        "type": "UPI",
+        "bankNum": "kunal12765@okhdfcbank",
+        "name": "UPI for kunal",
+        "ifsc": "",
+        "swift": "",
+        "active": true
+      }
+    ],
+    "active": true,
+    "globalPartyId": "6887631656bcc49a2ca162ae"
+  },
+  "status": 201,
+  "response": "[object Object]{\"status\":\"Success\",\"message\":\"The vendor has been created successfully with vendor code : 6887631656bcc49a2ca162b1 at 2025-07-28T11:46:30.721Z equivalent to IST 7/28/2025, 5:16:30 PM\",\"data\":{\"globalPartyId\":\"6887631656bcc49a2ca162ae\",\"businessType\":\"Manufacturing\",\"name\":\"Electro steel\",\"contactNum\":\"2639655100\",\"email\":\"test@elecsteel.com\",\"contactPersonName\":\"\",\"contactPersonPhone\":\"\",\"contactPersonEmail\":\"\",\"currency\":\"INR\",\"paymentTerms\":\"Net30D\",\"creditLimit\":2000,\"registrationNum\":\"R10jHTACR555K1Z\",\"panNum\":\"AAAC755HYK\",\"tanNum\":\"TRURT786UI\",\"address\":\"Electrosteel  Limited Maker Chambers - IV, Nariman Point Mumbai 400 021\",\"remarks\":\"false\",\"active\":true,\"archived\":false,\"groups\":[],\"linkedCoaAccount\":\"688762cbcf15ef6461b19713\",\"bankDetails\":[{\"code\":\"HDFC1873\",\"type\":\"Bank\",\"ifsc\":\"HDFC004484\",\"swift\":\"HDFCIBERIIT\",\"active\":true,\"qrDetails\":\"\",\"_id\":\"6887631656bcc49a2ca162b2\"},{\"code\":\"kunal1274\",\"type\":\"UPI\",\"ifsc\":\"\",\"swift\":\"\",\"active\":true,\"qrDetails\":\"\",\"_id\":\"6887631656bcc49a2ca162b3\"}],\"extras\":{},\"_id\":\"6887631656bcc49a2ca162b1\",\"files\":[],\"createdAt\":\"2025-07-28T11:46:30.561Z\",\"updatedAt\":\"2025-07-28T11:46:30.561Z\",\"code\":\"V_000006\",\"__v\":0}}"
+}

@@ -1,27 +1,25 @@
 import { Router } from 'express';
-const userRouter = Router();
-
+import { BaseRoutes } from './base.routes.js';
 import {
+  createUser,
   getUsers,
   getUserById,
   updateUser,
   deleteUser,
-  createUser,
+  getUserStats,
 } from '../controllers/user.controller.js';
 
-// CREATE
-userRouter.post('/', createUser);
+// Create standardized user routes
+const userRoutes = new BaseRoutes({
+  create: createUser,
+  getAll: getUsers,
+  getById: getUserById,
+  update: updateUser,
+  delete: deleteUser,
+  getStats: getUserStats,
+}, 'User');
 
-// READ ALL
-userRouter.get('/', getUsers);
-
-// READ ONE
-userRouter.get('/:userId', getUserById);
-
-// UPDATE
-userRouter.put('/:userId', updateUser);
-
-// DELETE
-userRouter.delete('/:userId', deleteUser);
+// Get the router instance
+const userRouter = userRoutes.getRouter();
 
 export default userRouter;

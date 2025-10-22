@@ -1,5 +1,5 @@
 // redisClient.js
-import { createClient } from "redis";
+import { createClient } from 'redis';
 
 const {
   REDIS_HOST,
@@ -15,7 +15,7 @@ const socketConfig = {
 };
 
 // If TLS is required (e.g., some Redis providers expect SSL/TLS connections)
-if (REDIS_USE_TLS === "true") {
+if (REDIS_USE_TLS === 'true') {
   socketConfig.tls = {};
 }
 
@@ -33,8 +33,8 @@ const redisClient = createClient({
 });
 
 // Log errors for better debugging
-redisClient.on("error", (err) => {
-  console.error("Redis Client Error:", err);
+redisClient.on('error', (err) => {
+  console.error('Redis Client Error:', err);
 });
 
 // Connect right away
@@ -43,7 +43,7 @@ redisClient.on("error", (err) => {
     await redisClient.connect();
     console.log(`Connected to Redis on ${REDIS_HOST}:${REDIS_PORT}`);
   } catch (err) {
-    console.error("Could not connect to Redis:", err);
+    console.error('Could not connect to Redis:', err);
   }
 })();
 

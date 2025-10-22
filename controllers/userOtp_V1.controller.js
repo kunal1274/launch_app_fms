@@ -1,22 +1,22 @@
 // controllers/authController.js
 //import twilio from "twilio";
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-console.log("EMAIL_USER:", !!process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", !!process.env.EMAIL_PASS);
+console.log('EMAIL_USER:', !!process.env.EMAIL_USER);
+console.log('EMAIL_PASS:', !!process.env.EMAIL_PASS);
 
-import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken";
-import { winstonLogger } from "../utility/logError.utils.js";
-import { UserGlobalModel } from "../models/userGlobal.model.js";
-import { UserOtpModel } from "../models/userOtp.model.js";
-import generateOtp from "../utility/generateOtp.utils.js";
+import nodemailer from 'nodemailer';
+import jwt from 'jsonwebtoken';
+import { winstonLogger } from '../utility/logError.utils.js';
+import { UserGlobalModel } from '../models/userGlobal.model.js';
+import { UserOtpModel } from '../models/userOtp.model.js';
+import generateOtp from '../utility/generateOtp.utils.js';
 import {
   getFormattedLocalDateTime,
   getLocalTimeString,
-} from "../utility/getLocalTime.js";
-import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
+} from '../utility/getLocalTime.js';
+import createGlobalPartyId from '../shared_service/utility/createGlobalParty.utility.js';
 
 // // Twilio configuration
 // const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -71,7 +71,7 @@ import createGlobalPartyId from "../shared_service/utility/createGlobalParty.uti
 
 // Nodemailer configuration for sending emails
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -96,10 +96,10 @@ const transporter = nodemailer.createTransport({
 transporter
   .verify()
   .then(() => {
-    dbgEmail("✅ SMTP connection OK");
+    dbgEmail('✅ SMTP connection OK');
   })
   .catch((err) => {
-    dbgEmail("❌ SMTP connection failed:", {
+    dbgEmail('❌ SMTP connection failed:', {
       message: err.message,
       stack: err.stack,
     });
@@ -115,39 +115,39 @@ transporter
  *  - otpLength (optional, defaults to 6).
  */
 
-dbgEmail("Nodemailer transport created with", transporter);
+dbgEmail('Nodemailer transport created with', transporter);
 
 export const sendOtp = async (req, res) => {
   const { phoneNumber, email, method, otpType, otpLength } = req.body;
 
   // Validate required inputs
   if (!method || (!phoneNumber && !email)) {
-    winstonLogger.error("Missing identifier or method", {
+    winstonLogger.error('Missing identifier or method', {
       phoneNumber,
       email,
       method,
     });
     return res.status(400).json({
-      msg: "⚠️ Phone number or email is required, and method must be specified",
+      msg: '⚠️ Phone number or email is required, and method must be specified',
     });
   }
 
-  if (!["whatsapp", "sms", "email"].includes(method)) {
+  if (!['whatsapp', 'sms', 'email'].includes(method)) {
     return res
       .status(400)
-      .json({ msg: "⚠️ Invalid method. Choose from whatsapp, sms, or email." });
+      .json({ msg: '⚠️ Invalid method. Choose from whatsapp, sms, or email.' });
   }
   if (
     otpType &&
-    !["numeric", "alphanumeric", "alphanumeric_special"].includes(otpType)
+    !['numeric', 'alphanumeric', 'alphanumeric_special'].includes(otpType)
   ) {
     return res.status(400).json({
-      msg: "⚠️ Invalid OTP type. Choose from numeric, alphanumeric, or alphanumeric_special.",
+      msg: '⚠️ Invalid OTP type. Choose from numeric, alphanumeric, or alphanumeric_special.',
     });
   }
 
   // For email method, ensure the email is not already registered in the User model.
-  if (method === "email" && email) {
+  if (method === 'email' && email) {
     const existingGlobalUser = await UserGlobalModel.findOne({
       email: email.toLowerCase().trim(),
     });
@@ -177,11 +177,11 @@ export const sendOtp = async (req, res) => {
     // }
   }
 
-  const finalOtpType = otpType || "numeric";
+  const finalOtpType = otpType || 'numeric';
   const finalOtpLength = otpLength || 6;
   const otp = generateOtp(finalOtpType, finalOtpLength);
 
-  winstonLogger.info("Generated OTP", { otp });
+  winstonLogger.info('Generated OTP', { otp });
 
   try {
     // Build query for existing OTP (if any) based on the method
@@ -204,48 +204,48 @@ export const sendOtp = async (req, res) => {
       method,
       otpType: finalOtpType,
     });
-    winstonLogger.info("OTP saved to database", { newOtpRecord });
+    winstonLogger.info('OTP saved to database', { newOtpRecord });
 
     // Send the OTP based on method
-    if (method === "whatsapp" && phoneNumber) {
+    if (method === 'whatsapp' && phoneNumber) {
       await client.messages.create({
         body: `Your OTP is: ${otp}`,
         from: whatsappFrom,
         to: `whatsapp:${phoneNumber}`,
       });
-      winstonLogger.info("OTP sent via WhatsApp", { phoneNumber });
+      winstonLogger.info('OTP sent via WhatsApp', { phoneNumber });
       return res
         .status(200)
-        .json({ msg: "OTP sent via WhatsApp successfully" });
-    } else if (method === "sms" && phoneNumber) {
+        .json({ msg: 'OTP sent via WhatsApp successfully' });
+    } else if (method === 'sms' && phoneNumber) {
       await client.messages.create({
         body: `Your OTP is: ${otp}`,
         from: smsFrom,
         to: phoneNumber,
       });
-      winstonLogger.info("OTP sent via SMS", { phoneNumber });
-      return res.status(200).json({ msg: "OTP sent via SMS successfully" });
-    } else if (method === "email" && email) {
+      winstonLogger.info('OTP sent via SMS', { phoneNumber });
+      return res.status(200).json({ msg: 'OTP sent via SMS successfully' });
+    } else if (method === 'email' && email) {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: "Your OTP Code",
+        subject: 'Your OTP Code',
         text: `Your OTP is: ${otp}`,
         html: `<b>Your OTP is: ${otp}</b>`,
       };
       await transporter.sendMail(mailOptions);
-      winstonLogger.info("OTP sent via Email", { email });
+      winstonLogger.info('OTP sent via Email', { email });
       return res.status(200).json({
         msg: `✅ OTP sent via email successfully recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
       });
     } else {
       return res
         .status(400)
-        .json({ msg: "❌ Invalid method or missing phone number/email" });
+        .json({ msg: '❌ Invalid method or missing phone number/email' });
     }
   } catch (err) {
-    winstonLogger.error("Error in sendOtp", { error: err });
-    return res.status(500).json({ msg: "❌ Server Error", error: err });
+    winstonLogger.error('Error in sendOtp', { error: err });
+    return res.status(500).json({ msg: '❌ Server Error', error: err });
   }
 };
 
@@ -258,12 +258,12 @@ export const sendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
   const { phoneNumber, email, otp } = req.body;
-  console.log("line 185 verifyOtpController.js ", req.body);
+  console.log('line 185 verifyOtpController.js ', req.body);
 
   if ((!phoneNumber && !email) || !otp) {
     return res
       .status(400)
-      .json({ msg: "⚠️ Phone number or email and OTP are required" });
+      .json({ msg: '⚠️ Phone number or email and OTP are required' });
   }
   try {
     let query = { otp };
@@ -280,7 +280,7 @@ export const verifyOtp = async (req, res) => {
       existingGlobalUser = await UserGlobalModel.findOne({ phoneNumber });
     }
 
-    console.log("line 201", query);
+    console.log('line 201', query);
 
     const otpRecord = await UserOtpModel.findOne(query);
     // const otpRecord1 = UserOtpModel.findOne(query);
@@ -288,19 +288,19 @@ export const verifyOtp = async (req, res) => {
     //   otpRecordVerification: otpRecord._id,
     // });
     console.log(
-      "line 209",
+      'line 209',
       otpRecord,
       otpRecord?.phoneNumber,
       otpRecord?.email
     );
     if (!otpRecord) {
-      return res.status(400).json({ msg: "🤕 Invalid or expired OTP" });
+      return res.status(400).json({ msg: '🤕 Invalid or expired OTP' });
     }
-    console.log("line 217 record expire", otpRecord.expiresAt < Date.now());
+    console.log('line 217 record expire', otpRecord.expiresAt < Date.now());
     // Check expiration
     if (otpRecord.expiresAt < Date.now()) {
       await UserOtpModel.deleteOne({ _id: otpRecord._id });
-      return res.status(400).json({ msg: "🤯 OTP has expired" });
+      return res.status(400).json({ msg: '🤯 OTP has expired' });
     }
 
     // Generate JWT token (payload can be customized)
@@ -311,12 +311,12 @@ export const verifyOtp = async (req, res) => {
       phoneNumber: phoneNumber,
     };
     const token1 = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: '1h',
     });
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "15m",
+      expiresIn: '15m',
     });
-    console.log("line 237 in user otp controller and token is ", token);
+    console.log('line 237 in user otp controller and token is ', token);
 
     // console.log(
     //   "line 239",
@@ -326,7 +326,7 @@ export const verifyOtp = async (req, res) => {
 
     if (existingGlobalUser && !existingGlobalUser.globalPartyId) {
       const partyIdForExistingRecord = await createGlobalPartyId(
-        "User",
+        'User',
         null,
         email ? email : phoneNumber
       );
@@ -336,7 +336,7 @@ export const verifyOtp = async (req, res) => {
 
     if (!existingGlobalUser) {
       const partyIdNew = await createGlobalPartyId(
-        "User",
+        'User',
         null,
         email ? email : phoneNumber
       );
@@ -344,13 +344,13 @@ export const verifyOtp = async (req, res) => {
       await UserGlobalModel.create({
         email,
         phoneNumber,
-        method: email ? "email" : "phone",
-        signInMethod: "otp",
+        method: email ? 'email' : 'phone',
+        signInMethod: 'otp',
         globalPartyId: partyIdNew,
       });
     }
 
-    console.log("line 269 record before deletion", otpRecord?._id);
+    console.log('line 269 record before deletion', otpRecord?._id);
 
     // OTP is valid; delete it and respond
     await UserOtpModel.deleteOne({ _id: otpRecord._id });
@@ -360,7 +360,7 @@ export const verifyOtp = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    winstonLogger.error("Error in verifyOtp", { error: err });
+    winstonLogger.error('Error in verifyOtp', { error: err });
 
     return res.status(500).json({
       msg: `❌ Server Error recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
@@ -382,7 +382,7 @@ export const createOtp = async (req, res) => {
 
     if (!otp || !method || !otpType) {
       return res.status(400).json({
-        message: "otp, method, and otpType are required fields",
+        message: 'otp, method, and otpType are required fields',
       });
     }
 
@@ -399,8 +399,8 @@ export const createOtp = async (req, res) => {
     const savedOtp = await newOtp.save();
     return res.status(201).json(savedOtp);
   } catch (error) {
-    console.error("Error creating OTP:", error);
-    return res.status(500).json({ message: "Failed to create OTP record" });
+    console.error('Error creating OTP:', error);
+    return res.status(500).json({ message: 'Failed to create OTP record' });
   }
 };
 
@@ -412,8 +412,8 @@ export const getAllOtps = async (req, res) => {
     const otps = await UserOtpModel.find();
     return res.json(otps);
   } catch (error) {
-    console.error("Error fetching OTPs:", error);
-    return res.status(500).json({ message: "Failed to fetch OTP records" });
+    console.error('Error fetching OTPs:', error);
+    return res.status(500).json({ message: 'Failed to fetch OTP records' });
   }
 };
 
@@ -425,12 +425,12 @@ export const getOtpById = async (req, res) => {
     const { id } = req.params;
     const otpRecord = await UserOtpModel.findById(id);
     if (!otpRecord) {
-      return res.status(404).json({ message: "OTP record not found" });
+      return res.status(404).json({ message: 'OTP record not found' });
     }
     return res.json(otpRecord);
   } catch (error) {
-    console.error("Error fetching OTP by ID:", error);
-    return res.status(500).json({ message: "Failed to fetch OTP record" });
+    console.error('Error fetching OTP by ID:', error);
+    return res.status(500).json({ message: 'Failed to fetch OTP record' });
   }
 };
 
@@ -449,13 +449,13 @@ export const updateOtp = async (req, res) => {
     );
 
     if (!updatedOtp) {
-      return res.status(404).json({ message: "OTP record not found" });
+      return res.status(404).json({ message: 'OTP record not found' });
     }
 
     return res.json(updatedOtp);
   } catch (error) {
-    console.error("Error updating OTP:", error);
-    return res.status(500).json({ message: "Failed to update OTP record" });
+    console.error('Error updating OTP:', error);
+    return res.status(500).json({ message: 'Failed to update OTP record' });
   }
 };
 
@@ -468,12 +468,12 @@ export const deleteOtp = async (req, res) => {
 
     const deletedOtp = await UserOtpModel.findByIdAndDelete(id);
     if (!deletedOtp) {
-      return res.status(404).json({ message: "OTP record not found" });
+      return res.status(404).json({ message: 'OTP record not found' });
     }
 
-    return res.json({ message: "OTP record deleted successfully" });
+    return res.json({ message: 'OTP record deleted successfully' });
   } catch (error) {
-    console.error("Error deleting OTP:", error);
-    return res.status(500).json({ message: "Failed to delete OTP record" });
+    console.error('Error deleting OTP:', error);
+    return res.status(500).json({ message: 'Failed to delete OTP record' });
   }
 };

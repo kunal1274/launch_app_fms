@@ -1,14 +1,14 @@
 // services/salesStock.service.js
 
-import { InventoryTransactionModel } from "../models/inventoryTransaction.model.js";
-import { StockBalanceModel } from "../models/inventStockBalance.model.js";
-import { ProvisionalBalanceModel } from "../models/provisionalBalance.model.js";
+import { InventoryTransactionModel } from '../models/inventoryTransaction.model.js';
+import { StockBalanceModel } from '../models/inventStockBalance.model.js';
+import { ProvisionalBalanceModel } from '../models/provisionalBalance.model.js';
 
 class SalesStockService1 {
   static async reserveSO(so, session) {
     for (let i = 0; i < so.lines.length; i++) {
       const l = so.lines[i];
-      const qty = so.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = so.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: so.site,
@@ -37,10 +37,10 @@ class SalesStockService1 {
 
       // tag with reference
       pb.extras = pb.extras || new Map();
-      pb.extras.set("refType", "SalesOrder");
-      pb.extras.set("refId", so._id.toString());
-      pb.extras.set("refNum", so.orderNum);
-      pb.extras.set("refLineNum", i + 1);
+      pb.extras.set('refType', 'SalesOrder');
+      pb.extras.set('refId', so._id.toString());
+      pb.extras.set('refNum', so.orderNum);
+      pb.extras.set('refLineNum', i + 1);
       await pb.save({ session });
     }
   }
@@ -48,7 +48,7 @@ class SalesStockService1 {
   static async releaseSO(so, session) {
     for (let i = 0; i < so.lines.length; i++) {
       const l = so.lines[i];
-      const qty = so.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = so.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: so.site,
@@ -78,7 +78,7 @@ class SalesStockService1 {
   static async applySO(so, session) {
     for (let i = 0; i < so.lines.length; i++) {
       const l = so.lines[i];
-      const qty = so.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = so.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: so.site,
@@ -114,10 +114,10 @@ class SalesStockService1 {
 
       // tag reference
       sb.extras = sb.extras || new Map();
-      sb.extras.set("refType", "SalesOrder");
-      sb.extras.set("refId", so._id.toString());
-      sb.extras.set("refNum", so.orderNum);
-      sb.extras.set("refLineNum", i + 1);
+      sb.extras.set('refType', 'SalesOrder');
+      sb.extras.set('refId', so._id.toString());
+      sb.extras.set('refNum', so.orderNum);
+      sb.extras.set('refLineNum', i + 1);
       await sb.save({ session });
     }
   }
@@ -125,7 +125,7 @@ class SalesStockService1 {
   static async reverseSO(so, session) {
     for (let i = 0; i < so.lines.length; i++) {
       const l = so.lines[i];
-      const qty = so.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = so.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: so.site,
@@ -145,7 +145,7 @@ class SalesStockService1 {
         serial: so.serial,
       };
       const sb = await StockBalanceModel.findOne(key).session(session);
-      if (!sb) throw new Error("Stock record not found for reversal");
+      if (!sb) throw new Error('Stock record not found for reversal');
       sb.quantity -= qty;
       sb.totalCostValue -= qty * l.price;
       sb.totalSalesValue -= qty > 0 ? qty * l.price : 0;
@@ -159,7 +159,7 @@ class SalesStockService1 {
 // for single  item
 class SalesStockService2 {
   static async reserveSO1(so, session) {
-    const qty = so.orderType === "Return" ? -so.quantity : so.quantity;
+    const qty = so.orderType === 'Return' ? -so.quantity : so.quantity;
     const key = {
       item: so.item,
       site: so.site,
@@ -194,10 +194,10 @@ class SalesStockService2 {
       },
       $set: {
         // stamp your SO reference fields into extras
-        "extras.refType": "SalesOrder",
-        "extras.refId": so._id.toString(),
-        "extras.refNum": so.orderNum,
-        "extras.refLineNum": (1).toString(),
+        'extras.refType': 'SalesOrder',
+        'extras.refId': so._id.toString(),
+        'extras.refNum': so.orderNum,
+        'extras.refLineNum': (1).toString(),
       },
     };
 
@@ -253,7 +253,7 @@ class SalesStockService2 {
   }
 
   static async reserveSO(so, session) {
-    const qty = so.orderType === "Return" ? -so.quantity : so.quantity;
+    const qty = so.orderType === 'Return' ? -so.quantity : so.quantity;
     const value = qty * so.price;
 
     const key = {
@@ -282,10 +282,10 @@ class SalesStockService2 {
       },
       // stamp your SO reference into the `extras` map
       $set: {
-        "extras.refType": "SalesOrder",
-        "extras.refId": so._id.toString(),
-        "extras.refNum": so.orderNum,
-        "extras.refLineNum": "1",
+        'extras.refType': 'SalesOrder',
+        'extras.refId': so._id.toString(),
+        'extras.refNum': so.orderNum,
+        'extras.refLineNum': '1',
       },
     };
 
@@ -305,7 +305,7 @@ class SalesStockService2 {
   }
 
   static async releaseSO(so, session) {
-    const qty = so.orderType === "Return" ? -so.quantity : so.quantity;
+    const qty = so.orderType === 'Return' ? -so.quantity : so.quantity;
     const key = {
       item: so.item,
       site: so.site,
@@ -332,7 +332,7 @@ class SalesStockService2 {
   }
 
   static async applySO(so, session) {
-    const qty = so.orderType === "Return" ? -so.quantity : so.quantity;
+    const qty = so.orderType === 'Return' ? -so.quantity : so.quantity;
     const key = {
       item: so.item,
       site: so.site,
@@ -368,15 +368,15 @@ class SalesStockService2 {
 
     // tag reference
     sb.extras = sb.extras || new Map();
-    sb.extras.set("refType", "SalesOrder");
-    sb.extras.set("refId", so._id.toString());
-    sb.extras.set("refNum", so.orderNum);
-    sb.extras.set("refLineNum", 1);
+    sb.extras.set('refType', 'SalesOrder');
+    sb.extras.set('refId', so._id.toString());
+    sb.extras.set('refNum', so.orderNum);
+    sb.extras.set('refLineNum', 1);
     await sb.save({ session });
   }
 
   static async reverseSO(so, session) {
-    const qty = so.orderType === "Return" ? -so.quantity : so.quantity;
+    const qty = so.orderType === 'Return' ? -so.quantity : so.quantity;
     const key = {
       item: so.item,
       site: so.site,
@@ -396,7 +396,7 @@ class SalesStockService2 {
       serial: so.serial,
     };
     const sb = await StockBalanceModel.findOne(key).session(session);
-    if (!sb) throw new Error("Stock record not found for reversal");
+    if (!sb) throw new Error('Stock record not found for reversal');
     sb.quantity -= qty;
     sb.totalCostValue -= qty * so.price;
     sb.totalSalesValue -= qty > 0 ? qty * so.price : 0;
@@ -413,7 +413,7 @@ class SalesStockService3 {
    *   - return   : qty → positive (inbound)
    */
   static async reserveSO(so, session) {
-    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const qtySigned = so.orderType === 'Return' ? so.quantity : -so.quantity;
     const value = qtySigned * so.price;
 
     const key = {
@@ -441,9 +441,9 @@ class SalesStockService3 {
         totalReserveValue: value,
       },
       $set: {
-        "extras.refType": "SALES",
-        "extras.refId": so._id.toString(),
-        "extras.refNum": so.orderNum,
+        'extras.refType': 'SALES',
+        'extras.refId': so._id.toString(),
+        'extras.refNum': so.orderNum,
       },
     };
 
@@ -463,7 +463,7 @@ class SalesStockService3 {
    * Release stock (back to DRAFT/CANCELLED).
    */
   static async releaseSO(so, session) {
-    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const qtySigned = so.orderType === 'Return' ? so.quantity : -so.quantity;
     const value = qtySigned * so.price;
     const key = {
       item: so.item,
@@ -494,7 +494,7 @@ class SalesStockService3 {
    * Apply real stock movement for a sale (Invoiced).
    */
   static async applySO(so, session) {
-    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const qtySigned = so.orderType === 'Return' ? so.quantity : -so.quantity;
     const key = {
       item: so.item,
       site: so.site,
@@ -523,7 +523,7 @@ class SalesStockService3 {
       totalCostValue: qtySigned * (qtySigned > 0 ? cost : cost),
       // for a sale, purchaseValue = 0; salesValue = (-qtySigned)*so.price
       totalRevenueValue:
-        so.orderType === "Return"
+        so.orderType === 'Return'
           ? -so.quantity * cost
           : so.quantity * so.price,
       totalPurchaseValue: 0,
@@ -538,9 +538,9 @@ class SalesStockService3 {
 
     // tag reference
     sb.extras = sb.extras || new Map();
-    sb.extras.set("refType", "SALES");
-    sb.extras.set("refId", so._id.toString());
-    sb.extras.set("refNum", so.orderNum);
+    sb.extras.set('refType', 'SALES');
+    sb.extras.set('refId', so._id.toString());
+    sb.extras.set('refNum', so.orderNum);
     await sb.save({ session });
   }
 
@@ -548,7 +548,7 @@ class SalesStockService3 {
    * Reverse real stock (on Cancel after Invoiced).
    */
   static async reverseSO(so, session) {
-    const qtySigned = so.orderType === "Return" ? so.quantity : -so.quantity;
+    const qtySigned = so.orderType === 'Return' ? so.quantity : -so.quantity;
     const key = {
       item: so.item,
       site: so.site,
@@ -569,7 +569,7 @@ class SalesStockService3 {
     };
 
     const sb = await StockBalanceModel.findOne(key).session(session);
-    if (!sb) throw new Error("Stock record not found for reversal");
+    if (!sb) throw new Error('Stock record not found for reversal');
 
     const cost = sb.costPrice || 0;
     sb.quantity -= qtySigned;
@@ -588,31 +588,31 @@ class SalesStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const qty = order.orderType === 'Return' ? ln.quantity : -ln.quantity;
       const val = qty * ln.price;
       const dims = {
         site: ln.site,
@@ -638,10 +638,10 @@ class SalesStockService {
         {
           $inc: { quantity: qty, totalReserveValue: val },
           $set: {
-            "extras.refType": "SaleOrder",
-            "extras.refId": order._id.toString(),
-            "extras.refNum": order.orderNum,
-            "extras.refLineNum": (idx + 1).toString(),
+            'extras.refType': 'SaleOrder',
+            'extras.refId': order._id.toString(),
+            'extras.refNum': order.orderNum,
+            'extras.refLineNum': (idx + 1).toString(),
           },
         },
         { upsert: true, session }
@@ -652,7 +652,7 @@ class SalesStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "SALES",
+            sourceType: 'SALES',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -668,8 +668,8 @@ class SalesStockService {
             },
             extras: {
               action:
-                order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
-              actionType: "RESERVE",
+                order.orderType === 'Return' ? 'SALES_RETURN' : 'SALES_ISSUE',
+              actionType: 'RESERVE',
               refNum: order.orderNum,
               discountAmt: order.discountAmt,
               chargesExpense: order.charges,
@@ -687,31 +687,31 @@ class SalesStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const qty = order.orderType === 'Return' ? ln.quantity : -ln.quantity;
       const val = qty * ln.price;
       // const dims = { /* same as above */ ...ln };
       const dims = {
@@ -749,7 +749,7 @@ class SalesStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "SALES",
+            sourceType: 'SALES',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -765,8 +765,8 @@ class SalesStockService {
             },
             extras: {
               action:
-                order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
-              actionType: "RELEASE",
+                order.orderType === 'Return' ? 'SALES_RETURN' : 'SALES_ISSUE',
+              actionType: 'RELEASE',
               refNum: order.orderNum,
               discountAmt: -order.discountAmt,
               chargesExpense: -order.charges,
@@ -784,33 +784,33 @@ class SalesStockService {
     const lines = Array.isArray(order.lines1)
       ? order.lines1
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     const txns = [];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
+      const qty = order.orderType === 'Return' ? -ln.quantity : ln.quantity;
       const price = ln.price;
       const costPrice = ln.costPrice;
       const purchPrice = ln.purchPrice;
@@ -849,10 +849,10 @@ class SalesStockService {
       );
       sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;
       sb.extras = sb.extras || new Map();
-      sb.extras.set("refType", "SalesOrder");
-      sb.extras.set("refId", order._id.toString());
-      sb.extras.set("refNum", order.orderNum);
-      sb.extras.set("refLineNum", (idx + 1).toString());
+      sb.extras.set('refType', 'SalesOrder');
+      sb.extras.set('refId', order._id.toString());
+      sb.extras.set('refNum', order.orderNum);
+      sb.extras.set('refLineNum', (idx + 1).toString());
       await sb.save({ session });
 
       // log transaction
@@ -883,7 +883,7 @@ class SalesStockService {
       // );
       txns.push({
         txnDate: new Date(),
-        sourceType: "SALES",
+        sourceType: 'SALES',
         sourceId: order._id,
         sourceLine: idx + 1,
         item: ln.item,
@@ -898,8 +898,8 @@ class SalesStockService {
           withholdingTax: order.withholdingTaxAmt,
         },
         extras: {
-          action: order.orderType === "Return" ? "SALES_RETURN" : "SALES_ISSUE",
-          actionType: "APPLY",
+          action: order.orderType === 'Return' ? 'SALES_RETURN' : 'SALES_ISSUE',
+          actionType: 'APPLY',
           refNum: order.orderNum,
           discountAmt: order.discountAmt,
           chargesExpense: order.charges,
@@ -922,31 +922,31 @@ class SalesStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? ln.quantity : -ln.quantity;
+      const qty = order.orderType === 'Return' ? ln.quantity : -ln.quantity;
       const price = ln.price;
       // const dims = { /* same as above */ ...ln };
       const dims = {
@@ -972,7 +972,7 @@ class SalesStockService {
         item: ln.item,
         ...dims,
       }).session(session);
-      if (!sb) throw new Error("Stock record not found for reversal");
+      if (!sb) throw new Error('Stock record not found for reversal');
       sb.quantity -= qty;
       sb.totalCostValue -= qty * price;
       sb.totalPurchaseValue -= qty < 0 ? -qty * price : 0;
@@ -986,7 +986,7 @@ class SalesStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "SALES",
+            sourceType: 'SALES',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -1002,10 +1002,10 @@ class SalesStockService {
             },
             extras: {
               action:
-                order.orderType === "Return"
-                  ? "SALES_RETURN_REVERSAL"
-                  : "SALES_ISSUE_REVERSAL",
-              actionType: "REVERSE",
+                order.orderType === 'Return'
+                  ? 'SALES_RETURN_REVERSAL'
+                  : 'SALES_ISSUE_REVERSAL',
+              actionType: 'REVERSE',
               refNum: order.orderNum,
               discountAmt: -order.discountAmt,
               chargesExpense: -order.charges,

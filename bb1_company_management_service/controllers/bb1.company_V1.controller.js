@@ -1,14 +1,14 @@
 // controllers/company.controller.js
 
-import mongoose from "mongoose";
-import { CompanyModel } from "../models/bb1.company.model.js";
-import { GlobalPartyModel } from "../../bb1_shared_management_service/models/bb1.globalParty.model.js";
-import { createAuditLog } from "../../bb1_audit_logging_service/utils/bb1.auditLogger.utils.js";
-import redisClient from "../../bb1_shared_management_service/middleware/bb1.redisClient.js";
-import { logStackError } from "../../bb1_shared_management_service/utility/bb1.logError.utils.js";
+import mongoose from 'mongoose';
+import { CompanyModel } from '../models/bb1.company.model.js';
+import { GlobalPartyModel } from '../../bb1_shared_management_service/models/bb1.globalParty.model.js';
+import { createAuditLog } from '../../bb1_audit_logging_service/utils/bb1.auditLogger.utils.js';
+import redisClient from '../../bb1_shared_management_service/middleware/bb1.redisClient.js';
+import { logStackError } from '../../bb1_shared_management_service/utility/bb1.logError.utils.js';
 import logger, {
   loggerJsonFormat,
-} from "../../bb1_shared_management_service/utility/bb1.logger.util.js";
+} from '../../bb1_shared_management_service/utility/bb1.logger.util.js';
 
 const CACHE_KEY = (req) => `${req.method}:${req.originalUrl}`;
 
@@ -28,9 +28,9 @@ export const createCompany = async (req, res) => {
 
     if (!companyCode || !companyName || !primaryGSTAddress || !email) {
       return res.status(422).json({
-        status: "failure",
+        status: 'failure',
         message:
-          "⚠️ companyCode, companyName, primaryGSTAddress, and email are required.",
+          '⚠️ companyCode, companyName, primaryGSTAddress, and email are required.',
       });
     }
 
@@ -42,25 +42,25 @@ export const createCompany = async (req, res) => {
     if (!globalPartyId) {
       const newParty = await GlobalPartyModel.create({
         name: companyName,
-        partyType: ["Company"],
+        partyType: ['Company'],
       });
       partyId = newParty._id;
     } else {
       if (!mongoose.Types.ObjectId.isValid(globalPartyId)) {
         return res.status(400).json({
-          status: "failure",
+          status: 'failure',
           message: `⚠️ Invalid globalPartyId: ${globalPartyId}`,
         });
       }
       const existing = await GlobalPartyModel.findById(globalPartyId);
       if (!existing) {
         return res.status(404).json({
-          status: "failure",
+          status: 'failure',
           message: `⚠️ GlobalParty ${globalPartyId} not found.`,
         });
       }
-      if (!existing.partyType.includes("Company")) {
-        existing.partyType.push("Company");
+      if (!existing.partyType.includes('Company')) {
+        existing.partyType.push('Company');
         await existing.save();
       }
       partyId = existing._id;
@@ -77,50 +77,50 @@ export const createCompany = async (req, res) => {
 
     // Audit log for creation
     await createAuditLog({
-      user: req.user?.username || "System",
-      module: "Company",
-      action: "CREATE",
+      user: req.user?.username || 'System',
+      module: 'Company',
+      action: 'CREATE',
       recordId: company._id,
       changes: { newData: company },
     });
 
-    await redisClient.del("/companies");
+    await redisClient.del('/companies');
 
-    logger.info("✅ Company created", { companyId: company._id });
-    loggerJsonFormat.info("✅ Company created", { companyId: company._id });
+    logger.info('✅ Company created', { companyId: company._id });
+    loggerJsonFormat.info('✅ Company created', { companyId: company._id });
 
     return res.status(201).json({
-      status: "success",
-      message: "✅ Company created successfully.",
+      status: 'success',
+      message: '✅ Company created successfully.',
       data: company,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("Company create validation", error);
+      logStackError('Company create validation', error);
       return res.status(422).json({
-        status: "failure",
-        message: "❌ Validation error.",
+        status: 'failure',
+        message: '❌ Validation error.',
         error: error.message,
       });
     }
     if (error.code === 11000) {
-      logStackError("Company create duplicate", error);
+      logStackError('Company create duplicate', error);
       return res.status(409).json({
-        status: "failure",
-        message: "❌ companyCode or email already exists.",
+        status: 'failure',
+        message: '❌ companyCode or email already exists.',
       });
     }
-    if (error.message?.includes("network error")) {
-      logStackError("Company create network", error);
+    if (error.message?.includes('network error')) {
+      logStackError('Company create network', error);
       return res.status(503).json({
-        status: "failure",
-        message: "❌ Service unavailable. Try again later.",
+        status: 'failure',
+        message: '❌ Service unavailable. Try again later.',
       });
     }
-    logStackError("Company create unknown", error);
+    logStackError('Company create unknown', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -136,8 +136,8 @@ export const getAllCompanies = async (req, res) => {
     if (cached) {
       const data = JSON.parse(cached);
       return res.status(200).json({
-        status: "success",
-        message: "✅ Companies retrieved (cache).",
+        status: 'success',
+        message: '✅ Companies retrieved (cache).',
         count: data.length,
         data,
         cached: true,
@@ -147,17 +147,17 @@ export const getAllCompanies = async (req, res) => {
     const companies = await CompanyModel.find();
     await redisClient.set(key, JSON.stringify(companies), { EX: 300 });
     return res.status(200).json({
-      status: "success",
-      message: "✅ Companies retrieved.",
+      status: 'success',
+      message: '✅ Companies retrieved.',
       count: companies.length,
       data: companies,
       cached: false,
     });
   } catch (error) {
-    logStackError("Get all companies", error);
+    logStackError('Get all companies', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -170,7 +170,7 @@ export const getCompanyById = async (req, res) => {
   const { companyId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(companyId)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `⚠️ Invalid companyId: ${companyId}`,
     });
   }
@@ -178,20 +178,20 @@ export const getCompanyById = async (req, res) => {
     const company = await CompanyModel.findById(companyId);
     if (!company) {
       return res.status(404).json({
-        status: "failure",
-        message: "⚠️ Company not found.",
+        status: 'failure',
+        message: '⚠️ Company not found.',
       });
     }
     return res.status(200).json({
-      status: "success",
-      message: "✅ Company retrieved.",
+      status: 'success',
+      message: '✅ Company retrieved.',
       data: company,
     });
   } catch (error) {
-    logStackError("Get company by ID", error);
+    logStackError('Get company by ID', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -204,7 +204,7 @@ export const updateCompanyById = async (req, res) => {
   const { companyId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(companyId)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `⚠️ Invalid companyId: ${companyId}`,
     });
   }
@@ -218,7 +218,7 @@ export const updateCompanyById = async (req, res) => {
     if (req.body.email) {
       req.body.email = req.body.email.trim().toLowerCase();
     }
-    req.body.updatedBy = req.user?.username || "Unknown";
+    req.body.updatedBy = req.user?.username || 'Unknown';
 
     const company = await CompanyModel.findByIdAndUpdate(companyId, req.body, {
       new: true,
@@ -226,45 +226,45 @@ export const updateCompanyById = async (req, res) => {
     });
     if (!company) {
       return res.status(404).json({
-        status: "failure",
-        message: "⚠️ Company not found.",
+        status: 'failure',
+        message: '⚠️ Company not found.',
       });
     }
 
     // Audit log for update
     await createAuditLog({
-      user: req.user?.username || "System",
-      module: "Company",
-      action: "UPDATE",
+      user: req.user?.username || 'System',
+      module: 'Company',
+      action: 'UPDATE',
       recordId: company._id,
       changes: { newData: company },
     });
 
-    await redisClient.del("/companies");
+    await redisClient.del('/companies');
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ Company updated successfully.",
+      status: 'success',
+      message: '✅ Company updated successfully.',
       data: company,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(422).json({
-        status: "failure",
-        message: "❌ Validation error.",
+        status: 'failure',
+        message: '❌ Validation error.',
         error: error.message,
       });
     }
     if (error.code === 11000) {
       return res.status(409).json({
-        status: "failure",
-        message: "❌ Duplicate companyCode or email.",
+        status: 'failure',
+        message: '❌ Duplicate companyCode or email.',
       });
     }
-    logStackError("Update company", error);
+    logStackError('Update company', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -277,7 +277,7 @@ export const deleteCompanyById = async (req, res) => {
   const { companyId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(companyId)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `⚠️ Invalid companyId: ${companyId}`,
     });
   }
@@ -285,31 +285,31 @@ export const deleteCompanyById = async (req, res) => {
     const company = await CompanyModel.findByIdAndDelete(companyId);
     if (!company) {
       return res.status(404).json({
-        status: "failure",
-        message: "⚠️ Company not found.",
+        status: 'failure',
+        message: '⚠️ Company not found.',
       });
     }
 
     // Audit log for deletion
     await createAuditLog({
-      user: req.user?.username || "System",
-      module: "Company",
-      action: "DELETE",
+      user: req.user?.username || 'System',
+      module: 'Company',
+      action: 'DELETE',
       recordId: company._id,
       changes: { oldData: company },
     });
 
-    await redisClient.del("/companies");
+    await redisClient.del('/companies');
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ Company deleted successfully.",
+      status: 'success',
+      message: '✅ Company deleted successfully.',
     });
   } catch (error) {
-    logStackError("Delete company", error);
+    logStackError('Delete company', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -322,44 +322,44 @@ export const archiveCompanyById = async (req, res) => {
   const { companyId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(companyId)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `⚠️ Invalid companyId: ${companyId}`,
     });
   }
   try {
     const company = await CompanyModel.findByIdAndUpdate(
       companyId,
-      { archived: true, updatedBy: req.user?.username || "Unknown" },
+      { archived: true, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!company) {
       return res.status(404).json({
-        status: "failure",
-        message: "⚠️ Company not found.",
+        status: 'failure',
+        message: '⚠️ Company not found.',
       });
     }
 
     // Audit log for archive
     await createAuditLog({
-      user: req.user?.username || "System",
-      module: "Company",
-      action: "ARCHIVE",
+      user: req.user?.username || 'System',
+      module: 'Company',
+      action: 'ARCHIVE',
       recordId: company._id,
       changes: { newData: company },
     });
 
-    await redisClient.del("/companies");
+    await redisClient.del('/companies');
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ Company archived successfully.",
+      status: 'success',
+      message: '✅ Company archived successfully.',
       data: company,
     });
   } catch (error) {
-    logStackError("Archive company", error);
+    logStackError('Archive company', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -372,44 +372,44 @@ export const unarchiveCompanyById = async (req, res) => {
   const { companyId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(companyId)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `⚠️ Invalid companyId: ${companyId}`,
     });
   }
   try {
     const company = await CompanyModel.findByIdAndUpdate(
       companyId,
-      { archived: false, updatedBy: req.user?.username || "Unknown" },
+      { archived: false, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!company) {
       return res.status(404).json({
-        status: "failure",
-        message: "⚠️ Company not found.",
+        status: 'failure',
+        message: '⚠️ Company not found.',
       });
     }
 
     // Audit log for unarchive
     await createAuditLog({
-      user: req.user?.username || "System",
-      module: "Company",
-      action: "UNARCHIVE",
+      user: req.user?.username || 'System',
+      module: 'Company',
+      action: 'UNARCHIVE',
       recordId: company._id,
       changes: { newData: company },
     });
 
-    await redisClient.del("/companies");
+    await redisClient.del('/companies');
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ Company unarchived successfully.",
+      status: 'success',
+      message: '✅ Company unarchived successfully.',
       data: company,
     });
   } catch (error) {
-    logStackError("Unarchive company", error);
+    logStackError('Unarchive company', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }
@@ -422,16 +422,16 @@ export const getArchivedCompanies = async (req, res) => {
   try {
     const companies = await CompanyModel.find({ archived: true });
     return res.status(200).json({
-      status: "success",
-      message: "✅ Archived companies retrieved.",
+      status: 'success',
+      message: '✅ Archived companies retrieved.',
       count: companies.length,
       data: companies,
     });
   } catch (error) {
-    logStackError("Get archived companies", error);
+    logStackError('Get archived companies', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error.",
+      status: 'failure',
+      message: '❌ Internal server error.',
       error: error.message,
     });
   }

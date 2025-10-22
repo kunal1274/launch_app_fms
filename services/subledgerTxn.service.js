@@ -1,5 +1,5 @@
-import { SubledgerTransactionModel } from "../models/subledgerTxn.model.js";
-import mongoose from "mongoose";
+import { SubledgerTransactionModel } from '../models/subledgerTxn.model.js';
+import mongoose from 'mongoose';
 
 export default class SubledgerService {
   /**
@@ -61,8 +61,8 @@ export default class SubledgerService {
     let {
       subledgerType,
       postingEventType,
-      previousPostingEventType = "NONE",
-      nextPostingEventType = "NONE",
+      previousPostingEventType = 'NONE',
+      nextPostingEventType = 'NONE',
       sourceType,
       sourceId,
       sourceLine = 1,
@@ -80,7 +80,7 @@ export default class SubledgerService {
     } = dto;
 
     // if dto.extras is a Mongoose Map, convert to a plain object
-    if (typeof extras.toObject === "function") {
+    if (typeof extras.toObject === 'function') {
       extras = extras.toObject();
     } else if (extras instanceof Map) {
       extras = Object.fromEntries(extras);
@@ -152,7 +152,7 @@ export default class SubledgerService {
       query.postingEventType = filters.postingEventType;
     if (filters.sourceId && mongoose.isValidObjectId(filters.sourceId))
       query.sourceId = filters.sourceId;
-    ["ledgerAccount", "customer", "supplier", "bankAccount", "item"].forEach(
+    ['ledgerAccount', 'customer', 'supplier', 'bankAccount', 'item'].forEach(
       (fld) => {
         if (filters[fld] && mongoose.isValidObjectId(filters[fld])) {
           query[fld] = filters[fld];

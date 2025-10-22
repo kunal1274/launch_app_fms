@@ -1,7 +1,7 @@
 // models/bank.model.js
 
-import mongoose, { Schema, model } from "mongoose";
-import { BankCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { BankCounterModel } from './counter.model.js';
 
 const bankSchema = new Schema(
   {
@@ -13,7 +13,7 @@ const bankSchema = new Schema(
     // auto generated
     globalPartyId: {
       type: Schema.Types.ObjectId,
-      ref: "GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      ref: 'GlobalParties', // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
       required: false,
       unique: true, //ensures only 1 Customer doc can point to the same globalParty
     },
@@ -22,12 +22,12 @@ const bankSchema = new Schema(
       type: String,
       required: [
         false,
-        "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
+        '⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique',
       ],
       validate: {
         validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
         message:
-          "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
+          '⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .',
       },
     },
     bankType: {
@@ -35,38 +35,38 @@ const bankSchema = new Schema(
       required: true,
       enum: {
         values: [
-          "All",
-          "BankAndUpi",
-          "Cash",
-          "Bank",
-          "UPI",
-          "Crypto",
-          "Barter",
+          'All',
+          'BankAndUpi',
+          'Cash',
+          'Bank',
+          'UPI',
+          'Crypto',
+          'Barter',
         ],
         message:
-          "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
+          '⚠️ {VALUE} is not a valid type. Use \'Cash\' or \'Bank\' or \'UPI\' or \'Crypto\' or \'Barter\'.',
       },
-      default: "Bank",
+      default: 'Bank',
     },
     address: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     parentAccount: {
       // if Bank account is hierarchical
       type: Schema.Types.ObjectId,
-      ref: "Banks",
+      ref: 'Banks',
       default: null,
     },
 
     linkedCoaAccount: {
       type: Schema.Types.ObjectId,
-      ref: "Accounts",
+      ref: 'Accounts',
       default: null,
       required: [
         true,
-        "Every BankAccount must specify the corresponding leaf AccountModel _id",
+        'Every BankAccount must specify the corresponding leaf AccountModel _id',
       ],
     },
     upi: {
@@ -100,11 +100,11 @@ const bankSchema = new Schema(
     qrDetails: {
       // in case of upi qr code can be given
       type: String,
-      default: "",
+      default: '',
     },
     digitalSignature: {
       type: String,
-      default: "",
+      default: '',
     },
     isLeaf: {
       // in case bank accountcodes are hierarchical in nature
@@ -119,23 +119,23 @@ const bankSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["INR", "USD", "EUR", "GBP"],
+        values: ['INR', 'USD', 'EUR', 'GBP'],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only\'INR\',\'USD\',\'EUR\',\'GBP\'.',
       },
-      default: "INR",
+      default: 'INR',
     },
     description: {
       type: String,
       trim: true,
-      default: "",
+      default: '',
     },
 
     // 8. Any other flags or “grouping code” if you need multiple COAs
     ledgerGroup: {
       // this will be used in futuer like to group multiple bank accounts to post to single account code
       type: String,
-      default: "",
+      default: '',
       trim: true,
       // e.g. "OPERATIONS", "FINANCE", "GLOBAL" (for multi-entity usage)
     },
@@ -154,7 +154,7 @@ const bankSchema = new Schema(
 // ─────────────────────────────────────────────────────────────────────────────
 const bankNodeSchema = new Schema(
   {
-    _id: { type: Schema.Types.ObjectId, ref: "Banks" },
+    _id: { type: Schema.Types.ObjectId, ref: 'Banks' },
     accountCode: { type: String, required: true },
     bankName: { type: String, required: true },
     children: [
@@ -174,18 +174,18 @@ bankSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      accountCode: { $exists: true, $type: "string", $ne: "" },
+      accountCode: { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 // Pre-save hook: if parentAccount is set, ensure parent exists
-bankSchema.pre("save", async function (next) {
+bankSchema.pre('save', async function (next) {
   // if (!this.isNew) {
   //   return next();
   // }
   if (this.parentAccount) {
-    const parent = await mongoose.model("Banks").findById(this.parentAccount);
+    const parent = await mongoose.model('Banks').findById(this.parentAccount);
     if (!parent) {
       return next(
         new Error(
@@ -207,42 +207,42 @@ bankSchema.pre("save", async function (next) {
 
     // Increment counter within the transaction
     const dbResponseNewCounter = await BankCounterModel.findOneAndUpdate(
-      { _id: "bankCode" },
+      { _id: 'bankCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
       //{ new: true, upsert: true, session }
     );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate bank code");
+      throw new Error('❌ Failed to generate bank code');
     }
     // Generate customer code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.sysCode = `BK_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during transaction:", error.stack);
+    console.error('❌ Error caught during transaction:', error.stack);
     // Decrement the counter in case of failure
     try {
       const isCounterIncremented =
         error.message &&
-        !error.message.startsWith("❌ Duplicate contact number");
+        !error.message.startsWith('❌ Duplicate contact number');
       if (isCounterIncremented) {
         await BankCounterModel.findByIdAndUpdate(
-          { _id: "bankCode" },
+          { _id: 'bankCode' },
           { $inc: { seq: -1 } }
         );
       }
     } catch (decrementError) {
-      console.error("❌ Error during counter decrement:", decrementError.stack);
+      console.error('❌ Error during counter decrement:', decrementError.stack);
     }
     next(error);
   } finally {
-    console.log("ℹ️ Finally bank counter closed");
+    console.log('ℹ️ Finally bank counter closed');
   }
 });
 
-export const BankModel = mongoose.models.Banks || model("Banks", bankSchema);
+export const BankModel = mongoose.models.Banks || model('Banks', bankSchema);

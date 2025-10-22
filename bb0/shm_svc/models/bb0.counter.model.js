@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from 'mongoose';
 
 const bb0_ledgerAccountCounterSchema = new Schema({
   _id: {
@@ -13,7 +13,7 @@ const bb0_ledgerAccountCounterSchema = new Schema({
 
 export const BB0_LedgerAccountCounterModel =
   mongoose.models.BB0_LedgerAccountCounters ||
-  model("BB0_LedgerAccountCounters", bb0_ledgerAccountCounterSchema);
+  model('BB0_LedgerAccountCounters', bb0_ledgerAccountCounterSchema);
 
 // Define Schema
 const bb0_globalPartyCounterSchema = new Schema({
@@ -30,7 +30,7 @@ const bb0_globalPartyCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const BB0_GlobalPartyCounterModel =
   mongoose.models.BB0_GlobalPartyCounters ||
-  model("BB0_GlobalPartyCounters", bb0_globalPartyCounterSchema);
+  model('BB0_GlobalPartyCounters', bb0_globalPartyCounterSchema);
 
 // Define Schema
 const bb0_customerCounterSchema = new Schema({
@@ -47,6 +47,6 @@ const bb0_customerCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const BB0_CustomerCounterModel =
   mongoose.models.BB0_CustomerCounters ||
-  model("BB0_CustomerCounters", bb0_customerCounterSchema);
+  model('BB0_CustomerCounters', bb0_customerCounterSchema);
 
 // dbgModels("global party counters mounted ", GlobalPartyCounterModel);

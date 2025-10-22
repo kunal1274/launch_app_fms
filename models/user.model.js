@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 /**
@@ -13,17 +13,17 @@ const UserSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    name: { type: String, default: "" },
+    name: { type: String, default: '' },
     // ...add more fields as needed...
     archived: { type: Boolean, default: false }, // New field
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
   },
   { timestamps: true }
 );
 
-export const UserModel = mongoose.model("User", UserSchema);
+export const UserModel = mongoose.model('User', UserSchema);

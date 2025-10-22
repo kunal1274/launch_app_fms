@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 const subTxnSchema = new Schema(
   {
@@ -6,10 +6,10 @@ const subTxnSchema = new Schema(
     // ── NEW: link back to the previous / next / related subledger txn
     previousTxnId: {
       type: Schema.Types.ObjectId,
-      ref: "SubledgerTransactions",
+      ref: 'SubledgerTransactions',
     },
-    nextTxnId: { type: Schema.Types.ObjectId, ref: "SubledgerTransactions" },
-    relatedTxnId: { type: Schema.Types.ObjectId, ref: "SubledgerTransactions" },
+    nextTxnId: { type: Schema.Types.ObjectId, ref: 'SubledgerTransactions' },
+    relatedTxnId: { type: Schema.Types.ObjectId, ref: 'SubledgerTransactions' },
 
     // ── NEW: link back to the previous / next / related voucher
     previousVoucher: { type: String, required: false },
@@ -20,65 +20,65 @@ const subTxnSchema = new Schema(
     previousPostingEventType: {
       type: String,
       enum: [
-        "NONE",
-        "POSITIONAL",
-        "PHYSICAL",
-        "MANAGEMENT",
-        "FINANCIAL",
-        "AUDIT",
+        'NONE',
+        'POSITIONAL',
+        'PHYSICAL',
+        'MANAGEMENT',
+        'FINANCIAL',
+        'AUDIT',
       ],
-      default: "NONE",
+      default: 'NONE',
     },
     postingEventType: {
       type: String,
       required: true,
       enum: [
-        "NONE",
-        "POSITIONAL",
-        "PHYSICAL",
-        "MANAGEMENT",
-        "FINANCIAL",
-        "AUDIT",
+        'NONE',
+        'POSITIONAL',
+        'PHYSICAL',
+        'MANAGEMENT',
+        'FINANCIAL',
+        'AUDIT',
       ],
-      default: "NONE",
+      default: 'NONE',
     },
     nextPostingEventType: {
       type: String,
       enum: [
-        "NONE",
-        "POSITIONAL",
-        "PHYSICAL",
-        "MANAGEMENT",
-        "FINANCIAL",
-        "AUDIT",
+        'NONE',
+        'POSITIONAL',
+        'PHYSICAL',
+        'MANAGEMENT',
+        'FINANCIAL',
+        'AUDIT',
       ],
-      default: "NONE",
+      default: 'NONE',
     },
     // which “bucket” of subledger
     subledgerType: {
       type: String,
       required: true,
       enum: [
-        "AR",
-        "AP",
-        "TAX",
-        "INV",
-        "WHT",
-        "CHARGES",
-        "DISCOUNT",
-        "BANK",
-        "LEDGER",
+        'AR',
+        'AP',
+        'TAX',
+        'INV',
+        'WHT',
+        'CHARGES',
+        'DISCOUNT',
+        'BANK',
+        'LEDGER',
       ],
     },
     sourceType: {
       type: String,
       required: true,
       enum: [
-        "SALES",
-        "PURCHASE",
-        "JOURNAL",
-        "BANK_TRANSFER",
-        "JOURNAL_REVERSAL",
+        'SALES',
+        'PURCHASE',
+        'JOURNAL',
+        'BANK_TRANSFER',
+        'JOURNAL_REVERSAL',
       ],
     },
     sourceId: { type: Schema.Types.ObjectId, required: true },
@@ -86,13 +86,13 @@ const subTxnSchema = new Schema(
     lineNum: { type: Number, required: true },
 
     // optional party link
-    ledgerAccount: { type: Schema.Types.ObjectId, ref: "Accounts" },
-    customer: { type: Schema.Types.ObjectId, ref: "Customers" },
-    supplier: { type: Schema.Types.ObjectId, ref: "Vendors" },
-    bankAccount: { type: Schema.Types.ObjectId, ref: "BankAccounts" },
+    ledgerAccount: { type: Schema.Types.ObjectId, ref: 'Accounts' },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customers' },
+    supplier: { type: Schema.Types.ObjectId, ref: 'Vendors' },
+    bankAccount: { type: Schema.Types.ObjectId, ref: 'BankAccounts' },
 
     // for ITEM-level charges or discounts
-    item: { type: Schema.Types.ObjectId, ref: "Items" },
+    item: { type: Schema.Types.ObjectId, ref: 'Items' },
 
     // amount in transaction currency
     amount: { type: Number, required: true },
@@ -103,21 +103,21 @@ const subTxnSchema = new Schema(
 
     // attach dims for inventory‐related line charges
     dims: {
-      site: { type: Schema.Types.ObjectId, ref: "Sites" },
-      warehouse: { type: Schema.Types.ObjectId, ref: "Warehouses" },
-      zone: { type: Schema.Types.ObjectId, ref: "Zones" },
-      location: { type: Schema.Types.ObjectId, ref: "Locations" },
-      aisle: { type: Schema.Types.ObjectId, ref: "Aisles" },
-      rack: { type: Schema.Types.ObjectId, ref: "Racks" },
-      shelf: { type: Schema.Types.ObjectId, ref: "Shelves" },
-      bin: { type: Schema.Types.ObjectId, ref: "Bins" },
-      config: { type: Schema.Types.ObjectId, ref: "Configurations" },
-      color: { type: Schema.Types.ObjectId, ref: "Colors" },
-      size: { type: Schema.Types.ObjectId, ref: "Sizes" },
-      style: { type: Schema.Types.ObjectId, ref: "Styles" },
-      version: { type: Schema.Types.ObjectId, ref: "Versions" },
-      batch: { type: Schema.Types.ObjectId, ref: "Batches" },
-      serial: { type: Schema.Types.ObjectId, ref: "Serials" },
+      site: { type: Schema.Types.ObjectId, ref: 'Sites' },
+      warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouses' },
+      zone: { type: Schema.Types.ObjectId, ref: 'Zones' },
+      location: { type: Schema.Types.ObjectId, ref: 'Locations' },
+      aisle: { type: Schema.Types.ObjectId, ref: 'Aisles' },
+      rack: { type: Schema.Types.ObjectId, ref: 'Racks' },
+      shelf: { type: Schema.Types.ObjectId, ref: 'Shelves' },
+      bin: { type: Schema.Types.ObjectId, ref: 'Bins' },
+      config: { type: Schema.Types.ObjectId, ref: 'Configurations' },
+      color: { type: Schema.Types.ObjectId, ref: 'Colors' },
+      size: { type: Schema.Types.ObjectId, ref: 'Sizes' },
+      style: { type: Schema.Types.ObjectId, ref: 'Styles' },
+      version: { type: Schema.Types.ObjectId, ref: 'Versions' },
+      batch: { type: Schema.Types.ObjectId, ref: 'Batches' },
+      serial: { type: Schema.Types.ObjectId, ref: 'Serials' },
     },
 
     extras: { type: Map, of: Schema.Types.Mixed, default: {} },
@@ -134,7 +134,7 @@ subTxnSchema.index({
 });
 
 // Auto-assign lineNum = max+1 per (subledgerType, sourceType, sourceId)
-subTxnSchema.pre("validate", async function (next) {
+subTxnSchema.pre('validate', async function (next) {
   if (this.isNew) {
     const filter = {
       subledgerType: this.subledgerType,
@@ -144,7 +144,7 @@ subTxnSchema.pre("validate", async function (next) {
     const last = await this.constructor
       .findOne(filter)
       .sort({ lineNum: -1 })
-      .select("lineNum")
+      .select('lineNum')
       .lean();
     this.lineNum = last ? last.lineNum + 1 : 1;
   }
@@ -153,4 +153,4 @@ subTxnSchema.pre("validate", async function (next) {
 
 export const SubledgerTransactionModel =
   mongoose.models.SubledgerTransactions ||
-  model("SubledgerTransactions", subTxnSchema);
+  model('SubledgerTransactions', subTxnSchema);

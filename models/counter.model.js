@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from 'mongoose';
 
 // Define Schema
 const customerCounterSchema = new Schema({
@@ -15,7 +15,7 @@ const customerCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const CustomerCounterModel =
   mongoose.models.CustomerCounters ||
-  model("CustomerCounters", customerCounterSchema);
+  model('CustomerCounters', customerCounterSchema);
 
 const vendorCounterSchema = new Schema({
   _id: {
@@ -30,7 +30,7 @@ const vendorCounterSchema = new Schema({
 
 export const VendorCounterModel =
   mongoose.models.VendorCounters ||
-  model("VendorCounters", vendorCounterSchema);
+  model('VendorCounters', vendorCounterSchema);
 
 const itemCounterSchema = new Schema({
   _id: {
@@ -44,7 +44,7 @@ const itemCounterSchema = new Schema({
 });
 
 export const ItemCounterModel =
-  mongoose.models.ItemCounters || model("ItemCounters", itemCounterSchema);
+  mongoose.models.ItemCounters || model('ItemCounters', itemCounterSchema);
 
 const ledgerAccountCounterSchema = new Schema({
   _id: {
@@ -59,7 +59,7 @@ const ledgerAccountCounterSchema = new Schema({
 
 export const LedgerAccountCounterModel =
   mongoose.models.LedgerAccountCounters ||
-  model("LedgerAccountCounters", ledgerAccountCounterSchema);
+  model('LedgerAccountCounters', ledgerAccountCounterSchema);
 
 const ledgerMappingCounterSchema = new Schema({
   _id: {
@@ -74,7 +74,7 @@ const ledgerMappingCounterSchema = new Schema({
 
 export const LedgerMappingCounterModel =
   mongoose.models.LedgerMappingCounters ||
-  model("LedgerMappingCounters", ledgerMappingCounterSchema);
+  model('LedgerMappingCounters', ledgerMappingCounterSchema);
 
 const bankCounterSchema = new Schema({
   _id: {
@@ -88,7 +88,7 @@ const bankCounterSchema = new Schema({
 });
 
 export const BankCounterModel =
-  mongoose.models.BankCounters || model("BankCounters", bankCounterSchema);
+  mongoose.models.BankCounters || model('BankCounters', bankCounterSchema);
 
 const taxCounterSchema = new Schema({
   _id: {
@@ -102,7 +102,7 @@ const taxCounterSchema = new Schema({
 });
 
 export const TaxCounterModel =
-  mongoose.models.TaxCounters || model("TaxCounters", taxCounterSchema);
+  mongoose.models.TaxCounters || model('TaxCounters', taxCounterSchema);
 
 const SalesOrderCounterSchema = new Schema({
   _id: {
@@ -117,7 +117,7 @@ const SalesOrderCounterSchema = new Schema({
 
 export const SalesOrderCounterModel =
   mongoose.models.SalesOrderCounters ||
-  model("SalesOrderCounters", SalesOrderCounterSchema);
+  model('SalesOrderCounters', SalesOrderCounterSchema);
 
 const purchaseOrderCounterSchema = new Schema({
   _id: {
@@ -132,7 +132,7 @@ const purchaseOrderCounterSchema = new Schema({
 
 export const PurchaseOrderCounterModel =
   mongoose.models.PurchaseOrderCounters ||
-  model("PurchaseOrderCounters", purchaseOrderCounterSchema);
+  model('PurchaseOrderCounters', purchaseOrderCounterSchema);
 
 const allocationCounterSchema = new Schema({
   _id: {
@@ -147,7 +147,7 @@ const allocationCounterSchema = new Schema({
 
 export const AllocationCounterModel =
   mongoose.models.AllocationCounters ||
-  model("AllocationCounters", allocationCounterSchema);
+  model('AllocationCounters', allocationCounterSchema);
 
 const siteCounterSchema = new Schema({
   _id: {
@@ -162,7 +162,7 @@ const siteCounterSchema = new Schema({
 
 // Check if the model already exists before defining it
 export const SiteCounterModel =
-  mongoose.models.SiteCounters || model("SiteCounters", siteCounterSchema);
+  mongoose.models.SiteCounters || model('SiteCounters', siteCounterSchema);
 
 const warehouseCounterSchema = new Schema({
   _id: {
@@ -178,7 +178,7 @@ const warehouseCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const WarehouseCounterModel =
   mongoose.models.WarehouseCounters ||
-  model("WarehouseCounters", warehouseCounterSchema);
+  model('WarehouseCounters', warehouseCounterSchema);
 
 const zoneCounterSchema = new Schema({
   _id: {
@@ -193,7 +193,7 @@ const zoneCounterSchema = new Schema({
 
 // Check if the model already exists before defining it
 export const ZoneCounterModel =
-  mongoose.models.ZoneCounters || model("ZoneCounters", zoneCounterSchema);
+  mongoose.models.ZoneCounters || model('ZoneCounters', zoneCounterSchema);
 
 const locationCounterSchema = new Schema({
   _id: {
@@ -209,7 +209,7 @@ const locationCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const LocationCounterModel =
   mongoose.models.LocationCounters ||
-  model("LocationCounters", locationCounterSchema);
+  model('LocationCounters', locationCounterSchema);
 
 const aisleCounterSchema = new Schema({
   _id: {
@@ -224,7 +224,7 @@ const aisleCounterSchema = new Schema({
 
 // Check if the model already exists before defining it
 export const AisleCounterModel =
-  mongoose.models.AisleCounters || model("AisleCounters", aisleCounterSchema);
+  mongoose.models.AisleCounters || model('AisleCounters', aisleCounterSchema);
 
 const rackCounterSchema = new Schema({
   _id: {
@@ -239,7 +239,7 @@ const rackCounterSchema = new Schema({
 
 // Check if the model already exists before defining it
 export const RackCounterModel =
-  mongoose.models.RackCounters || model("RackCounters", rackCounterSchema);
+  mongoose.models.RackCounters || model('RackCounters', rackCounterSchema);
 
 const shelfCounterSchema = new Schema({
   _id: {
@@ -254,7 +254,7 @@ const shelfCounterSchema = new Schema({
 
 // Check if the model already exists before defining it
 export const ShelfCounterModel =
-  mongoose.models.ShelfCounters || model("ShelfCounters", shelfCounterSchema);
+  mongoose.models.ShelfCounters || model('ShelfCounters', shelfCounterSchema);
 
 const binCounterSchema = new Schema({
   _id: {
@@ -269,7 +269,7 @@ const binCounterSchema = new Schema({
 
 // Check if the model already exists before defining it
 export const BinCounterModel =
-  mongoose.models.BinCounters || model("BinCounters", binCounterSchema);
+  mongoose.models.BinCounters || model('BinCounters', binCounterSchema);
 
 const productDimConfigCounterSchema = new Schema({
   _id: {
@@ -285,7 +285,7 @@ const productDimConfigCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const ProductDimConfigCounterModel =
   mongoose.models.ProductDimConfigCounters ||
-  model("ProductDimConfigCounters", productDimConfigCounterSchema);
+  model('ProductDimConfigCounters', productDimConfigCounterSchema);
 
 const productDimSizeCounterSchema = new Schema({
   _id: {
@@ -301,7 +301,7 @@ const productDimSizeCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const ProductDimSizeCounterModel =
   mongoose.models.ProductDimSizeCounters ||
-  model("ProductDimSizeCounters", productDimSizeCounterSchema);
+  model('ProductDimSizeCounters', productDimSizeCounterSchema);
 
 const productDimColorCounterSchema = new Schema({
   _id: {
@@ -317,7 +317,7 @@ const productDimColorCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const ProductDimColorCounterModel =
   mongoose.models.ProductDimColorCounters ||
-  model("ProductDimColorCounters", productDimColorCounterSchema);
+  model('ProductDimColorCounters', productDimColorCounterSchema);
 
 const productDimVersionCounterSchema = new Schema({
   _id: {
@@ -333,7 +333,7 @@ const productDimVersionCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const ProductDimVersionCounterModel =
   mongoose.models.ProductDimVersionCounters ||
-  model("ProductDimVersionCounters", productDimVersionCounterSchema);
+  model('ProductDimVersionCounters', productDimVersionCounterSchema);
 
 const productDimStyleCounterSchema = new Schema({
   _id: {
@@ -349,7 +349,7 @@ const productDimStyleCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const ProductDimStyleCounterModel =
   mongoose.models.ProductDimStyleCounters ||
-  model("ProductDimStyleCounters", productDimStyleCounterSchema);
+  model('ProductDimStyleCounters', productDimStyleCounterSchema);
 
 const batchGroupCounterSchema = new Schema({
   _id: {
@@ -364,7 +364,7 @@ const batchGroupCounterSchema = new Schema({
 
 export const BatchGroupCounterModel =
   mongoose.models.BatchGroupCounters ||
-  model("BatchGroupCounters", batchGroupCounterSchema);
+  model('BatchGroupCounters', batchGroupCounterSchema);
 
 const serialGroupCounterSchema = new Schema({
   _id: {
@@ -379,7 +379,7 @@ const serialGroupCounterSchema = new Schema({
 
 export const SerialGroupCounterModel =
   mongoose.models.SerialGroupCounters ||
-  model("SerialGroupCounters", serialGroupCounterSchema);
+  model('SerialGroupCounters', serialGroupCounterSchema);
 
 const batchCounterSchema = new Schema({
   _id: {
@@ -393,7 +393,7 @@ const batchCounterSchema = new Schema({
 });
 
 export const BatchCounterModel =
-  mongoose.models.BatchCounters || model("BatchCounters", batchCounterSchema);
+  mongoose.models.BatchCounters || model('BatchCounters', batchCounterSchema);
 
 const serialCounterSchema = new Schema({
   _id: {
@@ -408,7 +408,7 @@ const serialCounterSchema = new Schema({
 
 export const SerialCounterModel =
   mongoose.models.SerialCounters ||
-  model("SerialCounters", serialCounterSchema);
+  model('SerialCounters', serialCounterSchema);
 
 const inventJournalCounterSchema = new Schema({
   _id: {
@@ -423,7 +423,7 @@ const inventJournalCounterSchema = new Schema({
 
 export const InventJournalCounterModel =
   mongoose.models.InventJournalCounters ||
-  model("InventJournalCounters", inventJournalCounterSchema);
+  model('InventJournalCounters', inventJournalCounterSchema);
 
 const finVoucherCounterSchema = new Schema({
   _id: {
@@ -438,7 +438,7 @@ const finVoucherCounterSchema = new Schema({
 
 export const FinancialVoucherCounterModel =
   mongoose.models.FinancialVoucherCounters ||
-  model("FinancialVoucherCounters", finVoucherCounterSchema);
+  model('FinancialVoucherCounters', finVoucherCounterSchema);
 
 const salesInvoiceNumberCounterSchema = new Schema({
   _id: {
@@ -453,7 +453,7 @@ const salesInvoiceNumberCounterSchema = new Schema({
 
 export const SalesInvoiceNumberCounterModel =
   mongoose.models.SalesInvoiceNumberCounters ||
-  model("SalesInvoiceNumberCounters", salesInvoiceNumberCounterSchema);
+  model('SalesInvoiceNumberCounters', salesInvoiceNumberCounterSchema);
 
 const globalNumberingCounterSchema = new Schema({
   _id: {
@@ -468,7 +468,7 @@ const globalNumberingCounterSchema = new Schema({
 
 export const GlobalNumberingModel =
   mongoose.models.GlobalNumbers ||
-  model("GlobalNumbers", globalNumberingCounterSchema);
+  model('GlobalNumbers', globalNumberingCounterSchema);
 
 const sharedNumberingCounterSchema = new Schema({
   _id: {
@@ -483,7 +483,7 @@ const sharedNumberingCounterSchema = new Schema({
 
 export const SharedNumberingModel =
   mongoose.models.SharedNumbers ||
-  model("SharedNumbers", sharedNumberingCounterSchema);
+  model('SharedNumbers', sharedNumberingCounterSchema);
 
 const localNumberingCounterSchema = new Schema({
   _id: {
@@ -498,7 +498,7 @@ const localNumberingCounterSchema = new Schema({
 
 export const LocalNumberingModel =
   mongoose.models.LocalNumbers ||
-  model("LocalNumbers", localNumberingCounterSchema);
+  model('LocalNumbers', localNumberingCounterSchema);
 
 const companyCounterSchema = new Schema({
   _id: {
@@ -513,4 +513,4 @@ const companyCounterSchema = new Schema({
 
 export const CompanyCounterModel =
   mongoose.models.CompanyCounters ||
-  model("CompanyCounters", companyCounterSchema);
+  model('CompanyCounters', companyCounterSchema);

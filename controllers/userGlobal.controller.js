@@ -1,7 +1,7 @@
 // controllers/userGlobal.controller.js
-import { UserGlobalModel } from "../models/userGlobal.model.js";
-import { GlobalPartyModel } from "../shared_service/models/globalParty.model.js";
-import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
+import { UserGlobalModel } from '../models/userGlobal.model.js';
+import { GlobalPartyModel } from '../shared_service/models/globalParty.model.js';
+import createGlobalPartyId from '../shared_service/utility/createGlobalParty.utility.js';
 
 /**
  * Create a user
@@ -23,12 +23,12 @@ export const createUserGlobal = async (req, res) => {
     if (!email && !phoneNumber) {
       return res
         .status(400)
-        .json({ message: "Either email or phoneNumber is required" });
+        .json({ message: 'Either email or phoneNumber is required' });
     }
 
     // Additional checks, e.g. password, etc.
     const partyId = await createGlobalPartyId(
-      "User",
+      'User',
       globalPartyId,
       email ? email : phoneNumber
     );
@@ -46,8 +46,8 @@ export const createUserGlobal = async (req, res) => {
     await user.save();
     return res.status(201).json(user);
   } catch (error) {
-    console.error("Error in createUserGlobal:", error);
-    return res.status(500).json({ message: "Failed to create user" });
+    console.error('Error in createUserGlobal:', error);
+    return res.status(500).json({ message: 'Failed to create user' });
   }
 };
 
@@ -57,11 +57,11 @@ export const createUserGlobal = async (req, res) => {
 export const getAllUsersGlobal = async (req, res) => {
   try {
     // Optionally populate userRoles to see them
-    const users = await UserGlobalModel.find().populate("userRoles");
+    const users = await UserGlobalModel.find().populate('userRoles');
     return res.json(users);
   } catch (error) {
-    console.error("Error in getAllUsersGlobal:", error);
-    return res.status(500).json({ message: "Failed to fetch users" });
+    console.error('Error in getAllUsersGlobal:', error);
+    return res.status(500).json({ message: 'Failed to fetch users' });
   }
 };
 
@@ -71,14 +71,14 @@ export const getAllUsersGlobal = async (req, res) => {
 export const getUserGlobalById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await UserGlobalModel.findById(id).populate("userRoles");
+    const user = await UserGlobalModel.findById(id).populate('userRoles');
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
     return res.json(user);
   } catch (error) {
-    console.error("Error in getUserGlobalById:", error);
-    return res.status(500).json({ message: "Error fetching user" });
+    console.error('Error in getUserGlobalById:', error);
+    return res.status(500).json({ message: 'Error fetching user' });
   }
 };
 
@@ -111,16 +111,16 @@ export const updateUserGlobal = async (req, res) => {
         ...(userRoles && { userRoles }),
       },
       { new: true }
-    ).populate("userRoles");
+    ).populate('userRoles');
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     return res.json(updatedUser);
   } catch (error) {
-    console.error("Error in updateUserGlobal:", error);
-    return res.status(500).json({ message: "Failed to update user" });
+    console.error('Error in updateUserGlobal:', error);
+    return res.status(500).json({ message: 'Failed to update user' });
   }
 };
 
@@ -132,12 +132,12 @@ export const deleteUserGlobal = async (req, res) => {
     const { id } = req.params;
     const deleted = await UserGlobalModel.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
-    return res.json({ message: "User deleted successfully" });
+    return res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    console.error("Error in deleteUserGlobal:", error);
-    return res.status(500).json({ message: "Failed to delete user" });
+    console.error('Error in deleteUserGlobal:', error);
+    return res.status(500).json({ message: 'Failed to delete user' });
   }
 };
 
@@ -153,7 +153,7 @@ export const assignRolesToUser = async (req, res) => {
 
     const user = await UserGlobalModel.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Merge new role IDs with existing ones
@@ -164,12 +164,12 @@ export const assignRolesToUser = async (req, res) => {
     await user.save();
 
     const updatedUser = await UserGlobalModel.findById(userId).populate(
-      "userRoles"
+      'userRoles'
     );
     return res.json(updatedUser);
   } catch (error) {
-    console.error("Error in assignRolesToUser:", error);
-    return res.status(500).json({ message: "Failed to assign roles to user" });
+    console.error('Error in assignRolesToUser:', error);
+    return res.status(500).json({ message: 'Failed to assign roles to user' });
   }
 };
 
@@ -183,7 +183,7 @@ export const removeRolesFromUser = async (req, res) => {
 
     const user = await UserGlobalModel.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const updatedList = user.userRoles.filter(
@@ -193,11 +193,11 @@ export const removeRolesFromUser = async (req, res) => {
     await user.save();
 
     const updatedUser = await UserGlobalModel.findById(userId).populate(
-      "userRoles"
+      'userRoles'
     );
     return res.json(updatedUser);
   } catch (error) {
-    console.error("Error in removeRolesFromUser:", error);
-    return res.status(500).json({ message: "Failed to remove roles" });
+    console.error('Error in removeRolesFromUser:', error);
+    return res.status(500).json({ message: 'Failed to remove roles' });
   }
 };

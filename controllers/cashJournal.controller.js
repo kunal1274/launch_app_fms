@@ -1,13 +1,13 @@
 // controllers/cashJournal.controller.js
 
-import mongoose from "mongoose";
-import { BankAccountModel } from "../models/bankAccount.model.js";
-import { AccountModel } from "../models/account.model.js";
-import { ARTransactionModel } from "../models/arTransaction.model.js";
-import { APTransactionModel } from "../models/apTransaction.model.js";
-import { GLJournalModel } from "../models/glJournal.model.js";
-import VoucherService from "../services/voucher.service.js"; // or directly use GLJournalModel
-import { CashFXRevalModel } from "../models/cashFXReval.model.js"; // if you want to store reval events (optional)
+import mongoose from 'mongoose';
+import { BankAccountModel } from '../models/bankAccount.model.js';
+import { AccountModel } from '../models/account.model.js';
+import { ARTransactionModel } from '../models/arTransaction.model.js';
+import { APTransactionModel } from '../models/apTransaction.model.js';
+import { GLJournalModel } from '../models/glJournal.model.js';
+import VoucherService from '../services/voucher.service.js'; // or directly use GLJournalModel
+import { CashFXRevalModel } from '../models/cashFXReval.model.js'; // if you want to store reval events (optional)
 
 /**
  * Utility to round numbers to 2 decimal places.
@@ -55,17 +55,17 @@ export const postARReceipt = async (req, res) => {
       !exchangeRate
     ) {
       throw new Error(
-        "bankAccountId, customerId, invoiceId, amount, currency, exchangeRate are required."
+        'bankAccountId, customerId, invoiceId, amount, currency, exchangeRate are required.'
       );
     }
     if (!mongoose.Types.ObjectId.isValid(bankAccountId)) {
-      throw new Error("Invalid bankAccountId.");
+      throw new Error('Invalid bankAccountId.');
     }
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
-      throw new Error("Invalid customerId.");
+      throw new Error('Invalid customerId.');
     }
     if (!mongoose.Types.ObjectId.isValid(invoiceId)) {
-      throw new Error("Invalid invoiceId.");
+      throw new Error('Invalid invoiceId.');
     }
 
     // 2. Fetch BankAccount
@@ -73,7 +73,7 @@ export const postARReceipt = async (req, res) => {
       session
     );
     if (!bankAcc || !bankAcc.isActive) {
-      throw new Error("BankAccount not found or inactive.");
+      throw new Error('BankAccount not found or inactive.');
     }
     if (bankAcc.currency !== currency) {
       throw new Error(
@@ -86,10 +86,10 @@ export const postARReceipt = async (req, res) => {
     //  - AR account (lookup by code "1.1.2" or some known code)
     const bankCoaId = bankAcc.linkedCoaAccount;
     const arAccount = await AccountModel.findOne({
-      accountCode: "1.1.2", // replace with your actual AR leaf code
+      accountCode: '1.1.2', // replace with your actual AR leaf code
     }).session(session);
     if (!arAccount) {
-      throw new Error("Accounts Receivable account not found in COA.");
+      throw new Error('Accounts Receivable account not found in COA.');
     }
     const arCoaId = arAccount._id;
 
@@ -101,7 +101,7 @@ export const postARReceipt = async (req, res) => {
       [
         {
           txnDate: new Date(),
-          sourceType: "SALES",
+          sourceType: 'SALES',
           sourceId: invoiceId,
           sourceLine: 1,
           customer: customerId,
@@ -110,7 +110,7 @@ export const postARReceipt = async (req, res) => {
           exchangeRate: round2(exchangeRate),
           localAmount,
           bankAccount: bankAccountId,
-          remarks: remarks || "",
+          remarks: remarks || '',
         },
       ],
       { session }
@@ -132,7 +132,7 @@ export const postARReceipt = async (req, res) => {
         // localAmount = + (debit - credit) * exchangeRate
         localAmount: localAmount,
         subledger: {
-          sourceType: "AR",
+          sourceType: 'AR',
           txnId: arTxnDoc._id,
           lineNum: 1,
         },
@@ -146,7 +146,7 @@ export const postARReceipt = async (req, res) => {
         // localAmount = (0 - credit) * exchangeRate = -localAmount
         localAmount: -localAmount,
         subledger: {
-          sourceType: "AR",
+          sourceType: 'AR',
           txnId: arTxnDoc._id,
           lineNum: 1,
         },
@@ -157,7 +157,7 @@ export const postARReceipt = async (req, res) => {
     const glJournal = new GLJournalModel({
       voucherNo,
       voucherDate: new Date(),
-      sourceType: "AR_RECEIPT",
+      sourceType: 'AR_RECEIPT',
       sourceId: arTxnDoc._id,
       lines: glLines,
     });
@@ -168,15 +168,15 @@ export const postARReceipt = async (req, res) => {
     session.endSession();
 
     return res.status(201).json({
-      status: "success",
-      message: "AR Receipt posted and GL Journal created.",
+      status: 'success',
+      message: 'AR Receipt posted and GL Journal created.',
       data: { arTxn: arTxnDoc, glJournal },
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ postARReceipt Error:", error);
-    return res.status(400).json({ status: "failure", message: error.message });
+    console.error('❌ postARReceipt Error:', error);
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -219,17 +219,17 @@ export const postAPPayment = async (req, res) => {
       !exchangeRate
     ) {
       throw new Error(
-        "bankAccountId, supplierId, purchaseInvoiceId, amount, currency, exchangeRate are required."
+        'bankAccountId, supplierId, purchaseInvoiceId, amount, currency, exchangeRate are required.'
       );
     }
     if (!mongoose.Types.ObjectId.isValid(bankAccountId)) {
-      throw new Error("Invalid bankAccountId.");
+      throw new Error('Invalid bankAccountId.');
     }
     if (!mongoose.Types.ObjectId.isValid(supplierId)) {
-      throw new Error("Invalid supplierId.");
+      throw new Error('Invalid supplierId.');
     }
     if (!mongoose.Types.ObjectId.isValid(purchaseInvoiceId)) {
-      throw new Error("Invalid purchaseInvoiceId.");
+      throw new Error('Invalid purchaseInvoiceId.');
     }
 
     // 2. Fetch BankAccount
@@ -237,7 +237,7 @@ export const postAPPayment = async (req, res) => {
       session
     );
     if (!bankAcc || !bankAcc.isActive) {
-      throw new Error("BankAccount not found or inactive.");
+      throw new Error('BankAccount not found or inactive.');
     }
     if (bankAcc.currency !== currency) {
       throw new Error(
@@ -250,10 +250,10 @@ export const postAPPayment = async (req, res) => {
     //  - AP account (lookup by code "2.1.1" or whichever is your AP leaf code)
     const bankCoaId = bankAcc.linkedCoaAccount;
     const apAccount = await AccountModel.findOne({
-      accountCode: "2.1.1", // replace with your actual AP leaf code
+      accountCode: '2.1.1', // replace with your actual AP leaf code
     }).session(session);
     if (!apAccount) {
-      throw new Error("Accounts Payable account not found in COA.");
+      throw new Error('Accounts Payable account not found in COA.');
     }
     const apCoaId = apAccount._id;
 
@@ -265,7 +265,7 @@ export const postAPPayment = async (req, res) => {
       [
         {
           txnDate: new Date(),
-          sourceType: "PURCHASE",
+          sourceType: 'PURCHASE',
           sourceId: purchaseInvoiceId,
           sourceLine: 1,
           supplier: supplierId,
@@ -274,7 +274,7 @@ export const postAPPayment = async (req, res) => {
           exchangeRate: round2(exchangeRate),
           localAmount,
           bankAccount: bankAccountId,
-          remarks: remarks || "",
+          remarks: remarks || '',
         },
       ],
       { session }
@@ -295,7 +295,7 @@ export const postAPPayment = async (req, res) => {
         exchangeRate: round2(exchangeRate),
         localAmount: localAmount,
         subledger: {
-          sourceType: "AP",
+          sourceType: 'AP',
           txnId: apTxnDoc._id,
           lineNum: 1,
         },
@@ -308,7 +308,7 @@ export const postAPPayment = async (req, res) => {
         exchangeRate: round2(exchangeRate),
         localAmount: -localAmount,
         subledger: {
-          sourceType: "AP",
+          sourceType: 'AP',
           txnId: apTxnDoc._id,
           lineNum: 1,
         },
@@ -319,7 +319,7 @@ export const postAPPayment = async (req, res) => {
     const glJournal = new GLJournalModel({
       voucherNo,
       voucherDate: new Date(),
-      sourceType: "AP_PAYMENT",
+      sourceType: 'AP_PAYMENT',
       sourceId: apTxnDoc._id,
       lines: glLines,
     });
@@ -330,15 +330,15 @@ export const postAPPayment = async (req, res) => {
     session.endSession();
 
     return res.status(201).json({
-      status: "success",
-      message: "AP Payment posted and GL Journal created.",
+      status: 'success',
+      message: 'AP Payment posted and GL Journal created.',
       data: { apTxn: apTxnDoc, glJournal },
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ postAPPayment Error:", error);
-    return res.status(400).json({ status: "failure", message: error.message });
+    console.error('❌ postAPPayment Error:', error);
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -390,18 +390,18 @@ export const postBankTransfer = async (req, res) => {
       !exchangeRateTo
     ) {
       throw new Error(
-        "fromBankAccountId, toBankAccountId, amountFrom, currencyFrom, exchangeRateFrom, amountTo, currencyTo, exchangeRateTo are required."
+        'fromBankAccountId, toBankAccountId, amountFrom, currencyFrom, exchangeRateFrom, amountTo, currencyTo, exchangeRateTo are required.'
       );
     }
     if (
       !mongoose.Types.ObjectId.isValid(fromBankAccountId) ||
       !mongoose.Types.ObjectId.isValid(toBankAccountId)
     ) {
-      throw new Error("Invalid BankAccountId.");
+      throw new Error('Invalid BankAccountId.');
     }
     if (fromBankAccountId === toBankAccountId) {
       throw new Error(
-        "fromBankAccountId and toBankAccountId cannot be the same."
+        'fromBankAccountId and toBankAccountId cannot be the same.'
       );
     }
 
@@ -410,7 +410,7 @@ export const postBankTransfer = async (req, res) => {
       session
     );
     if (!fromBA || !fromBA.isActive) {
-      throw new Error("Source BankAccount not found or inactive.");
+      throw new Error('Source BankAccount not found or inactive.');
     }
     if (fromBA.currency !== currencyFrom) {
       throw new Error(
@@ -421,7 +421,7 @@ export const postBankTransfer = async (req, res) => {
       session
     );
     if (!toBA || !toBA.isActive) {
-      throw new Error("Destination BankAccount not found or inactive.");
+      throw new Error('Destination BankAccount not found or inactive.');
     }
     if (toBA.currency !== currencyTo) {
       throw new Error(
@@ -454,7 +454,7 @@ export const postBankTransfer = async (req, res) => {
       exchangeRate: round2(exchangeRateTo),
       localAmount: localTo,
       subledger: {
-        sourceType: "BANK_TRANSFER",
+        sourceType: 'BANK_TRANSFER',
         txnId: null, // we’ll fill after we create a “BankTransfer” doc if needed
         lineNum: 1,
       },
@@ -469,7 +469,7 @@ export const postBankTransfer = async (req, res) => {
       exchangeRate: round2(exchangeRateFrom),
       localAmount: -localFrom,
       subledger: {
-        sourceType: "BANK_TRANSFER",
+        sourceType: 'BANK_TRANSFER',
         txnId: null,
         lineNum: 1,
       },
@@ -485,11 +485,11 @@ export const postBankTransfer = async (req, res) => {
       //   If diffLocal < 0, we need to **debit** an FX Loss account for |diffLocal|.
       //
       const fxAcct = await AccountModel.findOne({
-        accountCode: diffLocal > 0 ? "FX_GAIN" : "FX_LOSS",
+        accountCode: diffLocal > 0 ? 'FX_GAIN' : 'FX_LOSS',
       }).session(session);
       if (!fxAcct) {
         throw new Error(
-          `FX ${diffLocal > 0 ? "Gain" : "Loss"} account not found in COA.`
+          `FX ${diffLocal > 0 ? 'Gain' : 'Loss'} account not found in COA.`
         );
       }
 
@@ -503,7 +503,7 @@ export const postBankTransfer = async (req, res) => {
           exchangeRate: 1,
           localAmount: -diffLocal, // credit local
           subledger: {
-            sourceType: "BANK_TRANSFER",
+            sourceType: 'BANK_TRANSFER',
             txnId: null,
             lineNum: 1,
           },
@@ -519,7 +519,7 @@ export const postBankTransfer = async (req, res) => {
           exchangeRate: 1,
           localAmount: lossAmt, // debit local
           subledger: {
-            sourceType: "BANK_TRANSFER",
+            sourceType: 'BANK_TRANSFER',
             txnId: null,
             lineNum: 1,
           },
@@ -531,10 +531,10 @@ export const postBankTransfer = async (req, res) => {
     const glJournal = new GLJournalModel({
       voucherNo,
       voucherDate: new Date(),
-      sourceType: "BANK_TRANSFER",
+      sourceType: 'BANK_TRANSFER',
       sourceId: new mongoose.Types.ObjectId(), // we can leave blank or generate a separate BankTransfer doc if needed
       lines: glLines,
-      extras: { remarks: remarks || "" },
+      extras: { remarks: remarks || '' },
     });
     await glJournal.save({ session });
 
@@ -543,15 +543,15 @@ export const postBankTransfer = async (req, res) => {
     session.endSession();
 
     return res.status(201).json({
-      status: "success",
-      message: "Bank transfer posted and GL Journal created.",
+      status: 'success',
+      message: 'Bank transfer posted and GL Journal created.',
       data: glJournal,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ postBankTransfer Error:", error);
-    return res.status(400).json({ status: "failure", message: error.message });
+    console.error('❌ postBankTransfer Error:', error);
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -576,10 +576,10 @@ export const postFXRevaluation = async (req, res) => {
     const { bankAccountId, asOfDate, spotRate, remarks } = req.body;
 
     if (!bankAccountId || !asOfDate || !spotRate) {
-      throw new Error("bankAccountId, asOfDate, and spotRate are required.");
+      throw new Error('bankAccountId, asOfDate, and spotRate are required.');
     }
     if (!mongoose.Types.ObjectId.isValid(bankAccountId)) {
-      throw new Error("Invalid bankAccountId.");
+      throw new Error('Invalid bankAccountId.');
     }
 
     // 1) Fetch BankAccount
@@ -587,28 +587,28 @@ export const postFXRevaluation = async (req, res) => {
       session
     );
     if (!bankAcc || !bankAcc.isActive) {
-      throw new Error("BankAccount not found or inactive.");
+      throw new Error('BankAccount not found or inactive.');
     }
 
     // It must be a non‐functional currency (i.e. currency != functional). For demonstration, assume INR is functional.
-    const functionalCurrency = "INR";
+    const functionalCurrency = 'INR';
     if (bankAcc.currency === functionalCurrency) {
-      throw new Error("Cannot revalue a bank account in functional currency.");
+      throw new Error('Cannot revalue a bank account in functional currency.');
     }
 
     // 2) Compute net foreign currency balance and booked local balance as of asOfDate
-    const cutoff = new Date(asOfDate + "T23:59:59.999Z");
+    const cutoff = new Date(asOfDate + 'T23:59:59.999Z');
 
     // a) Aggregate GLJournal lines to get:
     //    1. netForeign = Σ(debit if currency==bankAcc.currency) − Σ(credit if currency==bankAcc.currency)
     //    2. bookedLocal = Σ(localAmount) for those lines (that local amount is already computed at historical rates).
     const agg = await GLJournalModel.aggregate([
-      { $unwind: "$lines" },
+      { $unwind: '$lines' },
       {
         $match: {
-          "lines.account": bankAcc.linkedCoaAccount,
+          'lines.account': bankAcc.linkedCoaAccount,
           voucherDate: { $lte: cutoff },
-          "lines.currency": bankAcc.currency,
+          'lines.currency': bankAcc.currency,
         },
       },
       {
@@ -616,11 +616,11 @@ export const postFXRevaluation = async (req, res) => {
           _id: null,
           netForeign: {
             $sum: {
-              $subtract: ["$lines.debit", "$lines.credit"],
+              $subtract: ['$lines.debit', '$lines.credit'],
             },
           },
           bookedLocal: {
-            $sum: "$lines.localAmount",
+            $sum: '$lines.localAmount',
           },
         },
       },
@@ -640,8 +640,8 @@ export const postFXRevaluation = async (req, res) => {
       await session.commitTransaction();
       session.endSession();
       return res.status(200).json({
-        status: "success",
-        message: "No FX revaluation needed; already at spot.",
+        status: 'success',
+        message: 'No FX revaluation needed; already at spot.',
         data: { netForeign, bookedLocal, revaluedLocal, diffLocal },
       });
     }
@@ -655,11 +655,11 @@ export const postFXRevaluation = async (req, res) => {
 
     // Fetch relevant FX Gain or FX Loss account
     const fxAcct = await AccountModel.findOne({
-      accountCode: diffLocal > 0 ? "FX_GAIN" : "FX_LOSS",
+      accountCode: diffLocal > 0 ? 'FX_GAIN' : 'FX_LOSS',
     }).session(session);
     if (!fxAcct) {
       throw new Error(
-        `FX ${diffLocal > 0 ? "Gain" : "Loss"} account not found in COA.`
+        `FX ${diffLocal > 0 ? 'Gain' : 'Loss'} account not found in COA.`
       );
     }
 
@@ -673,7 +673,7 @@ export const postFXRevaluation = async (req, res) => {
         exchangeRate: 1.0,
         localAmount: diffLocal, // [DEBIT local = +diffLocal]
         subledger: {
-          sourceType: "FX_REVALUATION",
+          sourceType: 'FX_REVALUATION',
           txnId: null,
           lineNum: 1,
         },
@@ -686,7 +686,7 @@ export const postFXRevaluation = async (req, res) => {
         exchangeRate: 1.0,
         localAmount: -diffLocal, // [CREDIT local = -diffLocal]
         subledger: {
-          sourceType: "FX_REVALUATION",
+          sourceType: 'FX_REVALUATION',
           txnId: null,
           lineNum: 1,
         },
@@ -702,7 +702,7 @@ export const postFXRevaluation = async (req, res) => {
         exchangeRate: 1.0,
         localAmount: lossAmt, // [DEBIT local = +lossAmt]
         subledger: {
-          sourceType: "FX_REVALUATION",
+          sourceType: 'FX_REVALUATION',
           txnId: null,
           lineNum: 1,
         },
@@ -715,7 +715,7 @@ export const postFXRevaluation = async (req, res) => {
         exchangeRate: 1.0,
         localAmount: -lossAmt, // [CREDIT local = -lossAmt]
         subledger: {
-          sourceType: "FX_REVALUATION",
+          sourceType: 'FX_REVALUATION',
           txnId: null,
           lineNum: 1,
         },
@@ -726,14 +726,14 @@ export const postFXRevaluation = async (req, res) => {
     const glJournal = new GLJournalModel({
       voucherNo,
       voucherDate: cutoff,
-      sourceType: "FX_REVALUATION",
+      sourceType: 'FX_REVALUATION',
       sourceId: bankAccountId, // you can store the bankAccount as the source
       lines: glLines,
       extras: {
         spotRate: round2(spotRate),
         oldLocalBalance: round2(bookedLocal),
         newLocalBalance: round2(revaluedLocal),
-        remarks: remarks || "",
+        remarks: remarks || '',
       },
     });
     await glJournal.save({ session });
@@ -762,8 +762,8 @@ export const postFXRevaluation = async (req, res) => {
     session.endSession();
 
     return res.status(201).json({
-      status: "success",
-      message: "FX Revaluation posted and GL Journal created.",
+      status: 'success',
+      message: 'FX Revaluation posted and GL Journal created.',
       data: {
         bankAccountId,
         netForeign,
@@ -776,7 +776,7 @@ export const postFXRevaluation = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ postFXRevaluation Error:", error);
-    return res.status(400).json({ status: "failure", message: error.message });
+    console.error('❌ postFXRevaluation Error:', error);
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };

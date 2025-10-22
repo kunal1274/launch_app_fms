@@ -1,5 +1,5 @@
-import mongoose, { Schema, model } from "mongoose";
-import { ShelfCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { ShelfCounterModel } from './counter.model.js';
 
 // Sales Order Schema
 const shelfSchema = new Schema(
@@ -22,15 +22,15 @@ const shelfSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
 
     rack: {
       type: Schema.Types.ObjectId,
-      ref: "Racks", // Reference to the Customer model
+      ref: 'Racks', // Reference to the Customer model
       required: true,
     },
 
@@ -45,18 +45,18 @@ const shelfSchema = new Schema(
     archived: { type: Boolean, default: false }, // New field
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     createdBy: {
       type: String,
       required: true,
-      default: "SystemShelfCreation",
+      default: 'SystemShelfCreation',
     },
     updatedBy: {
       type: String,
@@ -104,7 +104,7 @@ const shelfSchema = new Schema(
   }
 );
 
-shelfSchema.pre("save", async function (next) {
+shelfSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -117,7 +117,7 @@ shelfSchema.pre("save", async function (next) {
     const existingShelf = await ShelfModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -127,37 +127,37 @@ shelfSchema.pre("save", async function (next) {
 
     // Increment counter for item code
     const dbResponseNewCounter = await ShelfCounterModel.findOneAndUpdate(
-      { _id: "shelfCode" },
+      { _id: 'shelfCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
 
-    console.log("ℹ️ Counter increment result:", dbResponseNewCounter);
+    console.log('ℹ️ Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate shelf code");
+      throw new Error('❌ Failed to generate shelf code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `SH_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during shelf save:", error.stack);
+    console.error('❌ Error caught during shelf save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally shelf counter closed");
+    console.log('ℹ️ Finally shelf counter closed');
   }
 });
 
 shelfSchema.pre(/^find/, function (next) {
-  this.populate("rack", "code name description type active");
+  this.populate('rack', 'code name description type active');
   next();
 });
 
 shelfSchema.index({ name: 1, location: 1 });
 
 export const ShelfModel =
-  mongoose.models.Shelves || model("Shelves", shelfSchema);
+  mongoose.models.Shelves || model('Shelves', shelfSchema);

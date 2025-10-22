@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { ProductDimStyleCounterModel } from "./counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { ProductDimStyleCounterModel } from './counter.model.js';
 
 const productDimStyleSchema = new Schema(
   {
@@ -21,10 +21,10 @@ const productDimStyleSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
     values: {
       type: [String],
@@ -39,12 +39,12 @@ const productDimStyleSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     // New field for file uploads
     files: [
@@ -67,7 +67,7 @@ const productDimStyleSchema = new Schema(
   }
 );
 
-productDimStyleSchema.pre("save", async function (next) {
+productDimStyleSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -80,7 +80,7 @@ productDimStyleSchema.pre("save", async function (next) {
     const existingStyle = await ProductDimStyleModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -91,28 +91,28 @@ productDimStyleSchema.pre("save", async function (next) {
     // Increment counter for item code
     const dbResponseNewCounter =
       await ProductDimStyleCounterModel.findOneAndUpdate(
-        { _id: "styleCode" },
+        { _id: 'styleCode' },
         { $inc: { seq: 1 } },
         { new: true, upsert: true }
       );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate Style code");
+      throw new Error('❌ Failed to generate Style code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `STL_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during style save:", error.stack);
+    console.error('❌ Error caught during style save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally style counter closed");
+    console.log('ℹ️ Finally style counter closed');
   }
 });
 
@@ -121,4 +121,4 @@ productDimStyleSchema.pre("save", async function (next) {
 // siteSchema.set("toJSON", { getters: true });
 
 export const ProductDimStyleModel =
-  mongoose.models.Styles || model("Styles", productDimStyleSchema);
+  mongoose.models.Styles || model('Styles', productDimStyleSchema);

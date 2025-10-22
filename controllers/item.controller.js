@@ -1,26 +1,26 @@
-import mongoose from "mongoose";
-import cl from "../utility/cl.utils.js";
-import ce from "../utility/ce.utils.js";
-import { ItemModel } from "../models/item.model.js";
-import { ItemCounterModel } from "../models/counter.model.js";
-import { logError, winstonLogger } from "../utility/logError.utils.js";
+import mongoose from 'mongoose';
+import cl from '../utility/cl.utils.js';
+import ce from '../utility/ce.utils.js';
+import { ItemModel } from '../models/item.model.js';
+import { ItemCounterModel } from '../models/counter.model.js';
+import { logError, winstonLogger } from '../utility/logError.utils.js';
 
 // controllers/metadata.controller.js
 
-import { SiteModel } from "../models/site.model.js";
-import { WarehouseModel } from "../models/warehouse.model.js";
-import { ZoneModel } from "../models/zone.model.js";
-import { RackModel } from "../models/rack.model.js";
-import { ShelfModel } from "../models/shelf.model.js";
-import { AisleModel } from "../models/aisle.model.js";
-import { BinModel } from "../models/bin.model.js";
-import { ProductDimConfigModel } from "../models/productDimConfig.model.js";
-import { ProductDimColorModel } from "../models/productDimColor.model.js";
-import { ProductDimSizeModel } from "../models/productDimSize.model.js";
-import { ProductDimStyleModel } from "../models/productDimStyle.model.js";
-import { ProductDimVersionModel } from "../models/productDimVersion.model.js";
-import { BatchModel } from "../models/trackingDimBatch.model.js";
-import { SerialModel } from "../models/trackingDimSerial.model.js";
+import { SiteModel } from '../models/site.model.js';
+import { WarehouseModel } from '../models/warehouse.model.js';
+import { ZoneModel } from '../models/zone.model.js';
+import { RackModel } from '../models/rack.model.js';
+import { ShelfModel } from '../models/shelf.model.js';
+import { AisleModel } from '../models/aisle.model.js';
+import { BinModel } from '../models/bin.model.js';
+import { ProductDimConfigModel } from '../models/productDimConfig.model.js';
+import { ProductDimColorModel } from '../models/productDimColor.model.js';
+import { ProductDimSizeModel } from '../models/productDimSize.model.js';
+import { ProductDimStyleModel } from '../models/productDimStyle.model.js';
+import { ProductDimVersionModel } from '../models/productDimVersion.model.js';
+import { BatchModel } from '../models/trackingDimBatch.model.js';
+import { SerialModel } from '../models/trackingDimSerial.model.js';
 
 /**
  * GET /fms/api/v0/metadata/items
@@ -63,7 +63,7 @@ export const getMetadataItems = async (req, res) => {
 
     // Send everything in one atomic response
     res.status(200).json({
-      status: "success",
+      status: 'success',
       data: {
         sites,
         warehouses,
@@ -82,10 +82,10 @@ export const getMetadataItems = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching metadata:", error);
+    console.error('Error fetching metadata:', error);
     res.status(500).json({
-      status: "failure",
-      message: "Couldn’t load form metadata",
+      status: 'failure',
+      message: 'Couldn’t load form metadata',
       error: error.message,
     });
   }
@@ -126,33 +126,33 @@ export const getMetadataAndItem = async (req, res) => {
       BatchModel.find({}),
       SerialModel.find({}),
       ItemModel.findById(itemId).populate([
-        "site",
-        "warehouse",
-        "zone",
-        "location",
-        "aisle",
-        "rack",
-        "shelf",
-        "bin",
-        "config",
-        "color",
-        "size",
-        "style",
-        "version",
-        "batch",
-        "serial",
+        'site',
+        'warehouse',
+        'zone',
+        'location',
+        'aisle',
+        'rack',
+        'shelf',
+        'bin',
+        'config',
+        'color',
+        'size',
+        'style',
+        'version',
+        'batch',
+        'serial',
       ]),
     ]);
 
     if (!item) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `Item ${itemId} not found.`,
       });
     }
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       data: {
         metadata: {
           sites,
@@ -174,10 +174,10 @@ export const getMetadataAndItem = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching combined metadata + item:", error);
+    console.error('Error fetching combined metadata + item:', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Couldn’t load item details and metadata",
+      status: 'failure',
+      message: 'Couldn’t load item details and metadata',
       error: error.message,
     });
   }
@@ -188,8 +188,8 @@ export const createItem = async (req, res) => {
   try {
     if (!itemBody.itemNum || !itemBody.name) {
       return res.status(422).send({
-        status: "failure",
-        message: "⚠️ Item code and Item Name are the required fields.",
+        status: 'failure',
+        message: '⚠️ Item code and Item Name are the required fields.',
       });
     }
 
@@ -204,55 +204,55 @@ export const createItem = async (req, res) => {
       `Item master has been created successfully with id : ${
         dbResponseNewItem._id
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`
     );
 
     return res.status(201).send({
-      status: "success",
+      status: 'success',
       message: `✅ Item master has been created successfully with code : ${
         dbResponseNewItem.code
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`,
       data: dbResponseNewItem,
     });
   } catch (error) {
     // Database Validation Error
     if (error instanceof mongoose.Error.ValidationError) {
-      logError("Item Creation - Validation Error", error);
+      logError('Item Creation - Validation Error', error);
       return res.status(422).send({
-        status: "failure",
-        message: "❌ Validation error during item creation.",
+        status: 'failure',
+        message: '❌ Validation error during item creation.',
         error: error.message || error,
       });
     }
 
     // MongoDB Duplicate Key Error (e.g., email uniqueness constraint)
     if (error.code === 11000) {
-      logError("Item Creation - Duplicate Error", error);
+      logError('Item Creation - Duplicate Error', error);
       return res.status(409).send({
-        status: "failure",
-        message: "❌ An item with the same code already exists.",
+        status: 'failure',
+        message: '❌ An item with the same code already exists.',
       });
     }
 
     // Handle MongoDB connection or network issues
-    if (error.message.includes("network error")) {
-      logError("Item Creation - Network Error", error);
+    if (error.message.includes('network error')) {
+      logError('Item Creation - Network Error', error);
       return res.status(503).send({
-        status: "failure",
-        message: "Service temporarily unavailable. Please try again later.",
+        status: 'failure',
+        message: 'Service temporarily unavailable. Please try again later.',
       });
     }
 
     // General Server Error
-    logError("Item Creation - Unknown Error", error);
+    logError('Item Creation - Unknown Error', error);
     return res.status(500).send({
-      status: "failure",
-      message: "An unexpected error occurred. Please try again.",
+      status: 'failure',
+      message: 'An unexpected error occurred. Please try again.',
       error: error.message || error,
     });
   }
@@ -262,15 +262,15 @@ export const getItems = async (req, res) => {
   try {
     const dbResponse = await ItemModel.find({});
     return res.status(200).send({
-      status: "success",
-      message: " All the items has been fetched successfully",
+      status: 'success',
+      message: ' All the items has been fetched successfully',
       count: dbResponse.length,
       data: dbResponse,
     });
   } catch (error) {
     return res.status(400).send({
-      status: "failure",
-      message: " There is an error while trying to fetch all the items",
+      status: 'failure',
+      message: ' There is an error while trying to fetch all the items',
       error: error,
     });
   }
@@ -282,20 +282,20 @@ export const getItem = async (req, res) => {
     const dbResponse = await ItemModel.findById(itemId);
     if (!dbResponse) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `The item ${itemId} has been deleted or does not exist `,
       });
     }
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `The item record ${itemId} has been fetched successfully.`,
       data: dbResponse,
     });
   } catch (error) {
     ce(`Error fetching item with ID ${itemId}:`, error);
     return res.status(500).send({
-      status: "failure",
-      message: `The error has been caught while fetching the item record `,
+      status: 'failure',
+      message: 'The error has been caught while fetching the item record ',
       error: error.message || error,
     });
   }
@@ -308,7 +308,7 @@ export const updateItem = async (request, response) => {
     const itemExists = await ItemModel.findById(itemId);
     if (!itemExists) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `The item ${itemId} has been deleted or does not exist `,
       });
     }
@@ -317,13 +317,13 @@ export const updateItem = async (request, response) => {
       { $set: itemBodyToUpdate }
     );
     return response.status(200).send({
-      status: "success",
+      status: 'success',
       message: `The item ${itemId} has been updated successfully.`,
       data: dbResponse,
     });
   } catch (error) {
     return response.status(400).send({
-      status: "failure",
+      status: 'failure',
       message: `There is an error while updating the item record ${itemId}`,
       error: error,
     });
@@ -336,19 +336,19 @@ export const deleteItem = async (req, res) => {
     const dbResponse = await ItemModel.findByIdAndDelete(itemId);
     if (!dbResponse) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `No item found with id ${itemId}`,
       });
     }
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `The item ${itemId} has been deleted successfully.`,
       data: dbResponse,
     });
   } catch (error) {
-    console.error("Error deleting item:", error);
+    console.error('Error deleting item:', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `There was an error while deleting the item with id ${itemId}.`,
       error: error.message,
     });
@@ -364,15 +364,15 @@ export const deleteAllItems = async (req, res) => {
 
     // Reset the counter for item code
     const resetCounter = await ItemCounterModel.findOneAndUpdate(
-      { _id: "itemCode" },
+      { _id: 'itemCode' },
       { seq: 0 }, // Reset sequence to 0
       { new: true, upsert: true } // Create document if it doesn't exist
     );
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message:
-        "All items have been deleted, and the sequence has been reset to 1.",
+        'All items have been deleted, and the sequence has been reset to 1.',
       data: {
         deletedCount: deleteResponse.deletedCount,
         counter: resetCounter,
@@ -380,12 +380,12 @@ export const deleteAllItems = async (req, res) => {
     });
   } catch (error) {
     console.error(
-      "Error while deleting all items and resetting sequence:",
+      'Error while deleting all items and resetting sequence:',
       error
     );
     return res.status(500).send({
-      status: "failure",
-      message: "Error while deleting all items or resetting the sequence.",
+      status: 'failure',
+      message: 'Error while deleting all items or resetting the sequence.',
       error: error.message,
     });
   }
@@ -401,8 +401,8 @@ export const uploadFilesAgainstItem = async (req, res) => {
 
     if (!files || files.length === 0) {
       return res.status(400).json({ 
-        status: "failure",
-        message: "⚠️ No files uploaded" 
+        status: 'failure',
+        message: '⚠️ No files uploaded' 
       });
     }
 
@@ -424,21 +424,21 @@ export const uploadFilesAgainstItem = async (req, res) => {
 
     if (!item) {
       return res.status(404).json({ 
-        status: "failure",
-        message: "⚠️ Item not found" 
+        status: 'failure',
+        message: '⚠️ Item not found' 
       });
     }
 
     res.status(200).json({ 
-      status: "success",
-      message: "✅ Files uploaded successfully", 
+      status: 'success',
+      message: '✅ Files uploaded successfully', 
       data: item 
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ 
-      status: "failure",
-      message: "❌ Internal server error" 
+      status: 'failure',
+      message: '❌ Internal server error' 
     });
   }
 };
@@ -504,8 +504,8 @@ export const searchItems = async (req, res) => {
     const totalPages = Math.ceil(totalCount / parseInt(limit));
 
     res.status(200).json({
-      status: "success",
-      message: "✅ Items searched successfully",
+      status: 'success',
+      message: '✅ Items searched successfully',
       data: items,
       pagination: {
         currentPage: parseInt(page),
@@ -517,10 +517,10 @@ export const searchItems = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error searching items:", error);
+    console.error('Error searching items:', error);
     res.status(500).json({
-      status: "failure",
-      message: "❌ Error searching items",
+      status: 'failure',
+      message: '❌ Error searching items',
       error: error.message
     });
   }
@@ -535,8 +535,8 @@ export const bulkCreateItems = async (req, res) => {
     
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "⚠️ Items array is required and must not be empty"
+        status: 'failure',
+        message: '⚠️ Items array is required and must not be empty'
       });
     }
 
@@ -550,8 +550,8 @@ export const bulkCreateItems = async (req, res) => {
 
     if (validationErrors.length > 0) {
       return res.status(422).json({
-        status: "failure",
-        message: "❌ Validation errors found",
+        status: 'failure',
+        message: '❌ Validation errors found',
         errors: validationErrors
       });
     }
@@ -559,15 +559,15 @@ export const bulkCreateItems = async (req, res) => {
     const createdItems = await ItemModel.insertMany(items);
 
     res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${createdItems.length} items created successfully`,
       data: createdItems
     });
   } catch (error) {
-    console.error("Error in bulk create items:", error);
+    console.error('Error in bulk create items:', error);
     res.status(500).json({
-      status: "failure",
-      message: "❌ Error creating items in bulk",
+      status: 'failure',
+      message: '❌ Error creating items in bulk',
       error: error.message
     });
   }
@@ -582,8 +582,8 @@ export const bulkUpdateItems = async (req, res) => {
     
     if (!updates || !Array.isArray(updates) || updates.length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "⚠️ Updates array is required and must not be empty"
+        status: 'failure',
+        message: '⚠️ Updates array is required and must not be empty'
       });
     }
 
@@ -617,15 +617,15 @@ export const bulkUpdateItems = async (req, res) => {
     const failureCount = results.filter(r => r.status === 'failed').length;
 
     res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ Bulk update completed: ${successCount} successful, ${failureCount} failed`,
       data: results
     });
   } catch (error) {
-    console.error("Error in bulk update items:", error);
+    console.error('Error in bulk update items:', error);
     res.status(500).json({
-      status: "failure",
-      message: "❌ Error updating items in bulk",
+      status: 'failure',
+      message: '❌ Error updating items in bulk',
       error: error.message
     });
   }
@@ -640,8 +640,8 @@ export const bulkDeleteItems = async (req, res) => {
     
     if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "⚠️ Item IDs array is required and must not be empty"
+        status: 'failure',
+        message: '⚠️ Item IDs array is required and must not be empty'
       });
     }
 
@@ -650,7 +650,7 @@ export const bulkDeleteItems = async (req, res) => {
     });
 
     res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${deleteResult.deletedCount} items deleted successfully`,
       data: {
         deletedCount: deleteResult.deletedCount,
@@ -658,10 +658,10 @@ export const bulkDeleteItems = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error in bulk delete items:", error);
+    console.error('Error in bulk delete items:', error);
     res.status(500).json({
-      status: "failure",
-      message: "❌ Error deleting items in bulk",
+      status: 'failure',
+      message: '❌ Error deleting items in bulk',
       error: error.message
     });
   }

@@ -1,31 +1,31 @@
 // controllers/aisle.controller.js
 
-import mongoose from "mongoose";
-import { AisleModel } from "../models/aisle.model.js";
+import mongoose from 'mongoose';
+import { AisleModel } from '../models/aisle.model.js';
 import {
   AisleCounterModel,
   BinCounterModel,
   RackCounterModel,
   ShelfCounterModel,
-} from "../models/counter.model.js";
-import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
-import logger, { logStackError } from "../utility/logger.util.js";
-import { winstonLogger, logError } from "../utility/logError.utils.js";
-import { LocationModel } from "../models/location.model.js";
-import { RackModel } from "../models/rack.model.js";
-import { ShelfModel } from "../models/shelf.model.js";
-import { BinModel } from "../models/bin.model.js";
+} from '../models/counter.model.js';
+import { createAuditLog } from '../audit_logging_service/utils/auditLogger.utils.js';
+import redisClient from '../middleware/redisClient.js';
+import logger, { logStackError } from '../utility/logger.util.js';
+import { winstonLogger, logError } from '../utility/logError.utils.js';
+import { LocationModel } from '../models/location.model.js';
+import { RackModel } from '../models/rack.model.js';
+import { ShelfModel } from '../models/shelf.model.js';
+import { BinModel } from '../models/bin.model.js';
 
 // Helper: invalidate aisle cache
-const invalidateAisleCache = async (key = "/fms/api/v0/aisles") => {
+const invalidateAisleCache = async (key = '/fms/api/v0/aisles') => {
   try {
     await redisClient.del(key);
     logger.info(`Cache invalidated: ${key}`, {
-      context: "invalidateAisleCache",
+      context: 'invalidateAisleCache',
     });
   } catch (err) {
-    logStackError("❌ Aisle cache invalidation failed", err);
+    logStackError('❌ Aisle cache invalidation failed', err);
   }
 };
 
@@ -47,15 +47,15 @@ export const createAisle = async (req, res) => {
     } = req.body;
     if (!name || !location) {
       return res.status(422).json({
-        status: "failure",
-        message: "⚠️ 'name' and 'location' are required.",
+        status: 'failure',
+        message: '⚠️ \'name\' and \'location\' are required.',
       });
     }
 
     const lc = await LocationModel.findById(location);
     if (!lc) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Location ${location} not found.`,
       });
     }
@@ -74,9 +74,9 @@ export const createAisle = async (req, res) => {
     });
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Aisle",
-      action: "CREATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Aisle',
+      action: 'CREATE',
       recordId: aisle._id,
       changes: { newData: aisle },
     });
@@ -85,28 +85,28 @@ export const createAisle = async (req, res) => {
     winstonLogger.info(`✅ Aisle created: ${aisle._id}`);
 
     return res.status(201).json({
-      status: "success",
-      message: "✅ Aisle created successfully.",
+      status: 'success',
+      message: '✅ Aisle created successfully.',
       data: aisle,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("❌ Aisle Validation Error", error);
+      logStackError('❌ Aisle Validation Error', error);
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     if (error.code === 11000) {
-      logStackError("❌ Aisle Duplicate Error", error);
+      logStackError('❌ Aisle Duplicate Error', error);
       return res.status(409).json({
-        status: "failure",
-        message: "Aisle name or code already exists.",
+        status: 'failure',
+        message: 'Aisle name or code already exists.',
       });
     }
-    logStackError("❌ Aisle Creation Error", error);
+    logStackError('❌ Aisle Creation Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -122,12 +122,12 @@ export const getAllAisles = async (req, res) => {
     winstonLogger.info(`✅ Fetched all aisles (${list.length})`);
     return res
       .status(200)
-      .json({ status: "success", count: list.length, data: list });
+      .json({ status: 'success', count: list.length, data: list });
   } catch (error) {
-    logStackError("❌ Get All Aisles Error", error);
+    logStackError('❌ Get All Aisles Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -137,12 +137,12 @@ export const getAllAisles = async (req, res) => {
 export const getArchivedAisles = async (req, res) => {
   try {
     const archived = await AisleModel.find({ archived: true });
-    return res.status(200).json({ status: "success", data: archived });
+    return res.status(200).json({ status: 'success', data: archived });
   } catch (error) {
-    logError("❌ Get Archived Aisles Error", error);
+    logError('❌ Get Archived Aisles Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -156,15 +156,15 @@ export const getAisleById = async (req, res) => {
     if (!aisle) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Aisle not found." });
+        .json({ status: 'failure', message: '⚠️ Aisle not found.' });
     }
     winstonLogger.info(`✅ Retrieved aisle: ${aisleId}`);
-    return res.status(200).json({ status: "success", data: aisle });
+    return res.status(200).json({ status: 'success', data: aisle });
   } catch (error) {
-    logError("❌ Get Aisle By ID Error", error);
+    logError('❌ Get Aisle By ID Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -177,13 +177,13 @@ export const updateAisleById = async (req, res) => {
     const updateData = {
       ...req.body,
       // location,
-      updatedBy: req.user?.username || "Unknown",
+      updatedBy: req.user?.username || 'Unknown',
     };
 
     const lc = await LocationModel.findById(req.body.location);
     if (!lc) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Location ${req.body.location} not found.`,
       });
     }
@@ -195,13 +195,13 @@ export const updateAisleById = async (req, res) => {
     if (!aisle) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Aisle not found." });
+        .json({ status: 'failure', message: '⚠️ Aisle not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Aisle",
-      action: "UPDATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Aisle',
+      action: 'UPDATE',
       recordId: aisle._id,
       changes: { newData: aisle },
     });
@@ -210,17 +210,17 @@ export const updateAisleById = async (req, res) => {
     winstonLogger.info(`ℹ️ Updated aisle: ${aisleId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Aisle updated.", data: aisle });
+      .json({ status: 'success', message: '✅ Aisle updated.', data: aisle });
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logError("❌ Update Aisle Error", error);
+    logError('❌ Update Aisle Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -234,13 +234,13 @@ export const deleteAisleById = async (req, res) => {
     if (!aisle) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Aisle not found." });
+        .json({ status: 'failure', message: '⚠️ Aisle not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Aisle",
-      action: "DELETE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Aisle',
+      action: 'DELETE',
       recordId: aisle._id,
     });
 
@@ -248,12 +248,12 @@ export const deleteAisleById = async (req, res) => {
     winstonLogger.info(`ℹ️ Deleted aisle: ${aisleId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Aisle deleted." });
+      .json({ status: 'success', message: '✅ Aisle deleted.' });
   } catch (error) {
-    logError("❌ Delete Aisle Error", error);
+    logError('❌ Delete Aisle Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -265,31 +265,31 @@ export const archiveAisleById = async (req, res) => {
     const { aisleId } = req.params;
     const aisle = await AisleModel.findByIdAndUpdate(
       aisleId,
-      { archived: true, updatedBy: req.user?.username || "Unknown" },
+      { archived: true, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!aisle) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Aisle not found." });
+        .json({ status: 'failure', message: '⚠️ Aisle not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Aisle",
-      action: "ARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Aisle',
+      action: 'ARCHIVE',
       recordId: aisle._id,
     });
 
     await invalidateAisleCache();
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Aisle archived.", data: aisle });
+      .json({ status: 'success', message: '✅ Aisle archived.', data: aisle });
   } catch (error) {
-    logError("❌ Archive Aisle Error", error);
+    logError('❌ Archive Aisle Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -301,33 +301,33 @@ export const unarchiveAisleById = async (req, res) => {
     const { aisleId } = req.params;
     const aisle = await AisleModel.findByIdAndUpdate(
       aisleId,
-      { archived: false, updatedBy: req.user?.username || "Unknown" },
+      { archived: false, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!aisle) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Aisle not found." });
+        .json({ status: 'failure', message: '⚠️ Aisle not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Aisle",
-      action: "UNARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Aisle',
+      action: 'UNARCHIVE',
       recordId: aisle._id,
     });
 
     await invalidateAisleCache();
     return res.status(200).json({
-      status: "success",
-      message: "✅ Aisle unarchived.",
+      status: 'success',
+      message: '✅ Aisle unarchived.',
       data: aisle,
     });
   } catch (error) {
-    logError("❌ Unarchive Aisle Error", error);
+    logError('❌ Unarchive Aisle Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -338,8 +338,8 @@ export const bulkCreateAisles = async (req, res) => {
   const docs = req.body;
   if (!Array.isArray(docs) || docs.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide non-empty array of aisles.",
+      status: 'failure',
+      message: '⚠️ Provide non-empty array of aisles.',
     });
   }
 
@@ -367,10 +367,10 @@ export const bulkCreateAisles = async (req, res) => {
   });
   if (dupes.length) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Duplicate aisle name+location in request: " +
-        [...new Set(dupes.map((d) => `${d.name}@${d.location}`))].join(", "),
+        'Duplicate aisle name+location in request: ' +
+        [...new Set(dupes.map((d) => `${d.name}@${d.location}`))].join(', '),
     });
   }
 
@@ -378,15 +378,15 @@ export const bulkCreateAisles = async (req, res) => {
   const locIds = [...new Set(combos.map((c) => c.location))];
   if (locIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
     return res.status(400).json({
-      status: "failure",
-      message: "One or more invalid location IDs.",
+      status: 'failure',
+      message: 'One or more invalid location IDs.',
     });
   }
   const locCount = await LocationModel.countDocuments({ _id: { $in: locIds } });
   if (locCount !== locIds.length) {
     return res.status(404).json({
-      status: "failure",
-      message: "Some parent locations do not exist.",
+      status: 'failure',
+      message: 'Some parent locations do not exist.',
     });
   }
 
@@ -396,14 +396,14 @@ export const bulkCreateAisles = async (req, res) => {
     location,
   }));
   const conflicts = await AisleModel.find({ $or: conflictQuery })
-    .select("name location")
+    .select('name location')
     .lean();
   if (conflicts.length) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "These aisles already exist: " +
-        conflicts.map((c) => `${c.name}@${c.location}`).join(", "),
+        'These aisles already exist: ' +
+        conflicts.map((c) => `${c.name}@${c.location}`).join(', '),
     });
   }
 
@@ -414,7 +414,7 @@ export const bulkCreateAisles = async (req, res) => {
   try {
     const n = docs.length;
     const counter = await AisleCounterModel.findOneAndUpdate(
-      { _id: "aisleCode" },
+      { _id: 'aisleCode' },
       { $inc: { seq: n } },
       { new: true, upsert: true, session }
     );
@@ -422,16 +422,16 @@ export const bulkCreateAisles = async (req, res) => {
     const start = end - n + 1;
 
     docs.forEach((d, i) => {
-      d.code = `RK_${String(start + i).padStart(3, "0")}`;
+      d.code = `RK_${String(start + i).padStart(3, '0')}`;
     });
 
     const created = await AisleModel.insertMany(docs, { session });
     await Promise.all(
       created.map((a) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Aisle",
-          action: "BULK_CREATE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Aisle',
+          action: 'BULK_CREATE',
           recordId: a._id,
           changes: { newData: a },
         })
@@ -443,17 +443,17 @@ export const bulkCreateAisles = async (req, res) => {
     await invalidateAisleCache();
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${created.length} aisles created.`,
       data: created,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk create aisles error", error);
+    logStackError('❌ Bulk create aisles error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk creation.",
+      status: 'failure',
+      message: 'Error during bulk creation.',
       error: error.message,
     });
   }
@@ -464,8 +464,8 @@ export const bulkUpdateAisles = async (req, res) => {
   const updates = req.body;
   if (!Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide non-empty array of updates.",
+      status: 'failure',
+      message: '⚠️ Provide non-empty array of updates.',
     });
   }
 
@@ -475,7 +475,7 @@ export const bulkUpdateAisles = async (req, res) => {
     const docId = id || _id;
     if (!mongoose.Types.ObjectId.isValid(docId)) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message: `Invalid aisle ID: ${docId}`,
       });
     }
@@ -487,7 +487,7 @@ export const bulkUpdateAisles = async (req, res) => {
   // 2) Fetch originals
   const ids = toCheck.map((c) => c.id);
   const originals = await AisleModel.find({ _id: { $in: ids } })
-    .select("name location")
+    .select('name location')
     .lean();
   const origMap = new Map(originals.map((o) => [o._id.toString(), o]));
 
@@ -506,10 +506,10 @@ export const bulkUpdateAisles = async (req, res) => {
   });
   if (dupes.length) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Duplicate name+location in request: " +
-        [...new Set(dupes.map((d) => `${d.name}@${d.location}`))].join(", "),
+        'Duplicate name+location in request: ' +
+        [...new Set(dupes.map((d) => `${d.name}@${d.location}`))].join(', '),
     });
   }
 
@@ -518,15 +518,15 @@ export const bulkUpdateAisles = async (req, res) => {
   if (newLocIds.length) {
     if (newLocIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
       return res.status(400).json({
-        status: "failure",
-        message: "One or more invalid location IDs in updates.",
+        status: 'failure',
+        message: 'One or more invalid location IDs in updates.',
       });
     }
     const cnt = await LocationModel.countDocuments({ _id: { $in: newLocIds } });
     if (cnt !== newLocIds.length) {
       return res.status(404).json({
-        status: "failure",
-        message: "Some target locations do not exist.",
+        status: 'failure',
+        message: 'Some target locations do not exist.',
       });
     }
   }
@@ -538,14 +538,14 @@ export const bulkUpdateAisles = async (req, res) => {
     location,
   }));
   const conflicts = await AisleModel.find({ $or: conflictQs })
-    .select("name location")
+    .select('name location')
     .lean();
   if (conflicts.length) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "These aisle name+location pairs already exist: " +
-        conflicts.map((c) => `${c.name}@${c.location}`).join(", "),
+        'These aisle name+location pairs already exist: ' +
+        conflicts.map((c) => `${c.name}@${c.location}`).join(', '),
     });
   }
 
@@ -562,15 +562,15 @@ export const bulkUpdateAisles = async (req, res) => {
 
       const a = await AisleModel.findByIdAndUpdate(
         id,
-        { ...entry.update, updatedBy: req.user?.username || "Unknown" },
+        { ...entry.update, updatedBy: req.user?.username || 'Unknown' },
         { new: true, runValidators: true, session }
       );
       if (!a) throw new Error(`Aisle not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "Aisle",
-        action: "BULK_UPDATE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'Aisle',
+        action: 'BULK_UPDATE',
         recordId: a._id,
         changes: { newData: a },
       });
@@ -582,17 +582,17 @@ export const bulkUpdateAisles = async (req, res) => {
     await invalidateAisleCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${results.length} aisles updated.`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk update aisles error", error);
+    logStackError('❌ Bulk update aisles error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk update.",
+      status: 'failure',
+      message: 'Error during bulk update.',
       error: error.message,
     });
   }
@@ -603,8 +603,8 @@ export const bulkDeleteAisles = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide non-empty array of ids.",
+      status: 'failure',
+      message: '⚠️ Provide non-empty array of ids.',
     });
   }
 
@@ -615,14 +615,14 @@ export const bulkDeleteAisles = async (req, res) => {
       { _id: { $in: ids } },
       { session }
     );
-    if (deletedCount === 0) throw new Error("No aisles deleted.");
+    if (deletedCount === 0) throw new Error('No aisles deleted.');
 
     await Promise.all(
       ids.map((id) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Aisle",
-          action: "BULK_DELETE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Aisle',
+          action: 'BULK_DELETE',
           recordId: id,
         })
       )
@@ -633,16 +633,16 @@ export const bulkDeleteAisles = async (req, res) => {
     await invalidateAisleCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${deletedCount} aisles deleted.`,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk delete aisles error", error);
+    logStackError('❌ Bulk delete aisles error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk delete.",
+      status: 'failure',
+      message: 'Error during bulk delete.',
       error: error.message,
     });
   }
@@ -654,19 +654,19 @@ export const bulkDeleteAisles = async (req, res) => {
 export const bulkAllDeleteAisles = async (req, res) => {
   try {
     // 1. Find all aisle IDs that have at least one Rack
-    const aislesWithChildren = await RackModel.distinct("aisle");
+    const aislesWithChildren = await RackModel.distinct('aisle');
 
     // 2. Leaf‐aisles are those NOT in that list
     const leafAisles = await AisleModel.find({
       _id: { $nin: aislesWithChildren },
     })
-      .select("_id code name")
+      .select('_id code name')
       .lean();
 
     if (leafAisles.length === 0) {
       return res.status(200).json({
-        status: "success",
-        message: "No leaf aisles to delete; every aisle has child racks.",
+        status: 'success',
+        message: 'No leaf aisles to delete; every aisle has child racks.',
         skippedDueToRacks: aislesWithChildren,
       });
     }
@@ -678,7 +678,7 @@ export const bulkAllDeleteAisles = async (req, res) => {
     });
 
     // 4. Recompute highest sequence from remaining codes
-    const remaining = await AisleModel.find({}, "code").lean();
+    const remaining = await AisleModel.find({}, 'code').lean();
     let maxSeq = 0;
     remaining.forEach(({ code }) => {
       const m = code.match(/(\d+)$/);
@@ -690,23 +690,23 @@ export const bulkAllDeleteAisles = async (req, res) => {
 
     // 5. Reset the aisleCode counter to maxSeq
     const resetCounter = await AisleCounterModel.findByIdAndUpdate(
-      { _id: "aisleCode" },
+      { _id: 'aisleCode' },
       { seq: maxSeq },
       { new: true, upsert: true }
     );
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Deleted ${deleted.deletedCount} leaf aisle(s).`,
       deletedAisles: leafAisles,
       skippedDueToRacks: aislesWithChildren,
       counter: resetCounter,
     });
   } catch (err) {
-    console.error("❌ bulkAllDeleteAisles error:", err);
+    console.error('❌ bulkAllDeleteAisles error:', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error in bulkAllDeleteAisles",
+      status: 'failure',
+      message: 'Error in bulkAllDeleteAisles',
       error: err.message,
     });
   }
@@ -720,7 +720,7 @@ export const bulkAllDeleteAislesCascade = async (req, res) => {
   session.startTransaction();
   try {
     // 1. Gather all Aisle IDs
-    const allAisles = await AisleModel.find({}, "_id").session(session).lean();
+    const allAisles = await AisleModel.find({}, '_id').session(session).lean();
     const aisleIds = allAisles.map((a) => a._id);
 
     if (aisleIds.length === 0) {
@@ -728,18 +728,18 @@ export const bulkAllDeleteAislesCascade = async (req, res) => {
       session.endSession();
       return res
         .status(200)
-        .json({ status: "success", message: "No aisles to delete." });
+        .json({ status: 'success', message: 'No aisles to delete.' });
     }
 
     // 2. Delete child Racks
-    const rackDocs = await RackModel.find({ aisle: { $in: aisleIds } }, "_id")
+    const rackDocs = await RackModel.find({ aisle: { $in: aisleIds } }, '_id')
       .session(session)
       .lean();
     const rackIds = rackDocs.map((r) => r._id);
     await RackModel.deleteMany({ aisle: { $in: aisleIds } }).session(session);
 
     // 3. Delete child Shelves
-    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, "_id")
+    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, '_id')
       .session(session)
       .lean();
     const shelfIds = shelfDocs.map((s) => s._id);
@@ -757,22 +757,22 @@ export const bulkAllDeleteAislesCascade = async (req, res) => {
     const [resetAisleCtr, resetRackCtr, resetShelfCtr, resetBinCtr] =
       await Promise.all([
         AisleCounterModel.findByIdAndUpdate(
-          { _id: "aisleCode" },
+          { _id: 'aisleCode' },
           { seq: 0 },
           { new: true, upsert: true, session }
         ),
         RackCounterModel.findByIdAndUpdate(
-          { _id: "rackCode" },
+          { _id: 'rackCode' },
           { seq: 0 },
           { new: true, upsert: true, session }
         ),
         ShelfCounterModel.findByIdAndUpdate(
-          { _id: "shelfCode" },
+          { _id: 'shelfCode' },
           { seq: 0 },
           { new: true, upsert: true, session }
         ),
         BinCounterModel.findByIdAndUpdate(
-          { _id: "binCode" },
+          { _id: 'binCode' },
           { seq: 0 },
           { new: true, upsert: true, session }
         ),
@@ -782,7 +782,7 @@ export const bulkAllDeleteAislesCascade = async (req, res) => {
     session.endSession();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Cascade-deleted ${deletedAisles.deletedCount} aisle(s) + all descendants.`,
       counter: {
         aisle: resetAisleCtr,
@@ -794,10 +794,10 @@ export const bulkAllDeleteAislesCascade = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ bulkAllDeleteAislesCascade error:", err);
+    console.error('❌ bulkAllDeleteAislesCascade error:', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error in bulkAllDeleteAislesCascade",
+      status: 'failure',
+      message: 'Error in bulkAllDeleteAislesCascade',
       error: err.message,
     });
   }

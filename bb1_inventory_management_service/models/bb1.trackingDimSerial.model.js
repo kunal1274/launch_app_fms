@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { SerialCounterModel } from "../../bb1_shared_management_service/models/bb1.counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { SerialCounterModel } from '../../bb1_shared_management_service/models/bb1.counter.model.js';
 
 const serialSchema = new Schema(
   {
@@ -27,19 +27,19 @@ const serialSchema = new Schema(
     },
     batchId: {
       type: Schema.Types.ObjectId,
-      ref: "BB1Batches",
+      ref: 'BB1Batches',
       required: false, // optional at creation time
     },
 
     status: {
       type: String,
-      enum: ["Available", "Used", "Damaged", "Returned", "Recalled"],
-      default: "Available",
+      enum: ['Available', 'Used', 'Damaged', 'Returned', 'Recalled'],
+      default: 'Available',
     },
 
     assignedTo: {
       type: Schema.Types.ObjectId,
-      ref: "BB1SalesOrders", // future enhancement
+      ref: 'BB1SalesOrders', // future enhancement
       required: false,
     },
 
@@ -47,10 +47,10 @@ const serialSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
     active: {
       type: Boolean,
@@ -61,12 +61,12 @@ const serialSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "BB1GlobalGroups", // from group.model.js
+        ref: 'BB1GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "BB1Companies",
+      ref: 'BB1Companies',
     },
     // New field for file uploads
     files: [
@@ -88,7 +88,7 @@ const serialSchema = new Schema(
   }
 );
 
-serialSchema.pre("save", async function (next) {
+serialSchema.pre('save', async function (next) {
   if (!this.isNew) return next();
 
   try {
@@ -96,7 +96,7 @@ serialSchema.pre("save", async function (next) {
 
     // Ensure expDate is after mfgDate
     if (this.expDate <= this.mfgDate) {
-      throw new Error("❌ Expiry date must be after manufacturing date.");
+      throw new Error('❌ Expiry date must be after manufacturing date.');
     }
 
     await this.validate(); // Ensure schema-level validations
@@ -105,7 +105,7 @@ serialSchema.pre("save", async function (next) {
     const existingSerial = await SerialModel.findOne({
       num: this.num,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2,
     });
 
@@ -116,25 +116,25 @@ serialSchema.pre("save", async function (next) {
     // Generate internal serial code only if not already set
     if (!this.code) {
       const counter = await SerialCounterModel.findOneAndUpdate(
-        { _id: "serialCode" },
+        { _id: 'serialCode' },
         { $inc: { seq: 1 } },
         { new: true, upsert: true }
       );
 
       if (!counter || counter.seq === undefined) {
-        throw new Error("❌ Failed to generate Serial code");
+        throw new Error('❌ Failed to generate Serial code');
       }
 
-      const seqNumber = counter.seq.toString().padStart(9, "0");
+      const seqNumber = counter.seq.toString().padStart(9, '0');
       this.code = `BN_${seqNumber}`;
     }
 
     next();
   } catch (error) {
-    console.error("❌ Error during serial save:", error.stack);
+    console.error('❌ Error during serial save:', error.stack);
     next(error);
   } finally {
-    console.log("ℹ️ Serial pre-save complete");
+    console.log('ℹ️ Serial pre-save complete');
   }
 });
 
@@ -143,4 +143,4 @@ serialSchema.pre("save", async function (next) {
 // siteSchema.set("toJSON", { getters: true });
 
 export const SerialModel =
-  mongoose.models.BB1Serials || model("BB1Serials", serialSchema);
+  mongoose.models.BB1Serials || model('BB1Serials', serialSchema);

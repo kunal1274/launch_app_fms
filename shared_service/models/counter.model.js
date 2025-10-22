@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { dbgModels } from "../../index.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { dbgModels } from '../../index.js';
 
 // Define Schema
 const globalPartyCounterSchema = new Schema({
@@ -16,6 +16,6 @@ const globalPartyCounterSchema = new Schema({
 // Check if the model already exists before defining it
 export const GlobalPartyCounterModel =
   mongoose.models.GlobalPartyCounters ||
-  model("GlobalPartyCounters", globalPartyCounterSchema);
+  model('GlobalPartyCounters', globalPartyCounterSchema);
 
 // dbgModels("global party counters mounted ", GlobalPartyCounterModel);

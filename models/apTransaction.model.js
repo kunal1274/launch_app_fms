@@ -1,5 +1,5 @@
 // models/apTransaction.model.js
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 const apTxnSchema = new Schema(
   {
@@ -10,7 +10,7 @@ const apTxnSchema = new Schema(
     },
     sourceType: {
       type: String,
-      enum: ["PURCHASE"], // always PURCHASE for AP
+      enum: ['PURCHASE'], // always PURCHASE for AP
       required: true,
     },
     sourceId: {
@@ -24,7 +24,7 @@ const apTxnSchema = new Schema(
     },
     supplier: {
       type: Schema.Types.ObjectId,
-      ref: "Vendors",
+      ref: 'Vendors',
       //required: true,
     },
     amount: {
@@ -39,7 +39,7 @@ const apTxnSchema = new Schema(
     exchangeRate: {
       type: Number,
       required: true,
-      min: [0, "ExchangeRate ≥ 0"],
+      min: [0, 'ExchangeRate ≥ 0'],
     },
     localAmount: {
       type: Number,
@@ -47,16 +47,16 @@ const apTxnSchema = new Schema(
     },
     bankAccount: {
       type: Schema.Types.ObjectId,
-      ref: "BankAccounts",
+      ref: 'BankAccounts',
       //required: true,
     },
     remarks: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   { timestamps: true }
 );
 
 export const APTransactionModel =
-  mongoose.models.APTransactions || model("APTransactions", apTxnSchema);
+  mongoose.models.APTransactions || model('APTransactions', apTxnSchema);

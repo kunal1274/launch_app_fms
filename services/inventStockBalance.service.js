@@ -2,7 +2,7 @@
 // import { InventoryJournalModel } from "../models/inventoryJournal.model.js";
 // import { StockBalanceModel } from "../models/stockBalance.model.js"; // you need to define this
 
-import { StockBalanceModel } from "../models/inventStockBalance.model.js";
+import { StockBalanceModel } from '../models/inventStockBalance.model.js';
 
 class StockBalanceService {
   /**
@@ -53,7 +53,7 @@ class StockBalanceService {
         serial: line.serial,
       };
       const sb = await StockBalanceModel.findOne(key).session(session);
-      if (!sb) throw new Error("Stock record not found for reversal.");
+      if (!sb) throw new Error('Stock record not found for reversal.');
       sb.quantity -= line.quantity;
       sb.totalCostValue -= line.quantity * line.costPrice;
       sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;

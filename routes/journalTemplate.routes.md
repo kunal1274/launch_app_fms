@@ -11,7 +11,7 @@ Below is a self-contained example of how you might wire up:
 ```js
 // middleware/authenticate.js
 import jwt from "jsonwebtoken";
-import { UserGlobalModel } from "../models/User.js";
+import { UserGlobalModel } from "../models/user.model.js";
 
 export default async function authenticate(req, res, next) {
   const auth = req.headers.authorization?.split(" ");

@@ -1,15 +1,15 @@
 // controllers/glJournal.controller.js
 
-import mongoose from "mongoose";
-import { GLJournalModel } from "../models/glJournal.model.js";
-import { AccountModel } from "../models/account.model.js";
-import VoucherService from "../services/voucher.service.js";
-import GLLineService from "../services/glJournalLine.service.js";
-import { BankModel } from "../models/bank.model.js";
-import { ItemModel } from "../models/item.model.js";
-import { CustomerModel } from "../models/customer.model.js";
-import { VendorModel } from "../models/vendor.model.js";
-import SubledgerService from "../services/subledgerTxn.service.js";
+import mongoose from 'mongoose';
+import { GLJournalModel } from '../models/glJournal.model.js';
+import { AccountModel } from '../models/account.model.js';
+import VoucherService from '../services/voucher.service.js';
+import GLLineService from '../services/glJournalLine.service.js';
+import { BankModel } from '../models/bank.model.js';
+import { ItemModel } from '../models/item.model.js';
+import { CustomerModel } from '../models/customer.model.js';
+import { VendorModel } from '../models/vendor.model.js';
+import SubledgerService from '../services/subledgerTxn.service.js';
 
 /**
  * Helper: rounds a number to two decimals
@@ -30,30 +30,30 @@ async function resolveLinkedAccount(line) {
 
   // otherwise they gave us a subledger reference:
   switch (line.subledger.subledgerType) {
-    case "AR":
-      // look up the customer → get its linkedCoaAccount
-      const cust = await CustomerModel.findById(line.customer);
-      if (!cust?.linkedCoaAccount) throw new Error("Customer has no COA link");
-      return cust.linkedCoaAccount;
+  case 'AR':
+    // look up the customer → get its linkedCoaAccount
+    const cust = await CustomerModel.findById(line.customer);
+    if (!cust?.linkedCoaAccount) throw new Error('Customer has no COA link');
+    return cust.linkedCoaAccount;
 
-    case "AP":
-      const vend = await VendorModel.findById(line.supplier);
-      if (!vend?.linkedCoaAccount) throw new Error("Vendor has no COA link");
-      return vend.linkedCoaAccount;
+  case 'AP':
+    const vend = await VendorModel.findById(line.supplier);
+    if (!vend?.linkedCoaAccount) throw new Error('Vendor has no COA link');
+    return vend.linkedCoaAccount;
 
-    case "BANK":
-      const ba = await BankModel.findById(line.bankAccount);
-      if (!ba?.linkedCoaAccount) throw new Error("BankAccount has no COA link");
-      return ba.linkedCoaAccount;
+  case 'BANK':
+    const ba = await BankModel.findById(line.bankAccount);
+    if (!ba?.linkedCoaAccount) throw new Error('BankAccount has no COA link');
+    return ba.linkedCoaAccount;
 
-    case "INV":
-      const item = await ItemModel.findById(line.item);
-      if (!item?.linkedCoaAccount) throw new Error("Item has no COA link");
-      return item.linkedCoaAccount;
+  case 'INV':
+    const item = await ItemModel.findById(line.item);
+    if (!item?.linkedCoaAccount) throw new Error('Item has no COA link');
+    return item.linkedCoaAccount;
 
     // …etc for other subledgers…
-    default:
-      throw new Error(`Unknown subledger type ${line.subledger.subledgerType}`);
+  default:
+    throw new Error(`Unknown subledger type ${line.subledger.subledgerType}`);
   }
 }
 
@@ -106,13 +106,13 @@ export const createGLJournal = async (req, res) => {
     const {
       templateId,
       journalDate = new Date(),
-      reference = "",
-      createdBy = req.user?.username || "system",
+      reference = '',
+      createdBy = req.user?.username || 'system',
       lines: rawLines,
     } = req.body;
 
     if (!Array.isArray(rawLines) || rawLines.length === 0) {
-      throw new Error("A GL Journal must have at least one line.");
+      throw new Error('A GL Journal must have at least one line.');
     }
 
     // 1) run your tax/discount/charge computations
@@ -211,17 +211,17 @@ export const createGLJournal = async (req, res) => {
       }
 
       // 6) Validate optional party/item pointers
-      for (let fld of ["item", "customer", "vendor", "bankAccount"]) {
+      for (let fld of ['item', 'customer', 'vendor', 'bankAccount']) {
         if (ln[fld] && !mongoose.isValidObjectId(ln[fld])) {
           throw new Error(`Line ${i + 1}: invalid ${fld} ID.`);
         }
       }
 
       // 7) Currency & rate
-      if (!currency || typeof currency !== "string") {
+      if (!currency || typeof currency !== 'string') {
         throw new Error(`Line ${i + 1}: currency is required.`);
       }
-      if (typeof exchangeRate !== "number" || exchangeRate < 0) {
+      if (typeof exchangeRate !== 'number' || exchangeRate < 0) {
         throw new Error(`Line ${i + 1}: exchangeRate must be ≥ 0.`);
       }
 
@@ -236,7 +236,7 @@ export const createGLJournal = async (req, res) => {
 
       // 9) Compute localAmount if missing
       const local =
-        typeof localAmount === "number"
+        typeof localAmount === 'number'
           ? roundToTwo(localAmount)
           : roundToTwo((d - c) * exchangeRate);
 
@@ -245,7 +245,7 @@ export const createGLJournal = async (req, res) => {
         lineNum: i + 1,
         sequence: i + 1, // if you want to store sequence too
         isHeader: !!ln.isHeader, // ← pull it from the incoming object
-        remarks: ln.remarks || "",
+        remarks: ln.remarks || '',
         account,
         subledger,
         item,
@@ -280,7 +280,7 @@ export const createGLJournal = async (req, res) => {
     const glj = new GLJournalModel({
       template: templateId,
       journalDate,
-      status: "DRAFT",
+      status: 'DRAFT',
       reference: reference.trim(),
       createdBy: createdBy.trim(),
       lines: processed,
@@ -290,15 +290,15 @@ export const createGLJournal = async (req, res) => {
     // 5) Commit & respond
     await session.commitTransaction();
     session.endSession();
-    return res.status(201).json({ status: "success", data: glj });
+    return res.status(201).json({ status: 'success', data: glj });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ createGLJournal error:", err);
+    console.error('❌ createGLJournal error:', err);
     if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(422).json({ status: "failure", message: err.message });
+      return res.status(422).json({ status: 'failure', message: err.message });
     }
-    return res.status(400).json({ status: "failure", message: err.message });
+    return res.status(400).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -308,14 +308,14 @@ export const postGLJournal = async (req, res) => {
 
   try {
     const { id } = req.params;
-    if (!isValidId(id)) throw new Error("Invalid journal ID");
+    if (!isValidId(id)) throw new Error('Invalid journal ID');
 
     // 1) Load & flip to POSTED
     const journal = await GLJournalModel.findById(id).session(session);
-    if (!journal) throw new Error("Journal not found");
-    if (journal.status !== "DRAFT") throw new Error("Only DRAFT can be posted");
+    if (!journal) throw new Error('Journal not found');
+    if (journal.status !== 'DRAFT') throw new Error('Only DRAFT can be posted');
 
-    journal.status = "POSTED";
+    journal.status = 'POSTED';
     await journal.save({ session });
 
     // 2) build & collect each subledger txn
@@ -325,7 +325,7 @@ export const postGLJournal = async (req, res) => {
     for (let ln of journal.lines) {
       // build common DTO
       const base = {
-        sourceType: "JOURNAL",
+        sourceType: 'JOURNAL',
         sourceId: journal._id,
         sourceLine: ln.lineNum,
         amount: ln.debit > 0 ? ln.debit : -ln.credit, // normal debit is positive and credit is negative
@@ -335,7 +335,7 @@ export const postGLJournal = async (req, res) => {
         extras: ln.extras,
       };
       const baseForReversal = {
-        sourceType: "JOURNAL_REVERSAL",
+        sourceType: 'JOURNAL_REVERSAL',
         sourceId: journal._id,
         sourceLine: ln.lineNum,
         amount: ln.debit > 0 ? -ln.debit : ln.credit, // reversal -  debit is negative and credit is positive
@@ -349,37 +349,37 @@ export const postGLJournal = async (req, res) => {
       if (ln.customer) {
         dto = {
           ...base,
-          subledgerType: "AR",
-          postingEventType: "MANAGEMENT",
+          subledgerType: 'AR',
+          postingEventType: 'MANAGEMENT',
           customer: ln.customer,
         };
       } else if (ln.vendor) {
         dto = {
           ...base,
-          subledgerType: "AP",
-          postingEventType: "MANAGEMENT",
+          subledgerType: 'AP',
+          postingEventType: 'MANAGEMENT',
           supplier: ln.vendor,
         };
       } else if (ln.item) {
         dto = {
           ...base,
-          subledgerType: "INV",
-          postingEventType: "MANAGEMENT",
+          subledgerType: 'INV',
+          postingEventType: 'MANAGEMENT',
           item: ln.item,
         };
       } else if (ln.bankAccount) {
         dto = {
           ...base,
-          subledgerType: "BANK",
-          postingEventType: "MANAGEMENT",
+          subledgerType: 'BANK',
+          postingEventType: 'MANAGEMENT',
           bankAccount: ln.bankAccount,
         };
       } else if (ln.account) {
         // NEW: direct ledger subledger
         dto = {
           ...base,
-          subledgerType: "LEDGER",
-          postingEventType: "MANAGEMENT",
+          subledgerType: 'LEDGER',
+          postingEventType: 'MANAGEMENT',
           ledgerAccount: ln.account,
         };
       } else {
@@ -400,18 +400,18 @@ export const postGLJournal = async (req, res) => {
       journal,
       session,
       subTxns,
-      "MANAGEMENT"
+      'MANAGEMENT'
     );
 
     // 4) Commit & respond
     await session.commitTransaction();
     session.endSession();
-    return res.json({ status: "success", data: journal });
+    return res.json({ status: 'success', data: journal });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ postGLJournal error:", err);
-    return res.status(400).json({ status: "failure", message: err.message });
+    console.error('❌ postGLJournal error:', err);
+    return res.status(400).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -420,14 +420,14 @@ export const postGLJournalFinancial = async (req, res) => {
   session.startTransaction();
   try {
     const { id } = req.params;
-    const eventType = req.query.event || "MANAGEMENT"; // or req.body.event
-    if (!isValidId(id)) throw new Error("Invalid journal ID");
+    const eventType = req.query.event || 'MANAGEMENT'; // or req.body.event
+    if (!isValidId(id)) throw new Error('Invalid journal ID');
 
     // 1) Load & flip to POSTED
     const journal = await GLJournalModel.findById(id).session(session);
-    if (!journal) throw new Error("Journal not found");
+    if (!journal) throw new Error('Journal not found');
     // if (journal.status !== "DRAFT") throw new Error("Only DRAFT can be posted");
-    journal.status = "POSTED";
+    journal.status = 'POSTED';
     await journal.save({ session });
 
     // 2) Build all subledger transactions
@@ -437,7 +437,7 @@ export const postGLJournalFinancial = async (req, res) => {
       const amount = ln.debit > 0 ? ln.debit : -ln.credit;
       const cleanExtras = JSON.parse(JSON.stringify(ln.extras || {}));
       const common = {
-        sourceType: "JOURNAL",
+        sourceType: 'JOURNAL',
         sourceId: journal._id,
         sourceLine: ln.lineNum,
         currency: ln.currency,
@@ -450,32 +450,32 @@ export const postGLJournalFinancial = async (req, res) => {
       // helper to pick the right subledgerType & key
       const pick = () => {
         if (ln.customer)
-          return { subledgerType: "AR", key: "customer", val: ln.customer };
+          return { subledgerType: 'AR', key: 'customer', val: ln.customer };
         if (ln.vendor)
-          return { subledgerType: "AP", key: "supplier", val: ln.vendor };
-        if (ln.item) return { subledgerType: "INV", key: "item", val: ln.item };
+          return { subledgerType: 'AP', key: 'supplier', val: ln.vendor };
+        if (ln.item) return { subledgerType: 'INV', key: 'item', val: ln.item };
         if (ln.bankAccount)
           return {
-            subledgerType: "BANK",
-            key: "bankAccount",
+            subledgerType: 'BANK',
+            key: 'bankAccount',
             val: ln.bankAccount,
           };
         /* else */ return {
-          subledgerType: "LEDGER",
-          key: "ledgerAccount",
+          subledgerType: 'LEDGER',
+          key: 'ledgerAccount',
           val: ln.account,
         };
       };
       const { subledgerType, key, val } = pick();
 
-      if (eventType === "FINANCIAL") {
+      if (eventType === 'FINANCIAL') {
         // 2a) reversal of MANAGEMENT
         const revDto = {
           ...common,
           amount: -amount, // flip sign
           subledgerType,
-          postingEventType: "FINANCIAL",
-          extras: { ...common.extras, previousEventType: "MANAGEMENT" },
+          postingEventType: 'FINANCIAL',
+          extras: { ...common.extras, previousEventType: 'MANAGEMENT' },
         };
         revDto[key] = val;
         const rev = await SubledgerService.create(revDto, session);
@@ -486,7 +486,7 @@ export const postGLJournalFinancial = async (req, res) => {
           ...common,
           amount,
           subledgerType,
-          postingEventType: "FINANCIAL",
+          postingEventType: 'FINANCIAL',
         };
         fwdDto[key] = val;
         const fwd = await SubledgerService.create(fwdDto, session);
@@ -497,7 +497,7 @@ export const postGLJournalFinancial = async (req, res) => {
           ...common,
           amount,
           subledgerType,
-          postingEventType: "MANAGEMENT",
+          postingEventType: 'MANAGEMENT',
         };
         dto[key] = val;
         const s = await SubledgerService.create(dto, session);
@@ -515,10 +515,10 @@ export const postGLJournalFinancial = async (req, res) => {
 
     // 4) Commit
     await session.commitTransaction();
-    return res.json({ status: "success", data: journal });
+    return res.json({ status: 'success', data: journal });
   } catch (err) {
     await session.abortTransaction();
-    return res.status(400).json({ status: "failure", message: err.message });
+    return res.status(400).json({ status: 'failure', message: err.message });
   } finally {
     session.endSession();
   }

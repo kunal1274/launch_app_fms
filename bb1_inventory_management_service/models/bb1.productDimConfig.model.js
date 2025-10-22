@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { ProductDimConfigCounterModel } from "../../bb1_shared_management_service/models/bb1.counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { ProductDimConfigCounterModel } from '../../bb1_shared_management_service/models/bb1.counter.model.js';
 
 const productDimConfigSchema = new Schema(
   {
@@ -21,10 +21,10 @@ const productDimConfigSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
     active: {
       type: Boolean,
@@ -35,12 +35,12 @@ const productDimConfigSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "BB1GlobalGroups", // from group.model.js
+        ref: 'BB1GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "BB1Companies",
+      ref: 'BB1Companies',
     },
     // New field for file uploads
     files: [
@@ -62,7 +62,7 @@ const productDimConfigSchema = new Schema(
   }
 );
 
-productDimConfigSchema.pre("save", async function (next) {
+productDimConfigSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -75,7 +75,7 @@ productDimConfigSchema.pre("save", async function (next) {
     const existingConfig = await ProductDimConfigModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -88,28 +88,28 @@ productDimConfigSchema.pre("save", async function (next) {
     // Increment counter for item code
     const dbResponseNewCounter =
       await ProductDimConfigCounterModel.findOneAndUpdate(
-        { _id: "configCode" },
+        { _id: 'configCode' },
         { $inc: { seq: 1 } },
         { new: true, upsert: true }
       );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate Config code");
+      throw new Error('❌ Failed to generate Config code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `CFG_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during config save:", error.stack);
+    console.error('❌ Error caught during config save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally config counter closed");
+    console.log('ℹ️ Finally config counter closed');
   }
 });
 
@@ -119,4 +119,4 @@ productDimConfigSchema.pre("save", async function (next) {
 
 export const ProductDimConfigModel =
   mongoose.models.BB1Configurations ||
-  model("BB1Configurations", productDimConfigSchema);
+  model('BB1Configurations', productDimConfigSchema);

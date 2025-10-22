@@ -1,16 +1,16 @@
-import fs from "node:fs";
-import csv from "fast-csv";
-import ExcelJS from "exceljs";
-import { SalesOrderModel } from "../models/bb3SalesOrder.model.js";
+import fs from 'node:fs';
+import csv from 'fast-csv';
+import ExcelJS from 'exceljs';
+import { SalesOrderModel } from '../models/bb3SalesOrder.model.js';
 
 export async function importCSV(filePath) {
   return new Promise((resolve, reject) => {
     const orders = [];
     fs.createReadStream(filePath)
       .pipe(csv.parse({ headers: true }))
-      .on("error", reject)
-      .on("data", (row) => orders.push(row))
-      .on("end", async () => {
+      .on('error', reject)
+      .on('data', (row) => orders.push(row))
+      .on('end', async () => {
         await SalesOrderModel.insertMany(orders, { ordered: false });
         resolve(orders.length);
       });

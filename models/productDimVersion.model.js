@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { ProductDimVersionCounterModel } from "./counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { ProductDimVersionCounterModel } from './counter.model.js';
 
 const productDimVersionSchema = new Schema(
   {
@@ -21,10 +21,10 @@ const productDimVersionSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
     values: {
       type: [String],
@@ -39,12 +39,12 @@ const productDimVersionSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     // New field for file uploads
     files: [
@@ -67,7 +67,7 @@ const productDimVersionSchema = new Schema(
   }
 );
 
-productDimVersionSchema.pre("save", async function (next) {
+productDimVersionSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -80,7 +80,7 @@ productDimVersionSchema.pre("save", async function (next) {
     const existingVersion = await ProductDimVersionModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -93,28 +93,28 @@ productDimVersionSchema.pre("save", async function (next) {
     // Increment counter for item code
     const dbResponseNewCounter =
       await ProductDimVersionCounterModel.findOneAndUpdate(
-        { _id: "configCode" },
+        { _id: 'configCode' },
         { $inc: { seq: 1 } },
         { new: true, upsert: true }
       );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate Version code");
+      throw new Error('❌ Failed to generate Version code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `VER_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during config save:", error.stack);
+    console.error('❌ Error caught during config save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally config counter closed");
+    console.log('ℹ️ Finally config counter closed');
   }
 });
 
@@ -123,4 +123,4 @@ productDimVersionSchema.pre("save", async function (next) {
 // siteSchema.set("toJSON", { getters: true });
 
 export const ProductDimVersionModel =
-  mongoose.models.Versions || model("Versions", productDimVersionSchema);
+  mongoose.models.Versions || model('Versions', productDimVersionSchema);

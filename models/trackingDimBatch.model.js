@@ -1,7 +1,7 @@
 // models/batch.model.js
 
-import mongoose, { model, Schema } from "mongoose";
-import { BatchCounterModel } from "./counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { BatchCounterModel } from './counter.model.js';
 
 // ——— Sub-schema for each batch value ———
 const batchValueSchema = new Schema(
@@ -30,8 +30,8 @@ const batchValueSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Created", "Ready", "Closed", "Obsolete"],
-      default: "Ready",
+      enum: ['Created', 'Ready', 'Closed', 'Obsolete'],
+      default: 'Ready',
     },
 
     // if you later need serial-tracking per value:
@@ -47,7 +47,7 @@ const batchValueSchema = new Schema(
         validator(arr) {
           return !this.serialTracking || (Array.isArray(arr) && arr.length > 0);
         },
-        message: "Enable serialTracking to supply at least one serial number.",
+        message: 'Enable serialTracking to supply at least one serial number.',
       },
     },
 
@@ -87,8 +87,8 @@ const batchSchema = new Schema(
     description: String,
     type: {
       type: String,
-      enum: ["Physical", "Virtual"],
-      default: "Physical",
+      enum: ['Physical', 'Virtual'],
+      default: 'Physical',
     },
     active: {
       type: Boolean,
@@ -102,12 +102,12 @@ const batchSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups",
+        ref: 'GlobalGroups',
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
 
     files: [
@@ -135,7 +135,7 @@ const batchSchema = new Schema(
 batchSchema.index({ code: 1 }, { unique: true });
 
 // ——— Validate sub-docs & generate `code` ———
-batchSchema.pre("validate", async function (next) {
+batchSchema.pre('validate', async function (next) {
   // 1) Ensure each value has expDate > mfgDate
   for (const val of this.values) {
     if (val.expDate <= val.mfgDate) {
@@ -157,18 +157,18 @@ batchSchema.pre("validate", async function (next) {
   // 3) Auto-generate master `code` if missing
   if (!this.code) {
     const counter = await BatchCounterModel.findOneAndUpdate(
-      { _id: "batchCode" },
+      { _id: 'batchCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
     if (!counter?.seq && counter.seq !== 0) {
-      return next(new Error("Failed to generate batch code"));
+      return next(new Error('Failed to generate batch code'));
     }
-    this.code = `BH_${String(counter.seq).padStart(9, "0")}`;
+    this.code = `BH_${String(counter.seq).padStart(9, '0')}`;
   }
 
   next();
 });
 
 export const BatchModel =
-  mongoose.models.Batches || model("Batches", batchSchema);
+  mongoose.models.Batches || model('Batches', batchSchema);

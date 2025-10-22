@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
   createStockBalance,
   bulkCreateStockBalances,
@@ -11,25 +11,25 @@ import {
   getProvisionalStockBalances,
   getStockTransactions,
   getStockTransactionsForBalance,
-} from "../controllers/inventStockBalance.controller.js";
+} from '../controllers/inventStockBalance.controller.js';
 
 const stockBalanceRouter = Router();
 
-stockBalanceRouter.get("/provisional", getProvisionalStockBalances);
-stockBalanceRouter.get("/transactions", getStockTransactions);
-stockBalanceRouter.post("/bulk", bulkCreateStockBalances);
-stockBalanceRouter.patch("/bulk", bulkUpdateStockBalances);
-stockBalanceRouter.delete("/bulk", bulkDeleteStockBalances);
+stockBalanceRouter.get('/provisional', getProvisionalStockBalances);
+stockBalanceRouter.get('/transactions', getStockTransactions);
+stockBalanceRouter.post('/bulk', bulkCreateStockBalances);
+stockBalanceRouter.patch('/bulk', bulkUpdateStockBalances);
+stockBalanceRouter.delete('/bulk', bulkDeleteStockBalances);
 
-stockBalanceRouter.post("/", createStockBalance);
-stockBalanceRouter.get("/", getAllStockBalances);
+stockBalanceRouter.post('/', createStockBalance);
+stockBalanceRouter.get('/', getAllStockBalances);
 
 stockBalanceRouter.get(
-  "/:balanceId/transactions",
+  '/:balanceId/transactions',
   getStockTransactionsForBalance
 );
-stockBalanceRouter.get("/:id", getStockBalanceById);
-stockBalanceRouter.patch("/:id", updateStockBalanceById);
-stockBalanceRouter.delete("/:id", deleteStockBalanceById);
+stockBalanceRouter.get('/:id', getStockBalanceById);
+stockBalanceRouter.patch('/:id', updateStockBalanceById);
+stockBalanceRouter.delete('/:id', deleteStockBalanceById);
 
 export default stockBalanceRouter;

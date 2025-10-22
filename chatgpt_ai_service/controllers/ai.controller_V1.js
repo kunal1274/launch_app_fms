@@ -1,5 +1,5 @@
-import callOpenAI from "../services/callOpenAi.js";
-import { SalesOrderModel } from "../../models/salesorder.model.js";
+import callOpenAI from '../services/callOpenAi.js';
+import { SalesOrderModel } from '../../models/salesorder.model.js';
 
 /* POST /api/ai/query  ----------------------------------------------- */
 export const chatQuery = async (req, res, next) => {
@@ -27,7 +27,7 @@ export const orderInsights = async (req, res, next) => {
       Return a short JSON: {summary, paymentRisk, profitMargin,outstandingShipments,outstandingDeliveries,shipmentBottlenecks,alerts}.
       Sales‑order:\n${JSON.stringify(so)}
     `;
-    const answer = await callOpenAI(prompt, 256, "json");
+    const answer = await callOpenAI(prompt, 256, 'json');
     res.json(JSON.parse(answer));
   } catch (e) {
     next(e);

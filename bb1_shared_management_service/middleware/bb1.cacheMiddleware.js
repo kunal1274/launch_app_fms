@@ -1,5 +1,5 @@
 // cacheMiddleware.js
-import redisClient from "./redisClient.js";
+import redisClient from './redisClient.js';
 
 /**
  * Caching middleware for GET requests:
@@ -8,7 +8,7 @@ import redisClient from "./redisClient.js";
 export async function cacheMiddleware(req, res, next) {
   try {
     // Only cache GET requests by default. If you want to cache other methods, remove this check.
-    if (req.method !== "GET") {
+    if (req.method !== 'GET') {
       return next();
     }
 
@@ -24,7 +24,7 @@ export async function cacheMiddleware(req, res, next) {
     console.log(`🚫[Cache MISS] ${cacheKey}`);
     return next(); // proceed to controller/DB
   } catch (err) {
-    console.error("Error in cacheMiddleware:", err);
+    console.error('Error in cacheMiddleware:', err);
     return next(); // fallback if cache fails
   }
 }

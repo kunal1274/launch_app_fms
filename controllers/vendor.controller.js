@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
-import { VendorModel } from "../models/vendor.model.js";
-import { VendorCounterModel } from "../models/counter.model.js";
-import ce from "../utility/ce.utils.js";
-import cl from "../utility/cl.utils.js";
-import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
-import { GlobalGroupModel } from "../shared_service/models/globalGroup.model.js";
+import mongoose from 'mongoose';
+import { VendorModel } from '../models/vendor.model.js';
+import { VendorCounterModel } from '../models/counter.model.js';
+import ce from '../utility/ce.utils.js';
+import cl from '../utility/cl.utils.js';
+import createGlobalPartyId from '../shared_service/utility/createGlobalParty.utility.js';
+import { GlobalGroupModel } from '../shared_service/models/globalGroup.model.js';
 
 // Helper function for error logging
 const logError = (context, error) => {
@@ -21,13 +21,13 @@ export const createVendor = async (req, res) => {
     if (!vendorBody.name || !vendorBody.contactNum) {
       // Adjust for required fields
       return res.status(422).send({
-        status: "failure",
-        message: "⚠️ Vendor name and contact num are required.",
+        status: 'failure',
+        message: '⚠️ Vendor name and contact num are required.',
       });
     }
 
     const partyId = await createGlobalPartyId(
-      "Vendor",
+      'Vendor',
       vendorBody.globalPartyId,
       vendorBody.name
     );
@@ -39,64 +39,64 @@ export const createVendor = async (req, res) => {
       `Vendor created successfully with ID: ${
         dbResponse._id
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`
     );
 
     return res.status(201).send({
-      status: "Success",
+      status: 'Success',
       message: `✅ The vendor has been created successfully with vendor code : ${
         dbResponse.code
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`,
       data: dbResponse,
     });
   } catch (error) {
     //ce(`The error during vendor creation : ${error}`);
-    if (error.message && error.message.startsWith("GlobalParty with ID")) {
+    if (error.message && error.message.startsWith('GlobalParty with ID')) {
       // That means our helper threw a "GlobalParty not found..." error
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: error.message,
       });
     }
 
     // Database Validation Error
     if (error instanceof mongoose.Error.ValidationError) {
-      logError("Vendor Creation - Validation Error", error);
+      logError('Vendor Creation - Validation Error', error);
       return res.status(422).send({
-        status: "failure",
-        message: "❌ Validation error during vendor creation.",
+        status: 'failure',
+        message: '❌ Validation error during vendor creation.',
         error: error.message || error,
       });
     }
 
     // MongoDB Duplicate Key Error (e.g., email uniqueness constraint)
     if (error.code === 11000) {
-      logError("Vendor Creation - Duplicate Error", error);
+      logError('Vendor Creation - Duplicate Error', error);
       return res.status(409).send({
-        status: "failure",
-        message: "❌ A vendor with this contact Num already exists.",
+        status: 'failure',
+        message: '❌ A vendor with this contact Num already exists.',
       });
     }
 
     // Handle MongoDB connection or network issues
-    if (error.message.includes("network error")) {
-      logError("Vendor Creation - Network Error", error);
+    if (error.message.includes('network error')) {
+      logError('Vendor Creation - Network Error', error);
       return res.status(503).send({
-        status: "failure",
-        message: "❌ Service temporarily unavailable. Please try again later.",
+        status: 'failure',
+        message: '❌ Service temporarily unavailable. Please try again later.',
       });
     }
 
     // General Server Error
-    logError("Vendor Creation - Unknown Error", error);
+    logError('Vendor Creation - Unknown Error', error);
     return res.status(500).send({
-      status: "failure",
-      message: "❌ An unexpected error occurred. Please try again.",
+      status: 'failure',
+      message: '❌ An unexpected error occurred. Please try again.',
       error: error.message || error,
     });
   }
@@ -106,15 +106,15 @@ export const getVendors = async (req, res) => {
   try {
     const dbResponse = await VendorModel.find({});
     return res.status(200).send({
-      status: "success",
-      message: "✅ All the vendors have been fetched successfully",
+      status: 'success',
+      message: '✅ All the vendors have been fetched successfully',
       count: dbResponse.length,
       data: dbResponse,
     });
   } catch (error) {
     return res.status(400).send({
-      status: "failure",
-      message: "❌ There is an error while trying to fetch all the vendors",
+      status: 'failure',
+      message: '❌ There is an error while trying to fetch all the vendors',
       error: error,
     });
   }
@@ -126,20 +126,20 @@ export const getVendor = async (req, res) => {
     const dbResponse = await VendorModel.findById(vendorId);
     if (!dbResponse) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ The vendor ${vendorId} has been deleted or does not exist`,
       });
     }
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `✅ The vendor record ${vendorId} has been fetched successfully.`,
       data: dbResponse,
     });
   } catch (error) {
     ce(`Error fetching vendor with ID ${vendorId}:`, error);
     return res.status(500).send({
-      status: "failure",
-      message: `❌ The error has been caught while fetching the vendor record`,
+      status: 'failure',
+      message: '❌ The error has been caught while fetching the vendor record',
       error: error.message || error,
     });
   }
@@ -152,7 +152,7 @@ export const updateVendor = async (request, response) => {
     const vendorExists = await VendorModel.findById(vendorId);
     if (!vendorExists) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `The vendor ${vendorId} has been deleted or does not exist `,
       });
     }
@@ -162,13 +162,13 @@ export const updateVendor = async (request, response) => {
       { $set: vendorBodyToUpdate }
     );
     return response.status(200).send({
-      status: "success",
+      status: 'success',
       message: `The vendor ${vendorId} has been updated successfully.`,
       data: dbResponse,
     });
   } catch (error) {
     return response.status(400).send({
-      status: "failure",
+      status: 'failure',
       message: `There is an error while updating the vendor record ${vendorId}`,
       error: error,
     });
@@ -181,19 +181,19 @@ export const deleteVendor = async (req, res) => {
     const dbResponse = await VendorModel.findByIdAndDelete(vendorId);
     if (!dbResponse) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `No vendor found with id ${vendorId}`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `The vendor ${vendorId} has been deleted successfully`,
       data: dbResponse,
     });
   } catch (error) {
     return res.status(400).send({
-      status: "failure",
+      status: 'failure',
       message: `There has been error while deleting the vendor id ${vendorId}`,
       error: error,
     });
@@ -210,15 +210,15 @@ export const deleteAllVendors = async (req, res) => {
     // Reset the counter for vendor code
 
     const resetCounter = await VendorCounterModel.findOneAndUpdate(
-      { _id: "vendorCode" },
+      { _id: 'vendorCode' },
       { seq: 0 }, // Reset sequence to 0
       { new: true, upsert: true } // Create document if it doesn't exist
     );
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message:
-        "All vendors have been deleted, and the sequence has been reset to 1.",
+        'All vendors have been deleted, and the sequence has been reset to 1.',
       data: {
         deletedCount: deleteResponse.deletedCount,
         counter: resetCounter,
@@ -226,12 +226,12 @@ export const deleteAllVendors = async (req, res) => {
     });
   } catch (error) {
     console.error(
-      "Error while deleting all vendors and resetting sequence:",
+      'Error while deleting all vendors and resetting sequence:',
       error
     );
     return res.status(500).send({
-      status: "failure",
-      message: "Error while deleting all vendors or resetting the sequence.",
+      status: 'failure',
+      message: 'Error while deleting all vendors or resetting the sequence.',
       error: error.message,
     });
   }
@@ -247,8 +247,8 @@ export const attachGroupToVendor = async (req, res) => {
 
     if (!vendorId || !groupId) {
       return res.status(400).json({
-        status: "failure",
-        message: "⚠️ Both 'vendorId' and 'groupId' are required.",
+        status: 'failure',
+        message: '⚠️ Both \'vendorId\' and \'groupId\' are required.',
       });
     }
 
@@ -256,7 +256,7 @@ export const attachGroupToVendor = async (req, res) => {
     const groupDoc = await GlobalGroupModel.findById(groupId);
     if (!groupDoc) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Group with ID ${groupId} not found.`,
       });
     }
@@ -265,15 +265,15 @@ export const attachGroupToVendor = async (req, res) => {
     const vendorDoc = await VendorModel.findById(vendorId);
     if (!vendorDoc) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Vendor with ID ${vendorId} not found.`,
       });
     }
 
     // 4) Check if group is released for "Vendor" module
-    if (!groupDoc.releaseModules.includes("Vendor")) {
+    if (!groupDoc.releaseModules.includes('Vendor')) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Group ${groupDoc.code} is NOT released for 'Vendor' module.`,
       });
     }
@@ -283,7 +283,7 @@ export const attachGroupToVendor = async (req, res) => {
     const vendorCompanyId = vendorDoc.company?.toString();
     if (!vendorCompanyId) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Vendor ${vendorId} does not have a company assigned.`,
       });
     }
@@ -298,7 +298,7 @@ export const attachGroupToVendor = async (req, res) => {
 
     if (!isCompanyAllowed) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Group ${groupDoc.code} is not released for the company of this Vendor.`,
       });
     }
@@ -313,7 +313,7 @@ export const attachGroupToVendor = async (req, res) => {
     );
     if (alreadyAttached) {
       return res.status(200).json({
-        status: "success",
+        status: 'success',
         message: `ℹ️ Group ${groupDoc.code} is already attached to Vendor ${vendorId}.`,
         data: vendorDoc,
       });
@@ -323,16 +323,16 @@ export const attachGroupToVendor = async (req, res) => {
     await vendorDoc.save();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ Group ${groupDoc.code} attached to Vendor ${vendorDoc.code} successfully.`,
       data: vendorDoc,
     });
   } catch (error) {
-    console.error("❌ Error in attachGroupToVendor:", error);
+    console.error('❌ Error in attachGroupToVendor:', error);
 
     return res.status(500).json({
-      status: "failure",
-      message: "❌ An unexpected error occurred while attaching the group.",
+      status: 'failure',
+      message: '❌ An unexpected error occurred while attaching the group.',
       error: error.message || error,
     });
   }

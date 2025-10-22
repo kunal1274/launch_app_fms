@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 const stageSchema = new Schema(
   {
@@ -17,12 +17,12 @@ const templateSchema = new Schema(
       unique: true,
       trim: true,
     },
-    description: { type: String, trim: true, default: "" },
+    description: { type: String, trim: true, default: '' },
     journalType: {
       type: String,
       required: true,
-      enum: ["STANDARD", "REVERSAL", "ADJUSTMENT", "PERIOD_CLOSE"],
-      default: "STANDARD",
+      enum: ['STANDARD', 'REVERSAL', 'ADJUSTMENT', 'PERIOD_CLOSE'],
+      default: 'STANDARD',
     },
     allowHeader: { type: Boolean, default: true },
     mandatorySingleHeader: { type: Boolean, default: false },
@@ -35,7 +35,7 @@ const templateSchema = new Schema(
           const seqs = arr.map((s) => s.sequence);
           return new Set(seqs).size === seqs.length;
         },
-        message: "Each stage must have a unique sequence",
+        message: 'Each stage must have a unique sequence',
       },
     },
     statusTransitions: {
@@ -50,4 +50,4 @@ const templateSchema = new Schema(
 templateSchema.index({ name: 1 });
 
 export const JournalTemplateModel =
-  mongoose.models.JournalTemplates || model("JournalTemplates", templateSchema);
+  mongoose.models.JournalTemplates || model('JournalTemplates', templateSchema);

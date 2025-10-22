@@ -1,5 +1,5 @@
-import mongoose, { Schema, model } from "mongoose";
-import { LocationCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { LocationCounterModel } from './counter.model.js';
 
 // Sales Order Schema
 const locationSchema = new Schema(
@@ -22,21 +22,21 @@ const locationSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
 
     warehouse: {
       type: Schema.Types.ObjectId,
-      ref: "Warehouses", // Reference to the Customer model
+      ref: 'Warehouses', // Reference to the Customer model
       required: false,
     },
 
     zone: {
       type: Schema.Types.ObjectId,
-      ref: "Zones", // Reference to the Customer model
+      ref: 'Zones', // Reference to the Customer model
       required: false,
     },
     locationAddress: {
@@ -55,18 +55,18 @@ const locationSchema = new Schema(
     archived: { type: Boolean, default: false }, // New field
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     createdBy: {
       type: String,
       required: true,
-      default: "SystemWHCreation",
+      default: 'SystemWHCreation',
     },
     updatedBy: {
       type: String,
@@ -114,7 +114,7 @@ const locationSchema = new Schema(
   }
 );
 
-locationSchema.pre("save", async function (next) {
+locationSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -127,7 +127,7 @@ locationSchema.pre("save", async function (next) {
     const existingLocation = await LocationModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -139,35 +139,35 @@ locationSchema.pre("save", async function (next) {
 
     // Increment counter for item code
     const dbResponseNewCounter = await LocationCounterModel.findOneAndUpdate(
-      { _id: "locationCode" },
+      { _id: 'locationCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
 
-    console.log("ℹ️ Counter increment result:", dbResponseNewCounter);
+    console.log('ℹ️ Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate location code");
+      throw new Error('❌ Failed to generate location code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `LN_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during location save:", error.stack);
+    console.error('❌ Error caught during location save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally location counter closed");
+    console.log('ℹ️ Finally location counter closed');
   }
 });
 
 locationSchema.pre(/^find/, function (next) {
-  this.populate("warehouse", "code name description type active").populate(
-    "zone",
-    "code name description type active"
+  this.populate('warehouse', 'code name description type active').populate(
+    'zone',
+    'code name description type active'
   );
   next();
 });
@@ -175,4 +175,4 @@ locationSchema.pre(/^find/, function (next) {
 locationSchema.index({ name: 1, zone: 1 });
 
 export const LocationModel =
-  mongoose.models.Locations || model("Locations", locationSchema);
+  mongoose.models.Locations || model('Locations', locationSchema);

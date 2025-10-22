@@ -1,11 +1,11 @@
 // models/userRole.model.js
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userRoleSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   permissions: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Permissions",
+    ref: 'Permissions',
     default: [],
   }, //["READ_CUSTOMER", "UPDATE_CUSTOMER"],
   scopes: {
@@ -14,4 +14,4 @@ const userRoleSchema = new mongoose.Schema({
   },
 });
 
-export const UserRoleModel = mongoose.model("UserRoles", userRoleSchema);
+export const UserRoleModel = mongoose.model('UserRoles', userRoleSchema);

@@ -1,28 +1,28 @@
-import { InventoryJournalModel } from "../models/inventJournal.model.js";
-import { StockBalanceModel } from "../models/inventStockBalance.model.js";
-import { logStackError } from "../utility/logger.util.js";
+import { InventoryJournalModel } from '../models/inventJournal.model.js';
+import { StockBalanceModel } from '../models/inventStockBalance.model.js';
+import { logStackError } from '../utility/logger.util.js';
 
 export const getStockTransactionsPerBalance1 = async (req, res) => {
   try {
     // 1) Build a match‐function from query‐string dims:
     const dims = {};
     [
-      "item",
-      "site",
-      "warehouse",
-      "zone",
-      "location",
-      "aisle",
-      "rack",
-      "shelf",
-      "bin",
-      "config",
-      "color",
-      "size",
-      "style",
-      "version",
-      "batch",
-      "serial",
+      'item',
+      'site',
+      'warehouse',
+      'zone',
+      'location',
+      'aisle',
+      'rack',
+      'shelf',
+      'bin',
+      'config',
+      'color',
+      'size',
+      'style',
+      'version',
+      'batch',
+      'serial',
     ].forEach((key) => {
       if (req.query[key]) dims[key] = req.query[key];
     });
@@ -30,7 +30,7 @@ export const getStockTransactionsPerBalance1 = async (req, res) => {
     // 2) Fetch all journals (posted + draft) that have at least one line matching dims
     //    We do a broad find, then filter in‐JS on the flattened lines.
     const journals = await InventoryJournalModel.find({
-      "lines.item": dims.item || { $exists: true },
+      'lines.item': dims.item || { $exists: true },
     }).lean();
 
     // 3) Flatten matching lines into a unified array
@@ -42,18 +42,18 @@ export const getStockTransactionsPerBalance1 = async (req, res) => {
         for (const [k, v] of Object.entries(dims)) {
           // line.from/line.to for storage dims; top‐level for others
           const val = [
-            "site",
-            "warehouse",
-            "zone",
-            "location",
-            "aisle",
-            "rack",
-            "shelf",
-            "bin",
+            'site',
+            'warehouse',
+            'zone',
+            'location',
+            'aisle',
+            'rack',
+            'shelf',
+            'bin',
           ].includes(k)
-            ? journal.type === "TRANSFER"
+            ? journal.type === 'TRANSFER'
               ? // for TRANSFER, both legs matter, but we'll just include the line once
-                line.from[k] || line.to[k]
+              line.from[k] || line.to[k]
               : line.from[k] || line.to[k]
             : line[k];
           if (!val || val.toString() !== v) {
@@ -64,8 +64,8 @@ export const getStockTransactionsPerBalance1 = async (req, res) => {
         if (!ok) continue;
 
         const qty = line.quantity;
-        const posted = journal.status === "POSTED";
-        const draft = journal.status === "DRAFT";
+        const posted = journal.status === 'POSTED';
+        const draft = journal.status === 'DRAFT';
         const inQty = qty > 0 ? qty : 0;
         const outQty = qty < 0 ? -qty : 0;
         const purchaseV = inQty * line.purchasePrice;
@@ -138,10 +138,10 @@ export const getStockTransactionsPerBalance1 = async (req, res) => {
 
     return { data: ledger };
   } catch (err) {
-    logStackError("❌ Stock Transactions Error", err);
+    logStackError('❌ Stock Transactions Error', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Could not assemble transaction ledger.",
+      status: 'failure',
+      message: 'Could not assemble transaction ledger.',
       error: err.message,
     });
   }
@@ -161,22 +161,22 @@ export async function getStockTransactionsPerBalance(req) {
     // 1) Pull dims from the query
     const dims = {};
     [
-      "item",
-      "site",
-      "warehouse",
-      "zone",
-      "location",
-      "aisle",
-      "rack",
-      "shelf",
-      "bin",
-      "config",
-      "color",
-      "size",
-      "style",
-      "version",
-      "batch",
-      "serial",
+      'item',
+      'site',
+      'warehouse',
+      'zone',
+      'location',
+      'aisle',
+      'rack',
+      'shelf',
+      'bin',
+      'config',
+      'color',
+      'size',
+      'style',
+      'version',
+      'batch',
+      'serial',
     ].forEach((k) => {
       if (req.query[k]) dims[k] = req.query[k];
     });
@@ -184,7 +184,7 @@ export async function getStockTransactionsPerBalance(req) {
     // 2) Find all journals that _might_ affect these dims.
     //    We match on lines.item, and will filter fully in‐JS.
     const journals = await InventoryJournalModel.find({
-      "lines.item": dims.item,
+      'lines.item': dims.item,
     }).lean();
 
     // 3) Flatten & filter each line
@@ -197,14 +197,14 @@ export async function getStockTransactionsPerBalance(req) {
           let val;
           if (
             [
-              "site",
-              "warehouse",
-              "zone",
-              "location",
-              "aisle",
-              "rack",
-              "shelf",
-              "bin",
+              'site',
+              'warehouse',
+              'zone',
+              'location',
+              'aisle',
+              'rack',
+              'shelf',
+              'bin',
             ].includes(k)
           ) {
             // storage dims live under line.from or line.to
@@ -222,9 +222,9 @@ export async function getStockTransactionsPerBalance(req) {
 
         // 4) Build the transaction row
         const qty = line.quantity;
-        const posted = journal.status === "POSTED";
+        const posted = journal.status === 'POSTED';
         const draft =
-          journal.status === "DRAFT" || journal.status === "CONFIRMED";
+          journal.status === 'DRAFT' || journal.status === 'CONFIRMED';
         const inQty = qty > 0 ? qty : 0;
         const outQty = qty < 0 ? -qty : 0;
         const purchaseV = inQty * line.purchasePrice;
@@ -303,7 +303,7 @@ export async function getStockTransactionsPerBalance(req) {
       };
     });
   } catch (err) {
-    logStackError("❌ getStockTransactionsPerBalance", err);
+    logStackError('❌ getStockTransactionsPerBalance', err);
     throw err;
   }
 }

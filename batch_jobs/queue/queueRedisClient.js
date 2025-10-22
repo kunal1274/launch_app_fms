@@ -1,6 +1,6 @@
 // queue/queueRedis.js  ( ✱ NEW FILE ✱ )
-import { Redis } from "ioredis";
-import dotenv from "dotenv";
+import { Redis } from 'ioredis';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const {
@@ -16,7 +16,7 @@ export const queueRedis = new Redis({
   port: Number(REDIS_PORT),
   username: REDIS_USERNAME || undefined,
   password: REDIS_PASSWORD || undefined,
-  tls: REDIS_USE_TLS === "true" ? {} : undefined,
+  tls: REDIS_USE_TLS === 'true' ? {} : undefined,
   // misc tuning
   maxRetriesPerRequest: null,
   enableReadyCheck: true,

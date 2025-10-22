@@ -1,13 +1,13 @@
 // models/inventoryJournal.model.js
 
-import mongoose, { Schema, model } from "mongoose";
-import { InventJournalCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { InventJournalCounterModel } from './counter.model.js';
 
 // sub‐schema for each journal line
 const journalLineSchema = new Schema(
   {
     lineNum: { type: String },
-    item: { type: Schema.Types.ObjectId, ref: "Items", required: true },
+    item: { type: Schema.Types.ObjectId, ref: 'Items', required: true },
     lineDate: { type: Date, required: true, default: Date.now }, // may override header.journalDate
     quantity: { type: Number, required: true, default: 1 }, // +ve number always
     loadOnInventoryValue: { type: Number, default: 0 }, // <-- NEW
@@ -23,36 +23,36 @@ const journalLineSchema = new Schema(
 
     // location dims
     from: {
-      site: { type: Schema.Types.ObjectId, ref: "Sites" },
-      warehouse: { type: Schema.Types.ObjectId, ref: "Warehouses" },
-      zone: { type: Schema.Types.ObjectId, ref: "Zones" },
-      location: { type: Schema.Types.ObjectId, ref: "Locations" },
-      aisle: { type: Schema.Types.ObjectId, ref: "Aisles" },
-      rack: { type: Schema.Types.ObjectId, ref: "Racks" },
-      shelf: { type: Schema.Types.ObjectId, ref: "Shelves" },
-      bin: { type: Schema.Types.ObjectId, ref: "Bins" },
+      site: { type: Schema.Types.ObjectId, ref: 'Sites' },
+      warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouses' },
+      zone: { type: Schema.Types.ObjectId, ref: 'Zones' },
+      location: { type: Schema.Types.ObjectId, ref: 'Locations' },
+      aisle: { type: Schema.Types.ObjectId, ref: 'Aisles' },
+      rack: { type: Schema.Types.ObjectId, ref: 'Racks' },
+      shelf: { type: Schema.Types.ObjectId, ref: 'Shelves' },
+      bin: { type: Schema.Types.ObjectId, ref: 'Bins' },
     },
     to: {
-      site: { type: Schema.Types.ObjectId, ref: "Sites" },
-      warehouse: { type: Schema.Types.ObjectId, ref: "Warehouses" },
-      zone: { type: Schema.Types.ObjectId, ref: "Zones" },
-      location: { type: Schema.Types.ObjectId, ref: "Locations" },
-      aisle: { type: Schema.Types.ObjectId, ref: "Aisles" },
-      rack: { type: Schema.Types.ObjectId, ref: "Racks" },
-      shelf: { type: Schema.Types.ObjectId, ref: "Shelves" },
-      bin: { type: Schema.Types.ObjectId, ref: "Bins" },
+      site: { type: Schema.Types.ObjectId, ref: 'Sites' },
+      warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouses' },
+      zone: { type: Schema.Types.ObjectId, ref: 'Zones' },
+      location: { type: Schema.Types.ObjectId, ref: 'Locations' },
+      aisle: { type: Schema.Types.ObjectId, ref: 'Aisles' },
+      rack: { type: Schema.Types.ObjectId, ref: 'Racks' },
+      shelf: { type: Schema.Types.ObjectId, ref: 'Shelves' },
+      bin: { type: Schema.Types.ObjectId, ref: 'Bins' },
     },
 
     // product dims
-    config: { type: Schema.Types.ObjectId, ref: "Configurations" },
-    color: { type: Schema.Types.ObjectId, ref: "Colors" },
-    size: { type: Schema.Types.ObjectId, ref: "Sizes" },
-    style: { type: Schema.Types.ObjectId, ref: "Styles" },
-    version: { type: Schema.Types.ObjectId, ref: "Versions" },
+    config: { type: Schema.Types.ObjectId, ref: 'Configurations' },
+    color: { type: Schema.Types.ObjectId, ref: 'Colors' },
+    size: { type: Schema.Types.ObjectId, ref: 'Sizes' },
+    style: { type: Schema.Types.ObjectId, ref: 'Styles' },
+    version: { type: Schema.Types.ObjectId, ref: 'Versions' },
 
     // tracking dims
-    batch: { type: Schema.Types.ObjectId, ref: "Batches" },
-    serial: { type: Schema.Types.ObjectId, ref: "Serials" },
+    batch: { type: Schema.Types.ObjectId, ref: 'Batches' },
+    serial: { type: Schema.Types.ObjectId, ref: 'Serials' },
 
     remarks: { type: String },
     attributes: { type: Map, of: Schema.Types.Mixed, default: {} },
@@ -71,21 +71,21 @@ const inventoryJournalSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["INOUT", "ADJUSTMENT", "COUNTING", "TRANSFER"],
+      enum: ['INOUT', 'ADJUSTMENT', 'COUNTING', 'TRANSFER'],
     },
     status: {
       type: String,
       required: true,
       enum: [
-        "DRAFT",
-        "CONFIRMED",
-        "POSTED",
-        "REVERSED",
-        "CANCELLED",
-        "ADMINMODE",
-        "ANYMODE",
+        'DRAFT',
+        'CONFIRMED',
+        'POSTED',
+        'REVERSED',
+        'CANCELLED',
+        'ADMINMODE',
+        'ANYMODE',
       ],
-      default: "DRAFT",
+      default: 'DRAFT',
     },
 
     journalDate: { type: Date, required: true, default: Date.now },
@@ -95,8 +95,8 @@ const inventoryJournalSchema = new Schema(
     posted: { type: Boolean, default: false },
     postedAt: { type: Date },
 
-    company: { type: Schema.Types.ObjectId, ref: "Companies", required: false },
-    groups: [{ type: Schema.Types.ObjectId, ref: "GlobalGroups" }],
+    company: { type: Schema.Types.ObjectId, ref: 'Companies', required: false },
+    groups: [{ type: Schema.Types.ObjectId, ref: 'GlobalGroups' }],
 
     lines: {
       type: [journalLineSchema],
@@ -105,7 +105,7 @@ const inventoryJournalSchema = new Schema(
         validator(arr) {
           return Array.isArray(arr) && arr.length > 0;
         },
-        message: "A journal must have at least one line.",
+        message: 'A journal must have at least one line.',
       },
     },
   },
@@ -118,15 +118,15 @@ const inventoryJournalSchema = new Schema(
 inventoryJournalSchema.index({ code: 1 }, { unique: true });
 
 // auto‐generate code + default lineDate
-inventoryJournalSchema.pre("validate", async function (next) {
+inventoryJournalSchema.pre('validate', async function (next) {
   // generate code if missing
   if (!this.code) {
     const ctr = await InventJournalCounterModel.findOneAndUpdate(
-      { _id: "inventJournalCode" },
+      { _id: 'inventJournalCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
-    this.code = `IJ_${String(ctr.seq).padStart(6, "0")}`;
+    this.code = `IJ_${String(ctr.seq).padStart(6, '0')}`;
   }
 
   // assign lineNum and default any missing lineDate to journalDate
@@ -144,4 +144,4 @@ inventoryJournalSchema.pre("validate", async function (next) {
 
 export const InventoryJournalModel =
   mongoose.models.InventoryJournals ||
-  model("InventoryJournals", inventoryJournalSchema);
+  model('InventoryJournals', inventoryJournalSchema);

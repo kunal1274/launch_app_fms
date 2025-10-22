@@ -1,17 +1,17 @@
 // models/arTransaction.model.js
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 const arTxnSchema1 = new Schema(
   {
     txnDate: { type: Date, required: true, default: Date.now },
     sourceType: {
       type: String,
-      enum: ["SALES", "PURCHASE", "JOURNAL"],
+      enum: ['SALES', 'PURCHASE', 'JOURNAL'],
       required: true,
     },
     sourceId: { type: Schema.Types.ObjectId, required: true },
     sourceLine: { type: Number, default: 1 },
-    customer: { type: Schema.Types.ObjectId, ref: "Customers", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customers', required: true },
     amount: { type: Number, required: true },
     extras: { type: Map, of: Schema.Types.Mixed, default: {} },
   },
@@ -27,7 +27,7 @@ const arTxnSchema = new Schema(
     },
     sourceType: {
       type: String,
-      enum: ["SALES"], // always SALES in this context
+      enum: ['SALES'], // always SALES in this context
       required: true,
     },
     sourceId: {
@@ -42,7 +42,7 @@ const arTxnSchema = new Schema(
     },
     customer: {
       type: Schema.Types.ObjectId,
-      ref: "Customers",
+      ref: 'Customers',
       required: true,
     },
     amount: {
@@ -57,7 +57,7 @@ const arTxnSchema = new Schema(
     exchangeRate: {
       type: Number,
       required: true,
-      min: [0, "ExchangeRate ≥ 0"],
+      min: [0, 'ExchangeRate ≥ 0'],
     },
     localAmount: {
       type: Number,
@@ -65,16 +65,16 @@ const arTxnSchema = new Schema(
     },
     bankAccount: {
       type: Schema.Types.ObjectId,
-      ref: "BankAccounts",
+      ref: 'BankAccounts',
       //required: true,
     },
     remarks: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   { timestamps: true }
 );
 
 export const ARTransactionModel =
-  mongoose.models.ARTransactions || model("ARTransactions", arTxnSchema);
+  mongoose.models.ARTransactions || model('ARTransactions', arTxnSchema);

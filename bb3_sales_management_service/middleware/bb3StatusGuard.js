@@ -1,5 +1,5 @@
-import createError from "http-errors";
-import { STATUS_TRANSITIONS } from "../models/bb3SalesOrder.model.js";
+import createError from 'http-errors';
+import { STATUS_TRANSITIONS } from '../models/bb3SalesOrder.model.js';
 
 /**
  * Validates that req.body.status is allowed from current sales‑order.status.

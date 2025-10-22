@@ -1,6 +1,6 @@
 // models/group.model.js
 
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 /**
  * This schema represents a "Group" that can be used by multiple modules
@@ -31,12 +31,12 @@ const globalGroupSchema = new Schema(
       {
         type: String,
         enum: [
-          "Customer",
-          "Vendor",
-          "Item",
-          "Company",
-          "Employee",
-          "Contact",
+          'Customer',
+          'Vendor',
+          'Item',
+          'Company',
+          'Employee',
+          'Contact',
           // etc. add more if needed
         ],
         required: true,
@@ -51,7 +51,7 @@ const globalGroupSchema = new Schema(
     releaseCompanies: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Company", // referencing your CompanyModel
+        ref: 'Company', // referencing your CompanyModel
       },
     ],
 
@@ -65,13 +65,13 @@ const globalGroupSchema = new Schema(
     releaseStage: {
       type: String,
       enum: [
-        "Draft",
-        "moduleReleased",
-        "companyReleased",
-        "Released",
-        "Cancelled",
+        'Draft',
+        'moduleReleased',
+        'companyReleased',
+        'Released',
+        'Cancelled',
       ],
-      default: "Draft",
+      default: 'Draft',
     },
 
     // A place to store user-defined key-value pairs if needed
@@ -86,7 +86,7 @@ const globalGroupSchema = new Schema(
   }
 );
 
-globalGroupSchema.pre("save", function (next) {
+globalGroupSchema.pre('save', function (next) {
   // Example: ensure code is uppercase, name is trimmed, etc.
   if (this.code) {
     this.code = this.code.trim().toUpperCase();
@@ -94,11 +94,11 @@ globalGroupSchema.pre("save", function (next) {
   if (!this.releaseModules || this.releaseModules.length === 0) {
     // You might enforce at least one module must be chosen
     throw new Error(
-      "At least one module must be specified in releaseModules as allowed."
+      'At least one module must be specified in releaseModules as allowed.'
     );
   }
   next();
 });
 
 export const GlobalGroupModel =
-  mongoose.models.GlobalGroups || model("GlobalGroups", globalGroupSchema);
+  mongoose.models.GlobalGroups || model('GlobalGroups', globalGroupSchema);

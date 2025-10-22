@@ -8,7 +8,7 @@
 export function getLocalTimeString() {
   const now = new Date();
 
-  const pad = (num) => num.toString().padStart(2, "0");
+  const pad = (num) => num.toString().padStart(2, '0');
 
   const year = now.getFullYear();
   const month = pad(now.getMonth() + 1); // Month is 0-indexed
@@ -33,20 +33,20 @@ export function getFormattedLocalDateTime() {
   const day = now.getDate();
   const daySuffix =
     day === 1 || day === 21 || day === 31
-      ? "st"
+      ? 'st'
       : day === 2 || day === 22
-      ? "nd"
-      : day === 3 || day === 23
-      ? "rd"
-      : "th";
+        ? 'nd'
+        : day === 3 || day === 23
+          ? 'rd'
+          : 'th';
 
-  const month = now.toLocaleString("default", { month: "short" }); // "Apr"
+  const month = now.toLocaleString('default', { month: 'short' }); // "Apr"
   const year = now.getFullYear();
-  const weekday = now.toLocaleString("default", { weekday: "long" }); // "Tuesday"
+  const weekday = now.toLocaleString('default', { weekday: 'long' }); // "Tuesday"
 
   let hours = now.getHours();
-  const minutes = now.getMinutes().toString().padStart(2, "0");
-  const ampm = hours >= 12 ? "pm" : "am";
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
   hours = hours % 12 || 12; // Convert to 12-hour format
 
   return `${day}${daySuffix} ${month} ${year}, ${weekday}, ${hours}:${minutes} ${ampm} (local time)`;

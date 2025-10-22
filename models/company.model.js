@@ -1,6 +1,6 @@
-import mongoose, { Schema, model } from "mongoose";
-import { dbgModels } from "../index.js";
-import { CompanyCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { dbgModels } from '../index.js';
+import { CompanyCounterModel } from './counter.model.js';
 
 /**
  * Subschema for Bank Account Details.
@@ -20,23 +20,23 @@ const bankDetailsSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["BankAndUpi", "Cash", "Bank", "UPI", "Crypto", "Barter"],
+        values: ['BankAndUpi', 'Cash', 'Bank', 'UPI', 'Crypto', 'Barter'],
         message:
-          "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
+          '⚠️ {VALUE} is not a valid type. Use \'Cash\' or \'Bank\' or \'UPI\' or \'Crypto\' or \'Barter\'.',
       },
-      default: "Bank",
+      default: 'Bank',
     },
     bankAccNum: {
       type: String,
       required: [
         false,
-        "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
+        '⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique',
       ],
       // unique: true,
       validate: {
         validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
         message:
-          "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
+          '⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .',
       },
     },
     upi: {
@@ -66,7 +66,7 @@ const bankDetailsSchema = new Schema(
     },
     qrDetails: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   { _id: true }
@@ -115,14 +115,14 @@ const companySchema = new Schema(
       validate: {
         validator: (v) => /^[A-Za-z0-9_-]+$/.test(v),
         message:
-          "⚠️ Company Code can only contain alphanumeric characters, dashes, or underscores.",
+          '⚠️ Company Code can only contain alphanumeric characters, dashes, or underscores.',
       },
       // You can enforce uppercase if needed by using a pre-save hook.
     },
     // auto generated
     globalPartyId: {
       type: Schema.Types.ObjectId,
-      ref: "GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      ref: 'GlobalParties', // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
       required: false,
       unique: true, //ensures only 1 company doc can point to the same globalParty
     },
@@ -136,34 +136,34 @@ const companySchema = new Schema(
       required: true,
       enum: {
         values: [
-          "Individual",
-          "Manufacturing",
-          "ServiceProvider",
-          "Trading",
-          "Distributor",
-          "Retailer",
-          "Wholesaler",
-          "Others",
+          'Individual',
+          'Manufacturing',
+          'ServiceProvider',
+          'Trading',
+          'Distributor',
+          'Retailer',
+          'Wholesaler',
+          'Others',
         ],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.',
       },
-      default: "Trading",
+      default: 'Trading',
     },
     currency: {
       type: String,
       required: true,
       enum: {
-        values: ["INR", "USD", "EUR", "GBP"],
+        values: ['INR', 'USD', 'EUR', 'GBP'],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only\'INR\',\'USD\',\'EUR\',\'GBP\'.',
       },
-      default: "INR",
+      default: 'INR',
     },
     remarks: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     primaryGSTAddress: {
       type: String,
@@ -188,7 +188,7 @@ const companySchema = new Schema(
     },
     email: {
       type: String,
-      required: [false, "⚠️ Email is not mandatory but recommended."],
+      required: [false, '⚠️ Email is not mandatory but recommended.'],
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"
@@ -196,9 +196,9 @@ const companySchema = new Schema(
           // "!v ||" allows empty if 'required: false'
         },
         message:
-          "⚠️ Email must be a valid email format (e.g. user@example.com).",
+          '⚠️ Email must be a valid email format (e.g. user@example.com).',
       },
-      default: "",
+      default: '',
       lowercase: true,
     },
     contactNum: {
@@ -218,7 +218,7 @@ const companySchema = new Schema(
     createdBy: {
       type: String,
       required: true,
-      default: "SystemCompanyCreation",
+      default: 'SystemCompanyCreation',
     },
     updatedBy: {
       type: String,
@@ -231,7 +231,7 @@ const companySchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     files: [
@@ -274,7 +274,7 @@ const companySchema = new Schema(
  * Pre-save hook to normalize and validate fields.
  * For example, we ensure that email is lowercase and trim companyCode.
  */
-companySchema.pre("save", async function (next) {
+companySchema.pre('save', async function (next) {
   // Ensure email is lowercase (this is already done by the schema 'lowercase' option)
   if (!this.isNew) {
     if (this.email) {
@@ -308,25 +308,25 @@ companySchema.pre("save", async function (next) {
 
     // Increment counter within the transaction
     const dbResponseNewCounter = await CompanyCounterModel.findOneAndUpdate(
-      { _id: "companyCode" },
+      { _id: 'companyCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
       //{ new: true, upsert: true, session }
     );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate company code");
+      throw new Error('❌ Failed to generate company code');
     }
 
     // Generate customer code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.sysCode = `CMP_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during transaction:", error.stack);
+    console.error('❌ Error caught during transaction:', error.stack);
 
     // Decrement the counter in case of failure
     try {
@@ -335,17 +335,17 @@ companySchema.pre("save", async function (next) {
       //   !error.message.startsWith("❌ Duplicate contact number");
       // if (isCounterIncremented) {
       await CustomerCounterModel.findByIdAndUpdate(
-        { _id: "companyCode" },
+        { _id: 'companyCode' },
         { $inc: { seq: -1 } }
       );
       // }
     } catch (decrementError) {
-      console.error("❌ Error during counter decrement:", decrementError.stack);
+      console.error('❌ Error during counter decrement:', decrementError.stack);
     }
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally company counter closed");
+    console.log('ℹ️ Finally company counter closed');
   }
 
   // Optionally, force companyCode to uppercase:
@@ -371,7 +371,7 @@ companySchema.pre("save", async function (next) {
 // CompanySchema.index({ email: 1 });
 
 companySchema.pre(/^find/, function (next) {
-  this.populate("globalPartyId", "sysCode active");
+  this.populate('globalPartyId', 'sysCode active');
   next();
 });
 
@@ -381,7 +381,7 @@ companySchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      email: { $exists: true, $type: "string", $ne: "" },
+      email: { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
@@ -391,30 +391,30 @@ companySchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      contactNum: { $exists: true, $type: "string", $ne: "" },
+      contactNum: { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 companySchema.index(
-  { "bankDetails.bankNum": 1 },
+  { 'bankDetails.bankNum': 1 },
   {
     unique: true,
     partialFilterExpression: {
-      "bankDetails.bankNum": { $exists: true, $type: "string", $ne: "" },
+      'bankDetails.bankNum': { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 companySchema.index(
-  { "bankDetails.code": 1 },
+  { 'bankDetails.code': 1 },
   {
     unique: true,
     partialFilterExpression: {
-      "bankDetails.code": { $exists: true, $type: "string", $ne: "" },
+      'bankDetails.code': { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 export const CompanyModel =
-  mongoose.models.Companies || model("Companies", companySchema);
+  mongoose.models.Companies || model('Companies', companySchema);

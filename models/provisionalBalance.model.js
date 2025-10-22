@@ -1,67 +1,67 @@
 // models/provisionalBalance.model.js
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 const provBalanceSchema = new Schema(
   {
-    item: { type: Schema.Types.ObjectId, ref: "Items", required: true },
-    site: { type: Schema.Types.ObjectId, ref: "Sites", required: true },
+    item: { type: Schema.Types.ObjectId, ref: 'Items', required: true },
+    site: { type: Schema.Types.ObjectId, ref: 'Sites', required: true },
     warehouse: {
       type: Schema.Types.ObjectId,
-      ref: "Warehouses",
+      ref: 'Warehouses',
       required: true,
     },
     // … include zone, location, aisle, rack, shelf, bin, config, color, size, style, version, batch, serial …
     zone: {
       type: Schema.Types.ObjectId,
-      ref: "Zones", // from zone.model.js
+      ref: 'Zones', // from zone.model.js
     },
     location: {
       type: Schema.Types.ObjectId,
-      ref: "Locations", // from location.model.js
+      ref: 'Locations', // from location.model.js
     },
     aisle: {
       type: Schema.Types.ObjectId,
-      ref: "Aisles", // from aisle.model.js
+      ref: 'Aisles', // from aisle.model.js
     },
     rack: {
       type: Schema.Types.ObjectId,
-      ref: "Racks", // from rack.model.js
+      ref: 'Racks', // from rack.model.js
     },
     shelf: {
       type: Schema.Types.ObjectId,
-      ref: "Shelves", // from shelf.model.js
+      ref: 'Shelves', // from shelf.model.js
     },
     bin: {
       type: Schema.Types.ObjectId,
-      ref: "Bins", // from bin.model.js
+      ref: 'Bins', // from bin.model.js
     },
     config: {
       type: Schema.Types.ObjectId,
-      ref: "Configurations", // from config.model.js
+      ref: 'Configurations', // from config.model.js
     },
     color: {
       type: Schema.Types.ObjectId,
-      ref: "Colors", // from color.model.js
+      ref: 'Colors', // from color.model.js
     },
     size: {
       type: Schema.Types.ObjectId,
-      ref: "Sizes", // from size.model.js
+      ref: 'Sizes', // from size.model.js
     },
     style: {
       type: Schema.Types.ObjectId,
-      ref: "Styles", // from style.model.js
+      ref: 'Styles', // from style.model.js
     },
     version: {
       type: Schema.Types.ObjectId,
-      ref: "Versions", // from version.model.js
+      ref: 'Versions', // from version.model.js
     },
     batch: {
       type: Schema.Types.ObjectId,
-      ref: "Batches", // from batch.model.js
+      ref: 'Batches', // from batch.model.js
     },
     serial: {
       type: Schema.Types.ObjectId,
-      ref: "Serials", // from serial.model.js
+      ref: 'Serials', // from serial.model.js
     },
     quantity: { type: Number, default: 0 },
     totalReserveValue: { type: Number, default: 0 }, // qty * PO-line price
@@ -99,4 +99,4 @@ provBalanceSchema.index(
 
 export const ProvisionalBalanceModel =
   mongoose.models.ProvisionalBalances ||
-  model("ProvisionalBalances", provBalanceSchema);
+  model('ProvisionalBalances', provBalanceSchema);

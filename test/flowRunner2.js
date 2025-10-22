@@ -1,17 +1,17 @@
 // test/flowRunner.js
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import request from "supertest";
-import createTestOrientedApp from "../app.js";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import request from 'supertest';
+import createTestOrientedApp from '../app.js';
 
 // ───────────────────────────────────────────────────────────────────────────────
 // bootstrap dotenv
 // ───────────────────────────────────────────────────────────────────────────────
 dotenv.config({
-  path: path.resolve(process.cwd(), ".env.test"),
+  path: path.resolve(process.cwd(), '.env.test'),
 });
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -19,20 +19,20 @@ dotenv.config({
 // ───────────────────────────────────────────────────────────────────────────────
 const manifestPath = process.argv[2]
   ? path.resolve(process.cwd(), process.argv[2])
-  : path.resolve(process.cwd(), "flows/manifest.json");
+  : path.resolve(process.cwd(), 'flows/manifest.json');
 
 if (!fs.existsSync(manifestPath)) {
   console.error(` ✖ manifest not found at ${manifestPath}`);
   process.exit(1);
 }
-const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
 // ───────────────────────────────────────────────────────────────────────────────
 // simple interpolation helper
 // ───────────────────────────────────────────────────────────────────────────────
 function interp(template, ctx) {
   return template.replace(/{{([^}]+)}}/g, (_, expr) =>
-    expr.split(".").reduce((o, k) => (o && o[k] != null ? o[k] : ""), ctx)
+    expr.split('.').reduce((o, k) => (o && o[k] != null ? o[k] : ''), ctx)
   );
 }
 
@@ -116,7 +116,7 @@ export default async function runFlow() {
 
     if (!progressed) {
       throw new Error(
-        "Circular or missing dependencies in flow manifest – could not make progress"
+        'Circular or missing dependencies in flow manifest – could not make progress'
       );
     }
   }
@@ -124,12 +124,12 @@ export default async function runFlow() {
   // ───────────────────────────────────────────────────────────────────────────────
   // write evidence log
   // ───────────────────────────────────────────────────────────────────────────────
-  const outDir = path.resolve(process.cwd(), "recordings");
+  const outDir = path.resolve(process.cwd(), 'recordings');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
   const outPath = path.join(outDir, `evidence-${Date.now()}.json`);
   fs.writeFileSync(outPath, JSON.stringify(evidence, null, 2));
-  console.log("✔ wrote evidence log to", outPath);
+  console.log('✔ wrote evidence log to', outPath);
 
   // close
   await mongoose.disconnect();

@@ -1,14 +1,14 @@
 // import { PurchaseOrderModel } from "../models/purchaseorders.muuSHakaH.model.js";
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import {
   PurchaseOrderModel,
   STATUS_TRANSITIONS,
-} from "../models/purchaseorder.model.js";
-import { PurchaseOrderCounterModel } from "../models/counter.model.js";
-import { ItemModel } from "../models/item.model.js";
-import { VendorModel } from "../models/vendor.model.js";
-import { logError } from "../utility/logError.utils.js";
-import PurchaseStockService from "../services/purchaseStock.service.js";
+} from '../models/purchaseorder.model.js';
+import { PurchaseOrderCounterModel } from '../models/counter.model.js';
+import { ItemModel } from '../models/item.model.js';
+import { VendorModel } from '../models/vendor.model.js';
+import { logError } from '../utility/logError.utils.js';
+import PurchaseStockService from '../services/purchaseStock.service.js';
 
 /**
  * Helper function to validate status transitions
@@ -18,21 +18,21 @@ import PurchaseStockService from "../services/purchaseStock.service.js";
  */
 const isValidStatusTransition = (currentStatus, newStatus) => {
   const STATUS_TRANSITIONS = {
-    Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
-    Confirmed: ["Shipped", "Cancelled", "AdminMode", "AnyMode"],
-    Shipped: ["Delivered", "Cancelled", "AdminMode", "AnyMode"],
-    Delivered: ["Invoiced", "AdminMode", "AnyMode"],
-    Invoiced: ["AdminMode", "AnyMode"],
-    Cancelled: ["AdminMode", "AnyMode"],
-    AdminMode: ["Draft", "AnyMode"],
+    Draft: ['Confirmed', 'Cancelled', 'AdminMode', 'AnyMode'],
+    Confirmed: ['Shipped', 'Cancelled', 'AdminMode', 'AnyMode'],
+    Shipped: ['Delivered', 'Cancelled', 'AdminMode', 'AnyMode'],
+    Delivered: ['Invoiced', 'AdminMode', 'AnyMode'],
+    Invoiced: ['AdminMode', 'AnyMode'],
+    Cancelled: ['AdminMode', 'AnyMode'],
+    AdminMode: ['Draft', 'AnyMode'],
     AnyMode: [
-      "Draft",
-      "Confirmed",
-      "Shipped",
-      "Delivered",
-      "Invoiced",
-      "Cancelled",
-      "AdminMode",
+      'Draft',
+      'Confirmed',
+      'Shipped',
+      'Delivered',
+      'Invoiced',
+      'Cancelled',
+      'AdminMode',
     ],
   };
 
@@ -42,11 +42,11 @@ const isValidStatusTransition = (currentStatus, newStatus) => {
 // Helper function to generate an invoice number (same as your existing implementation)
 async function generateInvoiceNumber() {
   const counter = await PurchaseOrderCounterModel.findByIdAndUpdate(
-    { _id: "invoiceNumber" },
+    { _id: 'invoiceNumber' },
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
-  const seqNumber = counter.seq.toString().padStart(6, "0");
+  const seqNumber = counter.seq.toString().padStart(6, '0');
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
@@ -56,8 +56,8 @@ async function generateInvoiceNumber() {
   } else {
     financialYear = `${year - 1}-${year.toString().slice(-2)}`;
   }
-  const monthPrefix = now.toLocaleString("en-US", { month: "short" });
-  const companyPrefix = process.env.COMPANY_PREFIX || "DEF";
+  const monthPrefix = now.toLocaleString('en-US', { month: 'short' });
+  const companyPrefix = process.env.COMPANY_PREFIX || 'DEF';
   return `${companyPrefix}/${financialYear}/${monthPrefix}/INV-${seqNumber}`;
 }
 
@@ -68,8 +68,8 @@ export const createPurchaseOrder = async (req, res) => {
     // Check for required fields
     if (!purchaseOrderBody.vendor || !purchaseOrderBody.item) {
       return res.status(422).send({
-        status: "failure",
-        message: "Vendor and Item are required fields.",
+        status: 'failure',
+        message: 'Vendor and Item are required fields.',
       });
     }
 
@@ -77,7 +77,7 @@ export const createPurchaseOrder = async (req, res) => {
     const vendorExists = await VendorModel.findById(purchaseOrderBody.vendor);
     if (!vendorExists) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Vendor with ID ${purchaseOrderBody.vendor} does not exist.`,
       });
     }
@@ -86,7 +86,7 @@ export const createPurchaseOrder = async (req, res) => {
     const itemExists = await ItemModel.findById(purchaseOrderBody.item);
     if (!itemExists) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Item with ID ${purchaseOrderBody.item} does not exist.`,
       });
     }
@@ -100,55 +100,55 @@ export const createPurchaseOrder = async (req, res) => {
       `Purchase order has been created successfully with id: ${
         dbResponseNewPurchaseOrder._id
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`
     );
 
     return res.status(201).send({
-      status: "success",
+      status: 'success',
       message: `Purchase order has been created successfully with id: ${
         dbResponseNewPurchaseOrder._id
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`,
       data: dbResponseNewPurchaseOrder,
     });
   } catch (error) {
     // Database Validation Error
     if (error instanceof mongoose.Error.ValidationError) {
-      logError("Purchase Order Creation - Validation Error", error);
+      logError('Purchase Order Creation - Validation Error', error);
       return res.status(422).send({
-        status: "failure",
-        message: "Validation error during purchase order creation.",
+        status: 'failure',
+        message: 'Validation error during purchase order creation.',
         error: error.message || error,
       });
     }
 
     // MongoDB Duplicate Key Error
     if (error.code === 11000) {
-      logError("Purchase Order Creation - Duplicate Error", error);
+      logError('Purchase Order Creation - Duplicate Error', error);
       return res.status(409).send({
-        status: "failure",
-        message: "A purchase order with the same order number already exists.",
+        status: 'failure',
+        message: 'A purchase order with the same order number already exists.',
       });
     }
 
     // Handle MongoDB connection or network issues
-    if (error.message.includes("network error")) {
-      logError("Purchase Order Creation - Network Error", error);
+    if (error.message.includes('network error')) {
+      logError('Purchase Order Creation - Network Error', error);
       return res.status(503).send({
-        status: "failure",
-        message: "Service temporarily unavailable. Please try again later.",
+        status: 'failure',
+        message: 'Service temporarily unavailable. Please try again later.',
       });
     }
 
     // General Server Error
-    logError("Purchase Order Creation - Unknown Error", error);
+    logError('Purchase Order Creation - Unknown Error', error);
     return res.status(500).send({
-      status: "failure",
-      message: "An unexpected error occurred. Please try again.",
+      status: 'failure',
+      message: 'An unexpected error occurred. Please try again.',
       error: error.message || error,
     });
   }
@@ -160,25 +160,25 @@ export const getPurchaseOrderById = async (req, res) => {
   try {
     // Use populate to fetch vendor and item details
     const purchaseOrder = await PurchaseOrderModel.findById(purchaseOrderId)
-      .populate("vendor", "name contactNum address")
-      .populate("item", "name description price type unit");
+      .populate('vendor', 'name contactNum address')
+      .populate('item', 'name description price type unit');
 
     if (!purchaseOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Purchase order with ID ${purchaseOrderId} not found.`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Purchase order retrieved successfully.",
+      status: 'success',
+      message: 'Purchase order retrieved successfully.',
       data: purchaseOrder,
     });
   } catch (error) {
-    logError("Get Purchase Order By ID", error);
+    logError('Get Purchase Order By ID', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error retrieving purchase order with ID ${purchaseOrderId}.`,
       error: error.message,
     });
@@ -188,37 +188,37 @@ export const getPurchaseOrderById = async (req, res) => {
 export const getAllPurchaseOrders = async (req, res) => {
   const { archived } = req.query; // Check if archived filter is passed
   const filter = { archived: false };
-  if (archived === "false") filter = {};
-  if (archived === "true") filter.archived = true;
+  if (archived === 'false') filter = {};
+  if (archived === 'true') filter.archived = true;
   //if (archived === "false") filter.archived = false;
   try {
     // Retrieve all purchase orders with vendor and item details populated
     const purchaseOrders = await PurchaseOrderModel.find(filter)
-      .populate("vendor", "name contactNum address")
+      .populate('vendor', 'name contactNum address')
       .populate(
-        "item",
-        "name description price purchPrice purchasePrice invPrice type unit"
+        'item',
+        'name description price purchPrice purchasePrice invPrice type unit'
       );
 
     if (!purchaseOrders || purchaseOrders.length === 0) {
       return res.status(404).send({
-        status: "failure",
-        message: "No purchase orders found.",
+        status: 'failure',
+        message: 'No purchase orders found.',
       });
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Purchase orders retrieved successfully.",
+      status: 'success',
+      message: 'Purchase orders retrieved successfully.',
       count: purchaseOrders.length,
       user: req.user?.email,
       data: purchaseOrders,
     });
   } catch (error) {
-    logError("Get All Purchase Orders", error);
+    logError('Get All Purchase Orders', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error retrieving purchase orders.",
+      status: 'failure',
+      message: 'Error retrieving purchase orders.',
       error: error.message,
     });
   }
@@ -232,8 +232,8 @@ export const updatePurchaseOrderById = async (req, res) => {
     // Check for required fields
     if (!updatedData.vendor || !updatedData.item) {
       return res.status(422).send({
-        status: "failure",
-        message: "Vendor and Item are required fields.",
+        status: 'failure',
+        message: 'Vendor and Item are required fields.',
       });
     }
 
@@ -242,35 +242,35 @@ export const updatePurchaseOrderById = async (req, res) => {
       updatedData,
       { new: true, runValidators: true }
     )
-      .populate("vendor", "name contactNum address")
-      .populate("item", "name description price type unit");
+      .populate('vendor', 'name contactNum address')
+      .populate('item', 'name description price type unit');
 
     if (!updatedPurchaseOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Purchase order with ID ${purchaseOrderId} not found.`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Purchase order updated successfully.",
+      status: 'success',
+      message: 'Purchase order updated successfully.',
       data: updatedPurchaseOrder,
     });
   } catch (error) {
-    logError("Update Purchase Order By ID", error);
+    logError('Update Purchase Order By ID', error);
 
     // Validation Error Handling
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(422).send({
-        status: "failure",
-        message: "Validation error during purchase order update.",
+        status: 'failure',
+        message: 'Validation error during purchase order update.',
         error: error.message,
       });
     }
 
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error updating purchase order with ID ${purchaseOrderId}.`,
       error: error.message,
     });
@@ -286,11 +286,11 @@ export const archivePurchaseOrderById = async (req, res) => {
       { new: true } // Return the updated document
     );
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Purchase order not found" });
+      return res.status(404).json({ message: 'Purchase order not found' });
     }
     res.status(200).json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ message: "Error archiving purchase order", error });
+    res.status(500).json({ message: 'Error archiving purchase order', error });
   }
 };
 
@@ -303,13 +303,13 @@ export const unarchivePurchaseOrderById = async (req, res) => {
       { new: true }
     );
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Purchase order not found" });
+      return res.status(404).json({ message: 'Purchase order not found' });
     }
     res.status(200).json(updatedOrder);
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error unarchiving purchase order", error });
+      .json({ message: 'Error unarchiving purchase order', error });
   }
 };
 
@@ -318,23 +318,23 @@ export const getArchivedPurchaseOrders = async (req, res) => {
     const archivedOrders = await PurchaseOrderModel.find({ archived: true });
     if (!archivedOrders) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message:
-          "No Archived purchase order found or failed to retrieve the archived PO",
+          'No Archived purchase order found or failed to retrieve the archived PO',
         count: 0,
         data: [],
       });
     }
     return res.status(200).send({
-      status: "success",
-      message: "Archived Purchase order are fetched successfully.",
+      status: 'success',
+      message: 'Archived Purchase order are fetched successfully.',
       count: archivedOrders.length,
       data: archivedOrders,
     });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error fetching archived purchase orders", error });
+      .json({ message: 'Error fetching archived purchase orders', error });
   }
 };
 
@@ -342,8 +342,8 @@ export const deletePurchaseOrderById = async (req, res) => {
   const { purchaseOrderId } = req.params;
   if (!purchaseOrderId) {
     return res.status(422).send({
-      status: "failure",
-      message: `The request parameter or body can't be blank`,
+      status: 'failure',
+      message: 'The request parameter or body can\'t be blank',
     });
   }
 
@@ -361,20 +361,20 @@ export const deletePurchaseOrderById = async (req, res) => {
 
     if (!deletedPurchaseOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Purchase order with ID ${purchaseOrderId} not found.`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `Purchase order with ID ${purchaseOrderId} deleted successfully.`,
       data: deletedPurchaseOrder,
     });
   } catch (error) {
-    logError("Delete Purchase Order By ID", error);
+    logError('Delete Purchase Order By ID', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error deleting purchase order with ID ${purchaseOrderId}.`,
       error: error.message,
     });
@@ -383,30 +383,30 @@ export const deletePurchaseOrderById = async (req, res) => {
 
 export const deleteAllPurchaseOrders = async (req, res) => {
   try {
-    console.log("Starting bulk delete...");
+    console.log('Starting bulk delete...');
 
     // Delete all purchase orders
     const deletedResponse = await PurchaseOrderModel.deleteMany({});
-    console.log("Deleted Response:", deletedResponse);
+    console.log('Deleted Response:', deletedResponse);
 
     // Reset the counter
     const resetCounter = await PurchaseOrderCounterModel.findOneAndUpdate(
-      { _id: "purchaseOrderCode" },
+      { _id: 'purchaseOrderCode' },
       { seq: 0 }, // Reset sequence to 0
       { new: true, upsert: true } // Create document if it doesn't exist
     );
-    console.log("Counter Reset Response:", resetCounter);
+    console.log('Counter Reset Response:', resetCounter);
 
     if (deletedResponse.deletedCount === 0) {
       return res.status(200).send({
-        status: "success",
-        message: "No purchase orders to delete.",
+        status: 'success',
+        message: 'No purchase orders to delete.',
         data: { deletedCount: 0 },
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `${deletedResponse.deletedCount} purchase orders deleted successfully.`,
       data: {
         deletedCount: deletedResponse.deletedCount,
@@ -414,10 +414,10 @@ export const deleteAllPurchaseOrders = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error deleting purchase orders:", error);
+    console.error('Error deleting purchase orders:', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error deleting all purchase orders.",
+      status: 'failure',
+      message: 'Error deleting all purchase orders.',
       error: error.message,
     });
   }
@@ -448,12 +448,12 @@ export const addPayment = async (req, res) => {
     //     .json({ error: "A positive payment amount is required." });
     // }
     if (!amount) {
-      return res.status(400).json({ error: "A payment amount is required." });
+      return res.status(400).json({ error: 'A payment amount is required.' });
     }
     // Retrieve the purchase order
     const order = await PurchaseOrderModel.findById(purchaseOrderId);
     if (!order) {
-      return res.status(404).json({ error: "Purchase Order not found." });
+      return res.status(404).json({ error: 'Purchase Order not found.' });
     }
     // // If order.status is not "Invoiced", treat payment as advance
     // if (order.status !== "Invoiced") {
@@ -488,12 +488,12 @@ export const changePurchaseOrderStatus1 = async (req, res) => {
     const { newStatus, invoiceDate, dueDate } = req.body; // optionally provided
 
     if (!newStatus) {
-      return res.status(400).json({ error: "New status is required" });
+      return res.status(400).json({ error: 'New status is required' });
     }
 
     const order = await PurchaseOrderModel.findById(purchaseOrderId);
     if (!order) {
-      return res.status(404).json({ error: "Purchase Order not found" });
+      return res.status(404).json({ error: 'Purchase Order not found' });
     }
 
     // Validate status transition
@@ -503,7 +503,7 @@ export const changePurchaseOrderStatus1 = async (req, res) => {
       });
     }
 
-    if (newStatus === "Invoiced") {
+    if (newStatus === 'Invoiced') {
       // Generate a new invoice number
       const newInvoiceNum = await generateInvoiceNumber();
 
@@ -533,7 +533,7 @@ export const changePurchaseOrderStatus1 = async (req, res) => {
     // Update status
     order.status = newStatus;
     // Optionally update 'updatedBy' field
-    order.updatedBy = req.user?.username || "Unknown"; // Assuming you have user info in req
+    order.updatedBy = req.user?.username || 'Unknown'; // Assuming you have user info in req
     await order.save();
 
     res.status(200).json(order);
@@ -557,12 +557,12 @@ export const changePurchaseOrderStatus2 = async (req, res) => {
   if (!po)
     return res
       .status(404)
-      .json({ status: "failure", message: "Purchase Order not found" });
+      .json({ status: 'failure', message: 'Purchase Order not found' });
 
   const allowed = STATUS_TRANSITIONS[po.status] || [];
   if (!allowed.includes(newStatus)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `Invalid status transition ${po.status} → ${newStatus}`,
     });
   }
@@ -578,23 +578,23 @@ export const changePurchaseOrderStatus2 = async (req, res) => {
       );
 
       // (b) Reserve / release / apply / reverse as needed
-      if (newStatus === "Confirmed" && order.status === "Draft") {
+      if (newStatus === 'Confirmed' && order.status === 'Draft') {
         await PurchaseStockService.reservePO(order, session);
       }
       if (
-        ["Draft", "Cancelled"].includes(newStatus) &&
-        order.status === "Confirmed"
+        ['Draft', 'Cancelled'].includes(newStatus) &&
+        order.status === 'Confirmed'
       ) {
         await PurchaseStockService.releasePO(order, session);
       }
-      if (newStatus === "Invoiced") {
+      if (newStatus === 'Invoiced') {
         await PurchaseStockService.releasePO(order, session);
         await PurchaseStockService.applyPO(order, session);
         order.invoiceDate = invoiceDate || new Date();
         order.dueDate =
           dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       }
-      if (newStatus === "Cancelled" && order.status === "Invoiced") {
+      if (newStatus === 'Cancelled' && order.status === 'Invoiced') {
         await PurchaseStockService.reversePO(order, session);
       }
 
@@ -603,11 +603,11 @@ export const changePurchaseOrderStatus2 = async (req, res) => {
       await order.save({ session });
     });
     // 4) If we get here, the transaction was committed
-    return res.json({ status: "success", data: po });
+    return res.json({ status: 'success', data: po });
   } catch (err) {
     // withTransaction has already aborted for us
-    console.error("Transaction aborted:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    console.error('Transaction aborted:', err);
+    return res.status(500).json({ status: 'failure', message: err.message });
   } finally {
     session.endSession();
   }
@@ -622,12 +622,12 @@ export const changePurchaseOrderStatus = async (req, res) => {
   if (!po) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Purchase Order not found" });
+      .json({ status: 'failure', message: 'Purchase Order not found' });
   }
   const allowed = STATUS_TRANSITIONS[po.status] || [];
   if (!allowed.includes(newStatus)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `Invalid status transition ${po.status} → ${newStatus}`,
     });
   }
@@ -643,16 +643,16 @@ export const changePurchaseOrderStatus = async (req, res) => {
     );
 
     // 4) Perform your reserve / release / apply / reverse calls:
-    if (newStatus === "Confirmed" && order.status === "Draft") {
+    if (newStatus === 'Confirmed' && order.status === 'Draft') {
       await PurchaseStockService.reservePO(order, session);
     }
     if (
-      ["Draft", "Cancelled"].includes(newStatus) &&
-      order.status === "Confirmed"
+      ['Draft', 'Cancelled'].includes(newStatus) &&
+      order.status === 'Confirmed'
     ) {
       await PurchaseStockService.releasePO(order, session);
     }
-    if (newStatus === "Invoiced") {
+    if (newStatus === 'Invoiced') {
       await PurchaseStockService.releasePO(order, session);
       await PurchaseStockService.applyPO(order, session);
       order.invoiceDate = invoiceDate ? new Date(invoiceDate) : new Date();
@@ -660,7 +660,7 @@ export const changePurchaseOrderStatus = async (req, res) => {
         ? new Date(dueDate)
         : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     }
-    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+    if (newStatus === 'Cancelled' && order.status === 'Invoiced') {
       await PurchaseStockService.reversePO(order, session);
     }
 
@@ -670,14 +670,14 @@ export const changePurchaseOrderStatus = async (req, res) => {
 
     // 6) Commit everything
     await session.commitTransaction();
-    return res.json({ status: "success", data: order });
+    return res.json({ status: 'success', data: order });
   } catch (err) {
     // 7) Abort on any error
     await session.abortTransaction();
-    console.error("❌ changePurchaseOrderStatus failed:", err);
+    console.error('❌ changePurchaseOrderStatus failed:', err);
     return res.status(400).json({
-      status: "failure",
-      message: err.message || "Could not change purchase order status",
+      status: 'failure',
+      message: err.message || 'Could not change purchase order status',
     });
   } finally {
     // 8) End the session
@@ -697,7 +697,7 @@ export const generateInvoiceForOrder = async (req, res) => {
     if (!order) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Purchase Order not found." });
+        .json({ status: 'failure', message: 'Purchase Order not found.' });
     }
 
     // Generate a new invoice number
@@ -711,15 +711,15 @@ export const generateInvoiceForOrder = async (req, res) => {
     await order.save();
 
     return res.status(200).json({
-      status: "success",
-      message: "Invoice generated successfully.",
+      status: 'success',
+      message: 'Invoice generated successfully.',
       data: order,
     });
   } catch (error) {
-    console.error("Error generating invoice:", error);
+    console.error('Error generating invoice:', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Failed to generate invoice.",
+      status: 'failure',
+      message: 'Failed to generate invoice.',
       error: error.message || error,
     });
   }
@@ -729,25 +729,25 @@ export const deleteDraftPurchaseOrders = async (req, res) => {
   try {
     // Restrict deletion to only 'Draft' purchase orders
     const deletedResponse = await PurchaseOrderModel.deleteMany({
-      status: "Draft",
+      status: 'Draft',
     });
 
     if (deletedResponse.deletedCount === 0) {
       return res.status(404).send({
-        status: "failure",
-        message: "No draft purchase orders found to delete.",
+        status: 'failure',
+        message: 'No draft purchase orders found to delete.',
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `Successfully deleted ${deletedResponse.deletedCount} draft purchase order(s).`,
     });
   } catch (error) {
-    console.error("Error deleting draft purchase orders:", error);
+    console.error('Error deleting draft purchase orders:', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error deleting draft purchase orders.",
+      status: 'failure',
+      message: 'Error deleting draft purchase orders.',
       error: error.message,
     });
   }
@@ -762,14 +762,14 @@ export const patchPurchaseOrderById = async (req, res) => {
 
     if (!purchaseOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Purchase order with ID ${purchaseOrderId} not found.`,
       });
     }
 
     // Track changes for audit
     const changes = [];
-    const changedBy = req.user?.name || "AdminUIPatch"; // Default to admin if no user info is available
+    const changedBy = req.user?.name || 'AdminUIPatch'; // Default to admin if no user info is available
 
     // If status is being updated, handle it separately
     if (patchedData.status && purchaseOrder.status !== patchedData.status) {
@@ -777,11 +777,11 @@ export const patchPurchaseOrderById = async (req, res) => {
         purchaseOrder,
         patchedData.status,
         changedBy,
-        patchedData.reason || "No Reason Provided"
+        patchedData.reason || 'No Reason Provided'
       );
 
       changes.push({
-        field: "status",
+        field: 'status',
         oldValue: purchaseOrder.status,
         newValue: patchedData.status,
       });
@@ -789,7 +789,7 @@ export const patchPurchaseOrderById = async (req, res) => {
     }
 
     // Update other fields
-    const allowedFields = ["vendor", "item", "quantity", "price"];
+    const allowedFields = ['vendor', 'item', 'quantity', 'price'];
     for (const field of allowedFields) {
       if (patchedData[field] && purchaseOrder[field] !== patchedData[field]) {
         changes.push({
@@ -812,22 +812,22 @@ export const patchPurchaseOrderById = async (req, res) => {
         field: change.field,
         oldValue: change.oldValue,
         newValue: change.newValue,
-        reason: patchedData.reason || "No Reason Provided",
+        reason: patchedData.reason || 'No Reason Provided',
         timestamp: new Date(),
       }));
       await PurchaseOrderEventLogModel.insertMany(logEntries);
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Purchase order updated successfully.",
+      status: 'success',
+      message: 'Purchase order updated successfully.',
       data: updatedPurchaseOrder,
     });
   } catch (error) {
-    console.error("Error updating purchase order:", error);
+    console.error('Error updating purchase order:', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error updating purchase order.",
+      status: 'failure',
+      message: 'Error updating purchase order.',
       error: error.message,
     });
   }
@@ -843,20 +843,20 @@ export const validatePurchaseOrderStatus = async (
 
   // Validate state transition
   const validTransitions = {
-    DRAFT: ["DRAFT", "CONFIRMED", "CANCELLED", "ADMINMODE"],
-    CONFIRMED: ["CONFIRMED", "SHIPPED", "INVOICED", "CANCELLED", "ADMINMODE"],
-    SHIPPED: ["SHIPPED", "DELIVERED", "INVOICED", "ADMINMODE"],
-    DELIVERED: ["DELIVERED", "INVOICED", "ADMINMODE"],
-    INVOICED: ["INVOICED", "ADMINMODE"],
-    CANCELLED: ["CANCELLED", "ADMINMODE"],
+    DRAFT: ['DRAFT', 'CONFIRMED', 'CANCELLED', 'ADMINMODE'],
+    CONFIRMED: ['CONFIRMED', 'SHIPPED', 'INVOICED', 'CANCELLED', 'ADMINMODE'],
+    SHIPPED: ['SHIPPED', 'DELIVERED', 'INVOICED', 'ADMINMODE'],
+    DELIVERED: ['DELIVERED', 'INVOICED', 'ADMINMODE'],
+    INVOICED: ['INVOICED', 'ADMINMODE'],
+    CANCELLED: ['CANCELLED', 'ADMINMODE'],
     ADMINMODE: [
-      "DRAFT",
-      "CONFIRMED",
-      "CANCELLED",
-      "SHIPPED",
-      "DELIVERED",
-      "INVOICED",
-      "ADMINMODE",
+      'DRAFT',
+      'CONFIRMED',
+      'CANCELLED',
+      'SHIPPED',
+      'DELIVERED',
+      'INVOICED',
+      'ADMINMODE',
     ],
   };
 
@@ -885,20 +885,20 @@ export const deleteAllPurchaseOrders1 = async (req, res) => {
     const deletedResponse = await PurchaseOrderModel.deleteMany({});
 
     const resetCounter = await PurchaseOrderCounterModel.findOneAndUpdate(
-      { _id: "purchaseOrderCode" },
+      { _id: 'purchaseOrderCode' },
       { seq: 0 }, // Reset sequence to 0
       { new: true, upsert: true } // Create document if it doesn't exist
     );
 
     if (deletedResponse.deletedCount === 0) {
       return res.status(404).send({
-        status: "failure",
-        message: "No purchase orders found to delete.",
+        status: 'failure',
+        message: 'No purchase orders found to delete.',
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `${deletedResponse.deletedCount} purchase orders deleted successfully.`,
       data: {
         deletedCount: deletedResponse.deletedCount,
@@ -906,10 +906,10 @@ export const deleteAllPurchaseOrders1 = async (req, res) => {
       },
     });
   } catch (error) {
-    logError("Delete All Purchase Orders", error);
+    logError('Delete All Purchase Orders', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error deleting all purchase orders.",
+      status: 'failure',
+      message: 'Error deleting all purchase orders.',
       error: error.message,
     });
   }
@@ -926,7 +926,7 @@ export const addPaymentV1 = async (req, res) => {
     //     .json({ error: "A positive payment amount is required." });
     // }
     if (!amount) {
-      return res.status(400).json({ error: "A payment amount is required." });
+      return res.status(400).json({ error: 'A payment amount is required.' });
     }
 
     // Push the new payment object into the paidAmt array
@@ -945,7 +945,7 @@ export const addPaymentV1 = async (req, res) => {
       { new: true }
     );
     if (!order) {
-      return res.status(404).json({ error: "Purchase Order not found." });
+      return res.status(404).json({ error: 'Purchase Order not found.' });
     }
 
     // Recalculate netAmountAfterAdvance using the updated totalPaid (virtual)
@@ -972,7 +972,7 @@ export const splitPurchaseOrder = async (originalOrderId, splitDetails) => {
       originalOrderId
     ).session(session);
     if (!originalOrder) {
-      throw new Error("Original Purchase Order not found");
+      throw new Error('Original Purchase Order not found');
     }
 
     // Create a new purchase order with a portion of the original order
@@ -998,7 +998,7 @@ export const splitPurchaseOrder = async (originalOrderId, splitDetails) => {
     session.endSession();
 
     return {
-      message: "Purchase Order successfully split",
+      message: 'Purchase Order successfully split',
       newOrder,
       originalOrder,
     };
@@ -1026,12 +1026,12 @@ export const transferPurchaseOrderItems = async (
     );
 
     if (!fromOrder || !toOrder) {
-      throw new Error("One or both Purchase Orders not found");
+      throw new Error('One or both Purchase Orders not found');
     }
 
     // Validate transfer quantity
     if (fromOrder.quantity < transferQuantity) {
-      throw new Error("Transfer quantity exceeds available quantity.");
+      throw new Error('Transfer quantity exceeds available quantity.');
     }
 
     // Adjust quantities
@@ -1065,14 +1065,14 @@ export const transferPurchaseOrderItems = async (
 export const patchPurchaseOrderByIdWithTracking = async (req, res) => {
   const { purchaseOrderId } = req.params;
   const updates = req.body;
-  const changedBy = req.user?.name || "SystemPatch"; // Assuming user info is in `req.user`
+  const changedBy = req.user?.name || 'SystemPatch'; // Assuming user info is in `req.user`
 
   try {
     // Find the existing purchase order
     const purchaseOrder = await PurchaseOrderModel.findById(purchaseOrderId);
     if (!purchaseOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Purchase order with ID ${purchaseOrderId} not found.`,
       });
     }
@@ -1083,32 +1083,32 @@ export const patchPurchaseOrderByIdWithTracking = async (req, res) => {
       const newStatus = updates.status;
 
       const validTransitions = {
-        Draft: ["Draft", "Confirmed", "Cancelled", "AdminMode"],
+        Draft: ['Draft', 'Confirmed', 'Cancelled', 'AdminMode'],
         Confirmed: [
-          "Confirmed",
-          "Shipped",
-          "Invoiced",
-          "Cancelled",
-          "AdminMode",
+          'Confirmed',
+          'Shipped',
+          'Invoiced',
+          'Cancelled',
+          'AdminMode',
         ],
-        Shipped: ["Shipped", "Delivered", "Invoiced", "AdminMode"],
-        Delivered: ["Delivered", "Invoiced", "AdminMode"],
-        Invoiced: ["Invoiced", "AdminMode"],
-        Cancelled: ["Cancelled", "AdminMode"],
+        Shipped: ['Shipped', 'Delivered', 'Invoiced', 'AdminMode'],
+        Delivered: ['Delivered', 'Invoiced', 'AdminMode'],
+        Invoiced: ['Invoiced', 'AdminMode'],
+        Cancelled: ['Cancelled', 'AdminMode'],
         AdminMode: [
-          "Draft",
-          "Confirmed",
-          "Cancelled",
-          "Shipped",
-          "Delivered",
-          "Invoiced",
-          "AdminMode",
+          'Draft',
+          'Confirmed',
+          'Cancelled',
+          'Shipped',
+          'Delivered',
+          'Invoiced',
+          'AdminMode',
         ],
       };
 
       if (!validTransitions[oldStatus].includes(newStatus)) {
         return res.status(400).send({
-          status: "failure",
+          status: 'failure',
           message: `Invalid status transition from ${oldStatus} to ${newStatus}.`,
         });
       }
@@ -1123,7 +1123,7 @@ export const patchPurchaseOrderByIdWithTracking = async (req, res) => {
 
     // Update purchase order fields
     Object.keys(updates).forEach((key) => {
-      if (key !== "reason") purchaseOrder[key] = updates[key];
+      if (key !== 'reason') purchaseOrder[key] = updates[key];
     });
 
     // Append change history
@@ -1133,14 +1133,14 @@ export const patchPurchaseOrderByIdWithTracking = async (req, res) => {
     const updatedPurchaseOrder = await purchaseOrder.save();
 
     return res.status(200).send({
-      status: "success",
-      message: "Purchase order updated successfully.",
+      status: 'success',
+      message: 'Purchase order updated successfully.',
       data: updatedPurchaseOrder,
     });
   } catch (error) {
-    console.error("Error updating purchase order:", error);
+    console.error('Error updating purchase order:', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error updating purchase order with ID ${purchaseOrderId}.`,
       error: error.message,
     });
@@ -1155,7 +1155,7 @@ export const trackFieldChanges = async (
   changedBy,
   reason
 ) => {
-  const fieldsToTrack = ["quantity", "price", "status"]; // Specify fields to track
+  const fieldsToTrack = ['quantity', 'price', 'status']; // Specify fields to track
   const changeHistory = [];
 
   fieldsToTrack.forEach((field) => {
@@ -1168,7 +1168,7 @@ export const trackFieldChanges = async (
         oldValue: purchaseOrder[field],
         newValue: updates[field],
         changedBy,
-        reason: reason || "No reason provided",
+        reason: reason || 'No reason provided',
         timestamp: new Date(),
       });
     }

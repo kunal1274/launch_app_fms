@@ -1,6 +1,6 @@
 // controllers/permission.controller.js
-import { PermissionModel } from "../models/permission.model.js";
-import { UserRoleModel } from "../models/userRole.model.js";
+import { PermissionModel } from '../models/permission.model.js';
+import { UserRoleModel } from '../models/userRole.model.js';
 
 /**
  * Create a Permission
@@ -13,7 +13,7 @@ export const createPermission = async (req, res) => {
     if (!key && !module) {
       return res
         .status(400)
-        .json({ message: "Permission key and module are required" });
+        .json({ message: 'Permission key and module are required' });
     }
 
     // Create new permission
@@ -27,8 +27,8 @@ export const createPermission = async (req, res) => {
 
     return res.status(201).json(newPermission);
   } catch (error) {
-    console.error("Error in createPermission:", error);
-    return res.status(500).json({ message: "Failed to create permission" });
+    console.error('Error in createPermission:', error);
+    return res.status(500).json({ message: 'Failed to create permission' });
   }
 };
 
@@ -40,8 +40,8 @@ export const getAllPermissions = async (req, res) => {
     const permissions = await PermissionModel.find();
     return res.json(permissions);
   } catch (error) {
-    console.error("Error in getAllPermissions:", error);
-    return res.status(500).json({ message: "Failed to fetch permissions" });
+    console.error('Error in getAllPermissions:', error);
+    return res.status(500).json({ message: 'Failed to fetch permissions' });
   }
 };
 
@@ -53,12 +53,12 @@ export const getPermissionById = async (req, res) => {
     const { id } = req.params;
     const permission = await PermissionModel.findById(id);
     if (!permission) {
-      return res.status(404).json({ message: "Permission not found" });
+      return res.status(404).json({ message: 'Permission not found' });
     }
     return res.json(permission);
   } catch (error) {
-    console.error("Error in getPermissionById:", error);
-    return res.status(500).json({ message: "Error fetching permission" });
+    console.error('Error in getPermissionById:', error);
+    return res.status(500).json({ message: 'Error fetching permission' });
   }
 };
 
@@ -76,13 +76,13 @@ export const updatePermission = async (req, res) => {
       { new: true }
     );
     if (!updatedPermission) {
-      return res.status(404).json({ message: "Permission not found" });
+      return res.status(404).json({ message: 'Permission not found' });
     }
 
     return res.json(updatedPermission);
   } catch (error) {
-    console.error("Error in updatePermission:", error);
-    return res.status(500).json({ message: "Failed to update permission" });
+    console.error('Error in updatePermission:', error);
+    return res.status(500).json({ message: 'Failed to update permission' });
   }
 };
 
@@ -99,19 +99,19 @@ export const deletePermission = async (req, res) => {
     if (referencingRoles.length > 0) {
       return res.status(400).json({
         message:
-          "Cannot delete Permission. It's referenced by one or more UserRoles.",
+          'Cannot delete Permission. It\'s referenced by one or more UserRoles.',
       });
     }
 
     const deleted = await PermissionModel.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ message: "Permission not found" });
+      return res.status(404).json({ message: 'Permission not found' });
     }
 
-    return res.json({ message: "Permission deleted successfully" });
+    return res.json({ message: 'Permission deleted successfully' });
   } catch (error) {
-    console.error("Error in deletePermission:", error);
-    return res.status(500).json({ message: "Failed to delete permission" });
+    console.error('Error in deletePermission:', error);
+    return res.status(500).json({ message: 'Failed to delete permission' });
   }
 };
 
@@ -126,14 +126,14 @@ export const bulkCreatePermissions = async (req, res) => {
     if (!Array.isArray(permissionsArray) || permissionsArray.length === 0) {
       return res
         .status(400)
-        .json({ message: "Request body must be a non-empty array." });
+        .json({ message: 'Request body must be a non-empty array.' });
     }
 
     // Basic validation: each item must have key & module
     for (const perm of permissionsArray) {
       if (!perm.key || !perm.module) {
         return res.status(400).json({
-          message: "Each permission requires at least 'key' and 'module'.",
+          message: 'Each permission requires at least \'key\' and \'module\'.',
         });
       }
     }
@@ -146,21 +146,21 @@ export const bulkCreatePermissions = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: "Permissions inserted successfully",
+      message: 'Permissions inserted successfully',
       data: inserted,
     });
   } catch (error) {
-    console.error("Error in bulkCreatePermissions:", error);
+    console.error('Error in bulkCreatePermissions:', error);
     // If it's a duplicate key error, you might want to parse it carefully
     if (error.code === 11000) {
       return res.status(409).json({
-        message: "Some permission(s) already exist (duplicate key error).",
+        message: 'Some permission(s) already exist (duplicate key error).',
         error: error.message,
       });
     }
     return res
       .status(500)
-      .json({ message: "Failed to bulk-insert permissions.", error });
+      .json({ message: 'Failed to bulk-insert permissions.', error });
   }
 };
 
@@ -174,12 +174,12 @@ export const bulkUpdatePermissions = async (req, res) => {
     if (!Array.isArray(updates) || updates.length === 0) {
       return res
         .status(400)
-        .json({ message: "Request body must be a non-empty array." });
+        .json({ message: 'Request body must be a non-empty array.' });
     }
 
     const updatePromises = updates.map(async (updateDoc) => {
       if (!updateDoc._id) {
-        throw new Error("Each item requires an _id to be updated.");
+        throw new Error('Each item requires an _id to be updated.');
       }
       const { _id, ...rest } = updateDoc;
       return PermissionModel.findByIdAndUpdate(_id, rest, { new: true });
@@ -192,20 +192,20 @@ export const bulkUpdatePermissions = async (req, res) => {
     const notFound = results.filter((doc) => doc === null);
     if (notFound.length > 0) {
       return res.status(404).json({
-        message: "Some permissions were not found for updating.",
+        message: 'Some permissions were not found for updating.',
         notFoundCount: notFound.length,
       });
     }
 
     return res.json({
-      message: "Bulk update successful",
+      message: 'Bulk update successful',
       data: results,
     });
   } catch (error) {
-    console.error("Error in bulkUpdatePermissions:", error);
+    console.error('Error in bulkUpdatePermissions:', error);
     return res
       .status(500)
-      .json({ message: "Failed to bulk-update permissions.", error });
+      .json({ message: 'Failed to bulk-update permissions.', error });
   }
 };
 
@@ -220,7 +220,7 @@ export const bulkDeletePermissions = async (req, res) => {
     if (!Array.isArray(ids) || ids.length === 0) {
       return res
         .status(400)
-        .json({ message: "Request body must contain 'ids' array." });
+        .json({ message: 'Request body must contain \'ids\' array.' });
     }
 
     // 1) Check references for each ID in UserRole
@@ -232,7 +232,7 @@ export const bulkDeletePermissions = async (req, res) => {
       // This means at least one of the given permission IDs is in use
       return res.status(400).json({
         message:
-          "Cannot delete. One or more permissions are referenced by user roles.",
+          'Cannot delete. One or more permissions are referenced by user roles.',
         referencingRoles,
       });
     }
@@ -244,14 +244,14 @@ export const bulkDeletePermissions = async (req, res) => {
     // deleteResult.deletedCount tells how many were actually found & removed
 
     return res.json({
-      message: "Bulk delete successful",
+      message: 'Bulk delete successful',
       deletedCount: deleteResult.deletedCount,
     });
   } catch (error) {
-    console.error("Error in bulkDeletePermissions:", error);
+    console.error('Error in bulkDeletePermissions:', error);
     return res
       .status(500)
-      .json({ message: "Failed to bulk-delete permissions.", error });
+      .json({ message: 'Failed to bulk-delete permissions.', error });
   }
 };
 
@@ -269,7 +269,7 @@ export const bulkOperationsPartial = async (req, res) => {
     const operations = req.body;
     if (!Array.isArray(operations) || operations.length === 0) {
       return res.status(400).json({
-        message: "Request body must be a non-empty array of operations.",
+        message: 'Request body must be a non-empty array of operations.',
       });
     }
 
@@ -292,14 +292,14 @@ export const bulkOperationsPartial = async (req, res) => {
 
       try {
         if (!action || !data) {
-          throw new Error("Each operation requires 'action' and 'data'.");
+          throw new Error('Each operation requires \'action\' and \'data\'.');
         }
 
         // 1) CREATE
-        if (action === "create") {
+        if (action === 'create') {
           // Basic validation
           if (!data.key || !data.module) {
-            throw new Error("For 'create', 'key' and 'module' are required.");
+            throw new Error('For \'create\', \'key\' and \'module\' are required.');
           }
           const createdDoc = await PermissionModel.create(data);
           resultItem.success = true;
@@ -307,9 +307,9 @@ export const bulkOperationsPartial = async (req, res) => {
         }
 
         // 2) UPDATE
-        else if (action === "update") {
+        else if (action === 'update') {
           if (!data._id) {
-            throw new Error("For 'update', '_id' is required in 'data'.");
+            throw new Error('For \'update\', \'_id\' is required in \'data\'.');
           }
 
           // Attempt update
@@ -329,7 +329,7 @@ export const bulkOperationsPartial = async (req, res) => {
         }
 
         //“create if _id doesn’t exist, otherwise update.
-        else if (action === "upsert") {
+        else if (action === 'upsert') {
           if (data._id) {
             // update
             const updated = await PermissionModel.findByIdAndUpdate(
@@ -356,9 +356,9 @@ export const bulkOperationsPartial = async (req, res) => {
         }
 
         // 3) DELETE
-        else if (action === "delete") {
+        else if (action === 'delete') {
           if (!data._id) {
-            throw new Error("For 'delete', '_id' is required in 'data'.");
+            throw new Error('For \'delete\', \'_id\' is required in \'data\'.');
           }
 
           // 3a) Check references in UserRole
@@ -381,7 +381,7 @@ export const bulkOperationsPartial = async (req, res) => {
 
           resultItem.success = true;
           resultItem.dataOrError = {
-            message: "Permission deleted successfully",
+            message: 'Permission deleted successfully',
             _id: data._id,
           };
         }
@@ -411,9 +411,9 @@ export const bulkOperationsPartial = async (req, res) => {
       results,
     });
   } catch (error) {
-    console.error("bulkOperationsPartial error:", error);
+    console.error('bulkOperationsPartial error:', error);
     return res.status(500).json({
-      message: "Failed to process bulk operations.",
+      message: 'Failed to process bulk operations.',
       error: error.message,
     });
   }

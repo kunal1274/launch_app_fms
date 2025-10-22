@@ -1,7 +1,7 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config(); // Loads .env into process.env
-import mongoose from "mongoose";
-import { SalesOrderModel } from "../models/salesorder.model.js";
+import mongoose from 'mongoose';
+import { SalesOrderModel } from '../models/salesorder.model.js';
 
 const connectToDb = async () => {
   const uriWithEnv = `mongodb+srv://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.PROJECT_NAME}.pnctyau.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=${process.env.APP_NAME}`;

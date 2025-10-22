@@ -1,44 +1,44 @@
-import express from "express";
-import * as T from "../controllers/journalTemplate.controller.js";
+import express from 'express';
+import * as T from '../controllers/journalTemplate.controller.js';
 
 // middleware/authenticate.js
-import jwt from "jsonwebtoken";
-import { UserGlobalModel } from "../models/userGlobal.model.js";
-import { loadJournalTemplateOwner } from "../middleware/rbacLoadOwner.js";
-import authorize from "../middleware/rbacAuthorize.js";
+import jwt from 'jsonwebtoken';
+import { UserGlobalModel } from '../models/userGlobal.model.js';
+import { loadJournalTemplateOwner } from '../middleware/rbacLoadOwner.js';
+import authorize from '../middleware/rbacAuthorize.js';
 
 export async function authenticate(req, res, next) {
-  const auth = req.headers.authorization?.split(" ");
-  if (!auth || auth[0] !== "Bearer" || !auth[1]) {
+  const auth = req.headers.authorization?.split(' ');
+  if (!auth || auth[0] !== 'Bearer' || !auth[1]) {
     return res
       .status(401)
-      .json({ status: "failure", message: "Missing token" });
+      .json({ status: 'failure', message: 'Missing token' });
   }
   try {
     const payload = jwt.verify(auth[1], process.env.JWT_SECRET);
     const user = await UserGlobalModel.findById(payload.sub)
-      .select("userRoles _id")
+      .select('userRoles _id')
       .lean();
     if (!user) {
       return res
         .status(401)
-        .json({ status: "failure", message: "Invalid token" });
+        .json({ status: 'failure', message: 'Invalid token' });
     }
     // we'll refer to user.id and user.userRoles in downstream middleware
     req.user = { id: user._id.toString(), userRoles: user.userRoles };
     next();
   } catch (err) {
-    return res.status(401).json({ status: "failure", message: "Unauthorized" });
+    return res.status(401).json({ status: 'failure', message: 'Unauthorized' });
   }
 }
 
 const glJournalTemplateRouter = express.Router();
 
 // // POST   /templates
-glJournalTemplateRouter.post("/", T.createTemplate);
+glJournalTemplateRouter.post('/', T.createTemplate);
 
 // // GET    /templates
-glJournalTemplateRouter.get("/", T.listTemplates);
+glJournalTemplateRouter.get('/', T.listTemplates);
 
 // // GET    /templates/:id
 // router.get("/:id", T.getTemplateById);

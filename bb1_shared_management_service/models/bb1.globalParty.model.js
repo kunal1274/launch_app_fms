@@ -1,6 +1,6 @@
 // models/globalparty.model.js
-import mongoose, { Schema, model } from "mongoose";
-import { GlobalPartyCounterModel } from "./bb1.counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { GlobalPartyCounterModel } from './bb1.counter.model.js';
 
 const globalPartySchema = new Schema(
   {
@@ -17,23 +17,23 @@ const globalPartySchema = new Schema(
       required: true,
       enum: {
         values: [
-          "None",
-          "User",
-          "Customer",
-          "Vendor",
-          "Employee",
-          "Worker",
-          "Contractor",
-          "Company",
-          "ContactPerson",
-          "Individual",
-          "Organization",
-          "OperatingUnit",
+          'None',
+          'User',
+          'Customer',
+          'Vendor',
+          'Employee',
+          'Worker',
+          'Contractor',
+          'Company',
+          'ContactPerson',
+          'Individual',
+          'Organization',
+          'OperatingUnit',
         ],
         message:
-          "{VALUE} is not a valid partyType. Use 'None','Customer','Vendor','Employee','Worker','Contractor','ContactPerson','Individual','Organization','OperatingUnit'.",
+          '{VALUE} is not a valid partyType. Use \'None\',\'Customer\',\'Vendor\',\'Employee\',\'Worker\',\'Contractor\',\'ContactPerson\',\'Individual\',\'Organization\',\'OperatingUnit\'.',
       },
-      default: ["None"], // can be an array with default
+      default: ['None'], // can be an array with default
     },
     // Additional fields common to all parties
     primaryContactNumber: {
@@ -63,18 +63,18 @@ const globalPartySchema = new Schema(
 );
 
 // For auto-generating a "Party" code if desired
-globalPartySchema.pre("save", async function (next) {
+globalPartySchema.pre('save', async function (next) {
   if (!this.isNew) return next();
   try {
     const counterDoc = await GlobalPartyCounterModel.findByIdAndUpdate(
-      { _id: "globalPartyCode" },
+      { _id: 'globalPartyCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
     if (!counterDoc || counterDoc.seq === undefined) {
-      throw new Error("Failed to generate global party code");
+      throw new Error('Failed to generate global party code');
     }
-    const seqNum = counterDoc.seq.toString().padStart(6, "0");
+    const seqNum = counterDoc.seq.toString().padStart(6, '0');
     this.code = `GP_${seqNum}`;
     next();
   } catch (err) {
@@ -84,4 +84,4 @@ globalPartySchema.pre("save", async function (next) {
 
 export const GlobalPartyModel =
   mongoose.models.BB1GlobalParties ||
-  model("BB1GlobalParties", globalPartySchema);
+  model('BB1GlobalParties', globalPartySchema);

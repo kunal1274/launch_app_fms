@@ -1,7 +1,7 @@
 // models/serial.model.js
 
-import mongoose, { model, Schema } from "mongoose";
-import { SerialCounterModel } from "./counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { SerialCounterModel } from './counter.model.js';
 
 // ——— Sub-schema for each serial value ———
 const serialValueSchema = new Schema(
@@ -30,8 +30,8 @@ const serialValueSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Created", "Ready", "Closed", "Obsolete"],
-      default: "Ready",
+      enum: ['Created', 'Ready', 'Closed', 'Obsolete'],
+      default: 'Ready',
     },
 
     // // if you later need serial-tracking per value:
@@ -86,8 +86,8 @@ const serialSchema = new Schema(
     description: String,
     type: {
       type: String,
-      enum: ["Physical", "Virtual"],
-      default: "Physical",
+      enum: ['Physical', 'Virtual'],
+      default: 'Physical',
     },
     active: {
       type: Boolean,
@@ -101,12 +101,12 @@ const serialSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups",
+        ref: 'GlobalGroups',
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
 
     files: [
@@ -134,7 +134,7 @@ const serialSchema = new Schema(
 serialSchema.index({ code: 1 }, { unique: true });
 
 // ——— Validate sub-docs & generate `code` ———
-serialSchema.pre("validate", async function (next) {
+serialSchema.pre('validate', async function (next) {
   // 1) Ensure each value has expDate > mfgDate
   for (const val of this.values) {
     if (val.expDate <= val.mfgDate) {
@@ -156,18 +156,18 @@ serialSchema.pre("validate", async function (next) {
   // 3) Auto-generate master `code` if missing
   if (!this.code) {
     const counter = await SerialCounterModel.findOneAndUpdate(
-      { _id: "serialCode" },
+      { _id: 'serialCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
     if (!counter?.seq && counter.seq !== 0) {
-      return next(new Error("Failed to generate serial code"));
+      return next(new Error('Failed to generate serial code'));
     }
-    this.code = `SL_${String(counter.seq).padStart(9, "0")}`;
+    this.code = `SL_${String(counter.seq).padStart(9, '0')}`;
   }
 
   next();
 });
 
 export const SerialModel =
-  mongoose.models.Serials || model("Serials", serialSchema);
+  mongoose.models.Serials || model('Serials', serialSchema);

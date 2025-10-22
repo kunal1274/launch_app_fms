@@ -1,7 +1,7 @@
 // controllers/bank.controller.js
 
-import mongoose from "mongoose";
-import { BankModel } from "../models/bank.model.js";
+import mongoose from 'mongoose';
+import { BankModel } from '../models/bank.model.js';
 
 function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id);
@@ -113,20 +113,20 @@ export const createBank = async (req, res) => {
     // Basic checks
     if (!bankType || !linkedCoaAccount || !currency) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message:
-          "Fields `type`, `linkedCoaAccount` (ObjectId), and `currency` are required.",
+          'Fields `type`, `linkedCoaAccount` (ObjectId), and `currency` are required.',
       });
     }
     if (!isValidObjectId(linkedCoaAccount)) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid linkedCoaAccount ID." });
+        .json({ status: 'failure', message: 'Invalid linkedCoaAccount ID.' });
     }
     if (parentAccount && !isValidObjectId(parentAccount)) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid parentAccount ID." });
+        .json({ status: 'failure', message: 'Invalid parentAccount ID.' });
     }
 
     const newBank = new BankModel({
@@ -135,40 +135,40 @@ export const createBank = async (req, res) => {
       bankType,
       parentAccount: parentAccount || null,
       linkedCoaAccount,
-      upi: upi || "",
-      bankName: bankName || "",
-      accountHolderName: accountHolderName || "",
-      ifsc: ifsc || "",
-      swift: swift || "",
+      upi: upi || '',
+      bankName: bankName || '',
+      accountHolderName: accountHolderName || '',
+      ifsc: ifsc || '',
+      swift: swift || '',
       active: active === true,
-      qrDetails: qrDetails || "",
+      qrDetails: qrDetails || '',
       isLeaf: isLeaf === false ? false : true,
       currency,
-      description: description || "",
-      ledgerGroup: ledgerGroup || "",
+      description: description || '',
+      ledgerGroup: ledgerGroup || '',
     });
 
     await newBank.save();
     return res
       .status(201)
-      .json({ status: "success", message: "Bank created.", data: newBank });
+      .json({ status: 'success', message: 'Bank created.', data: newBank });
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     if (error.code === 11000) {
       return res.status(409).json({
-        status: "failure",
+        status: 'failure',
         message:
-          "Duplicate accountCode. That bank account code already exists.",
+          'Duplicate accountCode. That bank account code already exists.',
       });
     }
-    console.error("❌ createBank Error:", error);
+    console.error('❌ createBank Error:', error);
     return res
       .status(500)
-      .json({ status: "failure", message: "Internal server error." });
+      .json({ status: 'failure', message: 'Internal server error.' });
   }
 };
 

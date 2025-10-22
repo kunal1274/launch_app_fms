@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 const userGroupRouter = Router();
 
 import {
@@ -7,21 +7,21 @@ import {
   getUserGroupById,
   updateUserGroup,
   deleteUserGroup,
-} from "../controllers/userGroupController.js";
+} from '../controllers/userGroup.controller.js';
 
 // CREATE
-userGroupRouter.post("/", createUserGroup);
+userGroupRouter.post('/', createUserGroup);
 
 // READ ALL
-userGroupRouter.get("/", getUserGroups);
+userGroupRouter.get('/', getUserGroups);
 
 // READ ONE
-userGroupRouter.get("/:groupId", getUserGroupById);
+userGroupRouter.get('/:groupId', getUserGroupById);
 
 // UPDATE
-userGroupRouter.put("/:groupId", updateUserGroup);
+userGroupRouter.put('/:groupId', updateUserGroup);
 
 // DELETE
-userGroupRouter.delete("/:groupId", deleteUserGroup);
+userGroupRouter.delete('/:groupId', deleteUserGroup);
 
 export default userGroupRouter;

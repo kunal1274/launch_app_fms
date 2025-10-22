@@ -1,14 +1,14 @@
 // services/purchaseStock.service.js
 
-import { StockBalanceModel } from "../models/inventStockBalance.model.js";
-import { ProvisionalBalanceModel } from "../models/provisionalBalance.model.js";
-import { InventoryTransactionModel } from "../models/inventoryTransaction.model.js";
+import { StockBalanceModel } from '../models/inventStockBalance.model.js';
+import { ProvisionalBalanceModel } from '../models/provisionalBalance.model.js';
+import { InventoryTransactionModel } from '../models/inventoryTransaction.model.js';
 
 class PurchaseStockService1 {
   static async reservePO(po, session) {
     for (let i = 0; i < po.lines.length; i++) {
       const l = po.lines[i];
-      const qty = po.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = po.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: po.site,
@@ -37,10 +37,10 @@ class PurchaseStockService1 {
 
       // tag with reference
       pb.extras = pb.extras || new Map();
-      pb.extras.set("refType", "PurchaseOrder");
-      pb.extras.set("refId", po._id.toString());
-      pb.extras.set("refNum", po.orderNum);
-      pb.extras.set("refLineNum", i + 1);
+      pb.extras.set('refType', 'PurchaseOrder');
+      pb.extras.set('refId', po._id.toString());
+      pb.extras.set('refNum', po.orderNum);
+      pb.extras.set('refLineNum', i + 1);
       await pb.save({ session });
     }
   }
@@ -48,7 +48,7 @@ class PurchaseStockService1 {
   static async releasePO(po, session) {
     for (let i = 0; i < po.lines.length; i++) {
       const l = po.lines[i];
-      const qty = po.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = po.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: po.site,
@@ -78,7 +78,7 @@ class PurchaseStockService1 {
   static async applyPO(po, session) {
     for (let i = 0; i < po.lines.length; i++) {
       const l = po.lines[i];
-      const qty = po.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = po.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: po.site,
@@ -114,10 +114,10 @@ class PurchaseStockService1 {
 
       // tag reference
       sb.extras = sb.extras || new Map();
-      sb.extras.set("refType", "PurchaseOrder");
-      sb.extras.set("refId", po._id.toString());
-      sb.extras.set("refNum", po.orderNum);
-      sb.extras.set("refLineNum", i + 1);
+      sb.extras.set('refType', 'PurchaseOrder');
+      sb.extras.set('refId', po._id.toString());
+      sb.extras.set('refNum', po.orderNum);
+      sb.extras.set('refLineNum', i + 1);
       await sb.save({ session });
     }
   }
@@ -125,7 +125,7 @@ class PurchaseStockService1 {
   static async reversePO(po, session) {
     for (let i = 0; i < po.lines.length; i++) {
       const l = po.lines[i];
-      const qty = po.orderType === "Return" ? -l.quantity : l.quantity;
+      const qty = po.orderType === 'Return' ? -l.quantity : l.quantity;
       const key = {
         item: l.item,
         site: po.site,
@@ -145,7 +145,7 @@ class PurchaseStockService1 {
         serial: po.serial,
       };
       const sb = await StockBalanceModel.findOne(key).session(session);
-      if (!sb) throw new Error("Stock record not found for reversal");
+      if (!sb) throw new Error('Stock record not found for reversal');
       sb.quantity -= qty;
       sb.totalCostValue -= qty * l.price;
       sb.totalPurchaseValue -= qty > 0 ? qty * l.price : 0;
@@ -159,7 +159,7 @@ class PurchaseStockService1 {
 // for single  item
 class PurchaseStockService2 {
   static async reservePO1(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const key = {
       item: po.item,
       site: po.site,
@@ -194,10 +194,10 @@ class PurchaseStockService2 {
       },
       $set: {
         // stamp your PO reference fields into extras
-        "extras.refType": "PurchaseOrder",
-        "extras.refId": po._id.toString(),
-        "extras.refNum": po.orderNum,
-        "extras.refLineNum": (1).toString(),
+        'extras.refType': 'PurchaseOrder',
+        'extras.refId': po._id.toString(),
+        'extras.refNum': po.orderNum,
+        'extras.refLineNum': (1).toString(),
       },
     };
 
@@ -253,7 +253,7 @@ class PurchaseStockService2 {
   }
 
   static async reservePO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const value = qty * po.price;
 
     const key = {
@@ -282,10 +282,10 @@ class PurchaseStockService2 {
       },
       // stamp your PO reference into the `extras` map
       $set: {
-        "extras.refType": "PurchaseOrder",
-        "extras.refId": po._id.toString(),
-        "extras.refNum": po.orderNum,
-        "extras.refLineNum": "1",
+        'extras.refType': 'PurchaseOrder',
+        'extras.refId': po._id.toString(),
+        'extras.refNum': po.orderNum,
+        'extras.refLineNum': '1',
       },
     };
 
@@ -305,7 +305,7 @@ class PurchaseStockService2 {
   }
 
   static async releasePO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const key = {
       item: po.item,
       site: po.site,
@@ -332,7 +332,7 @@ class PurchaseStockService2 {
   }
 
   static async applyPO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const key = {
       item: po.item,
       site: po.site,
@@ -368,15 +368,15 @@ class PurchaseStockService2 {
 
     // tag reference
     sb.extras = sb.extras || new Map();
-    sb.extras.set("refType", "PurchaseOrder");
-    sb.extras.set("refId", po._id.toString());
-    sb.extras.set("refNum", po.orderNum);
-    sb.extras.set("refLineNum", 1);
+    sb.extras.set('refType', 'PurchaseOrder');
+    sb.extras.set('refId', po._id.toString());
+    sb.extras.set('refNum', po.orderNum);
+    sb.extras.set('refLineNum', 1);
     await sb.save({ session });
   }
 
   static async reversePO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const key = {
       item: po.item,
       site: po.site,
@@ -396,7 +396,7 @@ class PurchaseStockService2 {
       serial: po.serial,
     };
     const sb = await StockBalanceModel.findOne(key).session(session);
-    if (!sb) throw new Error("Stock record not found for reversal");
+    if (!sb) throw new Error('Stock record not found for reversal');
     sb.quantity -= qty;
     sb.totalCostValue -= qty * po.price;
     sb.totalPurchaseValue -= qty > 0 ? qty * po.price : 0;
@@ -412,7 +412,7 @@ class PurchaseStockServiceSingleLine {
    * qty positive for normal PO, negative for Return.
    */
   static async reservePO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const value = qty * po.price;
     const dims = {
       site: po.site,
@@ -438,10 +438,10 @@ class PurchaseStockServiceSingleLine {
       {
         $inc: { quantity: qty, totalReserveValue: value },
         $set: {
-          "extras.refType": "PurchaseOrder",
-          "extras.refId": po._id.toString(),
-          "extras.refNum": po.orderNum,
-          "extras.refLineNum": "1",
+          'extras.refType': 'PurchaseOrder',
+          'extras.refId': po._id.toString(),
+          'extras.refNum': po.orderNum,
+          'extras.refLineNum': '1',
         },
       },
       { upsert: true, session }
@@ -452,7 +452,7 @@ class PurchaseStockServiceSingleLine {
       [
         {
           txnDate: new Date(),
-          sourceType: "PURCHASE",
+          sourceType: 'PURCHASE',
           sourceId: po._id,
           sourceLine: 1,
           item: po.item,
@@ -463,7 +463,7 @@ class PurchaseStockServiceSingleLine {
           salesPrice: 0,
           transferPrice: 0,
           taxes: { gst: 0, withholdingTax: 0 },
-          extras: { action: "RESERVE", refNum: po.orderNum },
+          extras: { action: 'RESERVE', refNum: po.orderNum },
         },
       ],
       { session }
@@ -474,7 +474,7 @@ class PurchaseStockServiceSingleLine {
    * Release a previously‐reserved PO (back to Draft/Cancelled).
    */
   static async releasePO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const value = qty * po.price;
     const dims = {
       site: po.site,
@@ -511,7 +511,7 @@ class PurchaseStockServiceSingleLine {
       [
         {
           txnDate: new Date(),
-          sourceType: "PURCHASE",
+          sourceType: 'PURCHASE',
           sourceId: po._id,
           sourceLine: 1,
           item: po.item,
@@ -522,7 +522,7 @@ class PurchaseStockServiceSingleLine {
           salesPrice: 0,
           transferPrice: 0,
           taxes: { gst: 0, withholdingTax: 0 },
-          extras: { action: "RELEASE", refNum: po.orderNum },
+          extras: { action: 'RELEASE', refNum: po.orderNum },
         },
       ],
       { session }
@@ -533,7 +533,7 @@ class PurchaseStockServiceSingleLine {
    * Apply (post) a Purchase Order → real stock receipt (or return).
    */
   static async applyPO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const price = po.price;
     const dims = {
       site: po.site,
@@ -570,10 +570,10 @@ class PurchaseStockServiceSingleLine {
     sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;
     // tag PO refs
     sb.extras = sb.extras || new Map();
-    sb.extras.set("refType", "PurchaseOrder");
-    sb.extras.set("refId", po._id.toString());
-    sb.extras.set("refNum", po.orderNum);
-    sb.extras.set("refLineNum", "1");
+    sb.extras.set('refType', 'PurchaseOrder');
+    sb.extras.set('refId', po._id.toString());
+    sb.extras.set('refNum', po.orderNum);
+    sb.extras.set('refLineNum', '1');
     await sb.save({ session });
 
     // 2) Log transaction
@@ -581,7 +581,7 @@ class PurchaseStockServiceSingleLine {
       [
         {
           txnDate: new Date(),
-          sourceType: "PURCHASE",
+          sourceType: 'PURCHASE',
           sourceId: po._id,
           sourceLine: 1,
           item: po.item,
@@ -593,7 +593,7 @@ class PurchaseStockServiceSingleLine {
           transferPrice: 0,
           taxes: { gst: 0, withholdingTax: 0 },
           extras: {
-            action: po.orderType === "Return" ? "RETURN" : "RECEIPT",
+            action: po.orderType === 'Return' ? 'RETURN' : 'RECEIPT',
             refNum: po.orderNum,
           },
         },
@@ -606,7 +606,7 @@ class PurchaseStockServiceSingleLine {
    * Reverse a posted Purchase Order (return an invoice) → undo the real stock change.
    */
   static async reversePO(po, session) {
-    const qty = po.orderType === "Return" ? -po.quantity : po.quantity;
+    const qty = po.orderType === 'Return' ? -po.quantity : po.quantity;
     const price = po.price;
     const dims = {
       site: po.site,
@@ -631,7 +631,7 @@ class PurchaseStockServiceSingleLine {
       item: po.item,
       ...dims,
     }).session(session);
-    if (!sb) throw new Error("Stock record not found for reversal");
+    if (!sb) throw new Error('Stock record not found for reversal');
     sb.quantity -= qty;
     sb.totalCostValue -= qty * price;
     sb.totalPurchaseValue -= qty > 0 ? qty * price : 0;
@@ -644,7 +644,7 @@ class PurchaseStockServiceSingleLine {
       [
         {
           txnDate: new Date(),
-          sourceType: "PURCHASE",
+          sourceType: 'PURCHASE',
           sourceId: po._id,
           sourceLine: 1,
           item: po.item,
@@ -657,9 +657,9 @@ class PurchaseStockServiceSingleLine {
           taxes: { gst: 0, withholdingTax: 0 },
           extras: {
             action:
-              po.orderType === "Return"
-                ? "RETURN_REVERSAL"
-                : "RECEIPT_REVERSAL",
+              po.orderType === 'Return'
+                ? 'RETURN_REVERSAL'
+                : 'RECEIPT_REVERSAL',
             refNum: po.orderNum,
           },
         },
@@ -680,31 +680,31 @@ class PurchaseStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
+      const qty = order.orderType === 'Return' ? -ln.quantity : ln.quantity;
       const val = qty * ln.price;
       const dims = {
         site: ln.site,
@@ -730,10 +730,10 @@ class PurchaseStockService {
         {
           $inc: { quantity: qty, totalReserveValue: val },
           $set: {
-            "extras.refType": "PurchaseOrder",
-            "extras.refId": order._id.toString(),
-            "extras.refNum": order.orderNum,
-            "extras.refLineNum": (idx + 1).toString(),
+            'extras.refType': 'PurchaseOrder',
+            'extras.refId': order._id.toString(),
+            'extras.refNum': order.orderNum,
+            'extras.refLineNum': (idx + 1).toString(),
           },
         },
         { upsert: true, session }
@@ -744,7 +744,7 @@ class PurchaseStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "PURCHASE",
+            sourceType: 'PURCHASE',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -755,7 +755,7 @@ class PurchaseStockService {
             salesPrice: 0,
             transferPrice: 0,
             taxes: { gst: 0, withholdingTax: 0 },
-            extras: { action: "RESERVE", refNum: order.orderNum },
+            extras: { action: 'RESERVE', refNum: order.orderNum },
           },
         ],
         { session }
@@ -767,31 +767,31 @@ class PurchaseStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
+      const qty = order.orderType === 'Return' ? -ln.quantity : ln.quantity;
       const val = qty * ln.price;
       // const dims = { /* same as above */ ...ln };
       const dims = {
@@ -829,7 +829,7 @@ class PurchaseStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "PURCHASE",
+            sourceType: 'PURCHASE',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -840,7 +840,7 @@ class PurchaseStockService {
             salesPrice: 0,
             transferPrice: 0,
             taxes: { gst: 0, withholdingTax: 0 },
-            extras: { action: "RELEASE", refNum: order.orderNum },
+            extras: { action: 'RELEASE', refNum: order.orderNum },
           },
         ],
         { session }
@@ -852,31 +852,31 @@ class PurchaseStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
+      const qty = order.orderType === 'Return' ? -ln.quantity : ln.quantity;
       const price = ln.price;
       // const dims = { /* same as above */ ...ln };
       const dims = {
@@ -912,10 +912,10 @@ class PurchaseStockService {
       );
       sb.costPrice = sb.quantity ? sb.totalCostValue / sb.quantity : 0;
       sb.extras = sb.extras || new Map();
-      sb.extras.set("refType", "PurchaseOrder");
-      sb.extras.set("refId", order._id.toString());
-      sb.extras.set("refNum", order.orderNum);
-      sb.extras.set("refLineNum", (idx + 1).toString());
+      sb.extras.set('refType', 'PurchaseOrder');
+      sb.extras.set('refId', order._id.toString());
+      sb.extras.set('refNum', order.orderNum);
+      sb.extras.set('refLineNum', (idx + 1).toString());
       await sb.save({ session });
 
       // log transaction
@@ -923,7 +923,7 @@ class PurchaseStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "PURCHASE",
+            sourceType: 'PURCHASE',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -936,9 +936,9 @@ class PurchaseStockService {
             taxes: { gst: 0, withholdingTax: 0 },
             extras: {
               action:
-                order.orderType === "Return"
-                  ? "PURCHASE_RETURN"
-                  : "PURCHASE_RECEIPT",
+                order.orderType === 'Return'
+                  ? 'PURCHASE_RETURN'
+                  : 'PURCHASE_RECEIPT',
               refNum: order.orderNum,
             },
           },
@@ -952,31 +952,31 @@ class PurchaseStockService {
     const lines = Array.isArray(order.lines)
       ? order.lines
       : [
-          {
-            item: order.item,
-            quantity: order.quantity,
-            price: order.price,
-            site: order.site,
-            warehouse: order.warehouse,
-            zone: order.zone,
-            location: order.location,
-            aisle: order.aisle,
-            rack: order.rack,
-            shelf: order.shelf,
-            bin: order.bin,
-            config: order.config,
-            color: order.color,
-            size: order.size,
-            style: order.style,
-            version: order.version,
-            batch: order.batch,
-            serial: order.serial,
-          },
-        ];
+        {
+          item: order.item,
+          quantity: order.quantity,
+          price: order.price,
+          site: order.site,
+          warehouse: order.warehouse,
+          zone: order.zone,
+          location: order.location,
+          aisle: order.aisle,
+          rack: order.rack,
+          shelf: order.shelf,
+          bin: order.bin,
+          config: order.config,
+          color: order.color,
+          size: order.size,
+          style: order.style,
+          version: order.version,
+          batch: order.batch,
+          serial: order.serial,
+        },
+      ];
 
     for (let idx = 0; idx < lines.length; idx++) {
       const ln = lines[idx];
-      const qty = order.orderType === "Return" ? -ln.quantity : ln.quantity;
+      const qty = order.orderType === 'Return' ? -ln.quantity : ln.quantity;
       const price = ln.price;
       // const dims = { /* same as above */ ...ln };
       const dims = {
@@ -1002,7 +1002,7 @@ class PurchaseStockService {
         item: ln.item,
         ...dims,
       }).session(session);
-      if (!sb) throw new Error("Stock record not found for reversal");
+      if (!sb) throw new Error('Stock record not found for reversal');
       sb.quantity -= qty;
       sb.totalCostValue -= qty * price;
       sb.totalPurchaseValue -= qty > 0 ? qty * price : 0;
@@ -1015,7 +1015,7 @@ class PurchaseStockService {
         [
           {
             txnDate: new Date(),
-            sourceType: "PURCHASE",
+            sourceType: 'PURCHASE',
             sourceId: order._id,
             sourceLine: idx + 1,
             item: ln.item,
@@ -1028,9 +1028,9 @@ class PurchaseStockService {
             taxes: { gst: 0, withholdingTax: 0 },
             extras: {
               action:
-                order.orderType === "Return"
-                  ? "PURCHASE_RETURN_REVERSAL"
-                  : "PURCHASE_RECEIPT_REVERSAL",
+                order.orderType === 'Return'
+                  ? 'PURCHASE_RETURN_REVERSAL'
+                  : 'PURCHASE_RECEIPT_REVERSAL',
               refNum: order.orderNum,
             },
           },

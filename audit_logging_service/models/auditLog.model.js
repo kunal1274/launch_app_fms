@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { dbgModels } from "../../index.js";
+import mongoose from 'mongoose';
+import { dbgModels } from '../../index.js';
 const { Schema, model } = mongoose;
 
 /**
@@ -11,7 +11,7 @@ const auditLogSchema = new Schema(
       // Typically references a User model. If you only have a username,
       // store it as a string. If you have a real user collection, do:
       type: Schema.Types.ObjectId,
-      ref: "UserGlobal",
+      ref: 'UserGlobal',
       //type: String,
       required: false,
       // default: "67ec2fb004d3cc3237b58772", //devratxen
@@ -45,4 +45,4 @@ const auditLogSchema = new Schema(
 );
 
 export const AuditLogModel =
-  mongoose.models.AuditLog || model("AuditLog", auditLogSchema);
+  mongoose.models.AuditLog || model('AuditLog', auditLogSchema);

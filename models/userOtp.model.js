@@ -1,5 +1,5 @@
 // models/Otp.js
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const UserOtpSchema = new mongoose.Schema(
@@ -27,12 +27,12 @@ const UserOtpSchema = new mongoose.Schema(
     },
     method: {
       type: String,
-      enum: ["whatsapp", "sms", "email"],
+      enum: ['whatsapp', 'sms', 'email'],
       required: true,
     },
     otpType: {
       type: String,
-      enum: ["numeric", "alphanumeric", "alphanumeric_special"],
+      enum: ['numeric', 'alphanumeric', 'alphanumeric_special'],
       required: true,
     },
     expiresAt: {
@@ -69,4 +69,4 @@ UserOtpSchema.index({ phoneNumber: 1 }, { unique: false, sparse: true });
 // module.exports = mongoose.model("Otp", OtpSchema);
 
 export const UserOtpModel =
-  mongoose.models.UserOtp || model("UserOtp", UserOtpSchema);
+  mongoose.models.UserOtp || model('UserOtp', UserOtpSchema);

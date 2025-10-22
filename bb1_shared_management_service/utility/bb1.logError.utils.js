@@ -1,5 +1,5 @@
 // Helper function for error logging
-import winston from "winston";
+import winston from 'winston';
 
 export const logError = (context, error) => {
   console.error(`[${new Date().toISOString()}] ${context} - Error:`, {
@@ -9,10 +9,10 @@ export const logError = (context, error) => {
 };
 
 export const winstonLogger = winston.createLogger({
-  level: "info",
+  level: 'info',
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
   ],
 });

@@ -3,8 +3,8 @@
  * Simplified and consistent with other modules
  */
 
-import mongoose, { Schema, model } from "mongoose";
-import { SalesOrderCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { SalesOrderCounterModel } from './counter.model.js';
 
 // Simplified status management
 export const ORDER_STATUS = {
@@ -449,8 +449,8 @@ salesOrderSchema.index({ company: 1 });
 // Pre-find middleware to populate references
 salesOrderSchema.pre(/^find/, function(next) {
   this.populate('customer', 'code name contactNum email address')
-       .populate('lineItems.item', 'code name price type unit')
-       .populate('company', 'name code');
+    .populate('lineItems.item', 'code name price type unit')
+    .populate('company', 'name code');
   next();
 });
 

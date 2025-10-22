@@ -1,6 +1,6 @@
 // models/globalparty.model.js
-import mongoose, { Schema, model } from "mongoose";
-import { BB0_GlobalPartyCounterModel } from "../../shm_svc/models/bb0.counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { BB0_GlobalPartyCounterModel } from '../../shm_svc/models/bb0.counter.model.js';
 
 const bb0_globalPartySchema = new Schema(
   {
@@ -17,27 +17,27 @@ const bb0_globalPartySchema = new Schema(
       required: true,
       enum: {
         values: [
-          "None",
-          "User",
-          "Customer",
-          "Vendor",
-          "Employee",
-          "Worker",
-          "Contractor",
-          "Company",
-          "ContactPerson",
-          "Individual",
-          "Organization",
-          "OperatingUnit",
-          "Item",
-          "Bank",
-          "Account",
+          'None',
+          'User',
+          'Customer',
+          'Vendor',
+          'Employee',
+          'Worker',
+          'Contractor',
+          'Company',
+          'ContactPerson',
+          'Individual',
+          'Organization',
+          'OperatingUnit',
+          'Item',
+          'Bank',
+          'Account',
           // need to think on site masters etc.
         ],
         message:
-          "{VALUE} is not a valid partyType. Use 'None','Customer','Vendor','Employee','Worker','Contractor','ContactPerson','Individual','Organization','OperatingUnit'.",
+          '{VALUE} is not a valid partyType. Use \'None\',\'Customer\',\'Vendor\',\'Employee\',\'Worker\',\'Contractor\',\'ContactPerson\',\'Individual\',\'Organization\',\'OperatingUnit\'.',
       },
-      default: ["None"], // can be an array with default
+      default: ['None'], // can be an array with default
     },
     // Additional fields common to all parties
     primaryContactNumber: {
@@ -67,18 +67,18 @@ const bb0_globalPartySchema = new Schema(
 );
 
 // For auto-generating a "Party" code if desired
-bb0_globalPartySchema.pre("save", async function (next) {
+bb0_globalPartySchema.pre('save', async function (next) {
   if (!this.isNew) return next();
   try {
     const counterDoc = await BB0_GlobalPartyCounterModel.findByIdAndUpdate(
-      { _id: "bb0_globalPartyCode" },
+      { _id: 'bb0_globalPartyCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
     if (!counterDoc || counterDoc.seq === undefined) {
-      throw new Error("Failed to generate global party code");
+      throw new Error('Failed to generate global party code');
     }
-    const seqNum = counterDoc.seq.toString().padStart(6, "0");
+    const seqNum = counterDoc.seq.toString().padStart(6, '0');
     this.code = `GP_${seqNum}`;
     next();
   } catch (err) {
@@ -88,4 +88,4 @@ bb0_globalPartySchema.pre("save", async function (next) {
 
 export const BB0_GlobalPartyModel =
   mongoose.models.BB0_GlobalParties ||
-  model("BB0_GlobalParties", bb0_globalPartySchema);
+  model('BB0_GlobalParties', bb0_globalPartySchema);

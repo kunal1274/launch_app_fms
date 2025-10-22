@@ -1,5 +1,5 @@
-import { Queue, Worker, QueueScheduler, JobsOptions } from "bullmq";
-import { queueRedis } from "./queueRedisClient";
+import { Queue, Worker, QueueScheduler, JobsOptions } from 'bullmq';
+import { queueRedis } from './queueRedisClient';
 
 /**
  * Helper that returns { queue, scheduler, addJob(data, opts) }
@@ -8,7 +8,7 @@ import { queueRedis } from "./queueRedisClient";
 export function createQueue(queueName, processor) {
   const q = new Queue(queueName, {
     connection: queueRedis,
-    prefix: "bb-queues",
+    prefix: 'bb-queues',
     defaultJobOptions: /** @type {JobsOptions} */ ({
       removeOnComplete: 1000,
       removeOnFail: 1000,
@@ -18,7 +18,7 @@ export function createQueue(queueName, processor) {
   // Dedicated scheduler (required for delayed / repeatable jobs)
   const qs = new QueueScheduler(queueName, {
     connection: redis,
-    prefix: "bb-queues",
+    prefix: 'bb-queues',
   });
 
   // Optional processor (you can attach many workers later)
@@ -26,13 +26,13 @@ export function createQueue(queueName, processor) {
   if (processor) {
     worker = new Worker(queueName, processor, {
       connection: redis,
-      prefix: "bb-queues",
+      prefix: 'bb-queues',
       concurrency: 5,
     });
-    worker.on("completed", (job) =>
+    worker.on('completed', (job) =>
       console.log(`✅  ${queueName} job ${job.id} done`)
     );
-    worker.on("failed", (job, err) =>
+    worker.on('failed', (job, err) =>
       console.error(`❌  ${queueName} job ${job?.id}`, err.message)
     );
   }

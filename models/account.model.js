@@ -1,14 +1,14 @@
 // models/account.model.js
 
-import mongoose, { Schema, model } from "mongoose";
-import { LedgerAccountCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { LedgerAccountCounterModel } from './counter.model.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub‐schema for nested accounts (if you want to embed children; optional)
 // ─────────────────────────────────────────────────────────────────────────────
 const accountNodeSchema = new Schema(
   {
-    _id: { type: Schema.Types.ObjectId, ref: "Accounts" },
+    _id: { type: Schema.Types.ObjectId, ref: 'Accounts' },
     accountCode: { type: String, required: true },
     accountName: { type: String, required: true },
     children: [
@@ -31,24 +31,24 @@ const accountSchema = new Schema(
     // auto generated
     globalPartyId: {
       type: Schema.Types.ObjectId,
-      ref: "GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      ref: 'GlobalParties', // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
       required: false,
       unique: true, //ensures only 1 Customer doc can point to the same globalParty
     },
     accountCode: {
       type: String,
-      required: [true, "Account code is required"],
+      required: [true, 'Account code is required'],
       trim: true,
       //unique: true,
       match: [
         /^[A-Za-z0-9\.\-]+$/,
-        "Account code may only contain letters, numbers, dots, dashes",
+        'Account code may only contain letters, numbers, dots, dashes',
       ],
       // e.g. "1.1000", or "2000-Expense-Office"
     },
     accountName: {
       type: String,
-      required: [true, "Account name is required"],
+      required: [true, 'Account name is required'],
       trim: true,
     },
 
@@ -56,18 +56,18 @@ const accountSchema = new Schema(
     //    Common types: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
     type: {
       type: String,
-      required: [true, "Account type is required"],
+      required: [true, 'Account type is required'],
       enum: {
-        values: ["ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE"],
+        values: ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'],
         message:
-          "`type` must be one of ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE",
+          '`type` must be one of ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE',
       },
     },
 
     // 3. Parent account reference (allow to build a tree or hierarchy)
     parentAccount: {
       type: Schema.Types.ObjectId,
-      ref: "Accounts",
+      ref: 'Accounts',
       default: null,
     },
 
@@ -75,9 +75,9 @@ const accountSchema = new Schema(
     //    (helps when building Trial Balance or checking balance sign)
     normalBalance: {
       type: String,
-      enum: ["DEBIT", "CREDIT"],
-      required: [true, "Normal balance side is required"],
-      default: "DEBIT",
+      enum: ['DEBIT', 'CREDIT'],
+      required: [true, 'Normal balance side is required'],
+      default: 'DEBIT',
     },
 
     // 5. Whether this account is a “leaf” sub-ledger (i.e. you can post to it),
@@ -102,28 +102,28 @@ const accountSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["INR", "USD", "EUR", "GBP"],
+        values: ['INR', 'USD', 'EUR', 'GBP'],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only\'INR\',\'USD\',\'EUR\',\'GBP\'.',
       },
-      default: "INR",
+      default: 'INR',
     },
     description: {
       type: String,
       trim: true,
-      default: "",
+      default: '',
     },
 
     // 8. Any other flags or “grouping code” if you need multiple COAs
     group: {
       type: String,
-      default: "",
+      default: '',
       trim: true,
       // e.g. "OPERATIONS", "FINANCE", "GLOBAL" (for multi-entity usage)
     },
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     isArchived: {
       type: Boolean,
@@ -149,10 +149,10 @@ const accountSchema = new Schema(
 accountSchema.index({ accountCode: 1 }, { unique: true });
 
 // Pre-save hook: if parentAccount is set, ensure parent exists
-accountSchema.pre("save", async function (next) {
+accountSchema.pre('save', async function (next) {
   if (this.parentAccount) {
     const parent = await mongoose
-      .model("Accounts")
+      .model('Accounts')
       .findById(this.parentAccount);
     if (!parent) {
       return next(
@@ -177,24 +177,24 @@ accountSchema.pre("save", async function (next) {
     // Increment counter within the transaction
     const dbResponseNewCounter =
       await LedgerAccountCounterModel.findOneAndUpdate(
-        { _id: "glAccCode" },
+        { _id: 'glAccCode' },
         { $inc: { seq: 1 } },
         { new: true, upsert: true }
         //{ new: true, upsert: true, session }
       );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate bank code");
+      throw new Error('❌ Failed to generate bank code');
     }
     // Generate customer code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(6, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(6, '0');
     this.sysCode = `LA_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during transaction:", error.stack);
+    console.error('❌ Error caught during transaction:', error.stack);
     // Decrement the counter in case of failure
     try {
       // const isCounterIncremented =
@@ -202,18 +202,18 @@ accountSchema.pre("save", async function (next) {
       //   !error.message.startsWith("❌ Duplicate contact number");
       //if (isCounterIncremented) {
       await LedgerAccountCounterModel.findByIdAndUpdate(
-        { _id: "glAccCode" },
+        { _id: 'glAccCode' },
         { $inc: { seq: -1 } }
       );
       // }
     } catch (decrementError) {
-      console.error("❌ Error during counter decrement:", decrementError.stack);
+      console.error('❌ Error during counter decrement:', decrementError.stack);
     }
     next(error);
   } finally {
-    console.log("ℹ️ Finally ledger Account counter closed");
+    console.log('ℹ️ Finally ledger Account counter closed');
   }
 });
 
 export const AccountModel =
-  mongoose.models.Accounts || model("Accounts", accountSchema);
+  mongoose.models.Accounts || model('Accounts', accountSchema);

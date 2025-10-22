@@ -10,7 +10,7 @@ export const applyDataScope = (resource) => {
   return (req, res, next) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "User is not authenticated." });
+        return res.status(401).json({ message: 'User is not authenticated.' });
       }
 
       const userRoles = req.user.userRoles || [];
@@ -52,7 +52,7 @@ export const applyDataScope = (resource) => {
       next();
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Error applying data scope." });
+      return res.status(500).json({ message: 'Error applying data scope.' });
     }
   };
 };

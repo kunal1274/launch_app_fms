@@ -1,89 +1,89 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config(); // Loads .env into process.env
 // import fs from "fs";
-import path from "path";
+import path from 'path';
 
-import createDebug from "debug";
+import createDebug from 'debug';
 // pick any namespace convention you like:
-export const dbgServer = createDebug("fms:server");
-export const dbgDB = createDebug("fms:db");
-export const dbgMW = createDebug("fms:mw");
-export const dbgSecurity = createDebug("fms:security");
-export const dbgRoutes = createDebug("fms:routes"); // initial
-export const dbgRoutesBB1 = createDebug("fms:routes-bb1");
-export const dbgRoutesBB2 = createDebug("fms:routes-bb2");
-export const dbgRoutesBB3 = createDebug("fms:routes-bb3");
-export const dbgEmail = createDebug("fms:email");
-export const dbgRedis = createDebug("fms:redis");
-export const dbgModels = createDebug("fms:models");
-export const dbgControllers = createDebug("fms:controllers");
-export const dbgException = createDebug("fms:exception");
+export const dbgServer = createDebug('fms:server');
+export const dbgDB = createDebug('fms:db');
+export const dbgMW = createDebug('fms:mw');
+export const dbgSecurity = createDebug('fms:security');
+export const dbgRoutes = createDebug('fms:routes'); // initial
+export const dbgRoutesBB1 = createDebug('fms:routes-bb1');
+export const dbgRoutesBB2 = createDebug('fms:routes-bb2');
+export const dbgRoutesBB3 = createDebug('fms:routes-bb3');
+export const dbgEmail = createDebug('fms:email');
+export const dbgRedis = createDebug('fms:redis');
+export const dbgModels = createDebug('fms:models');
+export const dbgControllers = createDebug('fms:controllers');
+export const dbgException = createDebug('fms:exception');
 
 // In-built Node JS Modules Import
-import expressAumMrigah from "express";
+import expressAumMrigah from 'express';
 
 // 3rd-Party Node JS Modules Import
-import cors from "cors"; // new2
-import morgan from "morgan";
-import helmet from "helmet";
-import xss from "xss-clean";
-import rateLimit from "express-rate-limit";
-import hpp from "hpp";
-import ExpressMongoSanitize from "express-mongo-sanitize";
-import session from "express-session";
-import passport from "passport";
+import cors from 'cors'; // new2
+import morgan from 'morgan';
+import helmet from 'helmet';
+import xss from 'xss-clean';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp';
+import ExpressMongoSanitize from 'express-mongo-sanitize';
+import session from 'express-session';
+import passport from 'passport';
 
 // Project FMS server related imports
-import connectToDb from "./database/mongoDb.js";
-import userGroupRouter from "./routes/userGroupRoutes.js";
-import userRouter from "./routes/userRoutes.js";
-import { companyRouter } from "./routes/company.routes.js";
-import { customerRouter } from "./routes/customer.routes.js";
-import { itemRouter } from "./routes/item.routes.js";
-import { salesOrderRouter } from "./routes/salesorder.routes.js";
-import { vendorRouter } from "./routes/vendor.routes.js";
-import { purchaseOrderRouter } from "./routes/purchaseorder.routes.js";
-import logger from "./utility/logger.util.js";
-import { requestTimer } from "./middleware/requestTimer.js";
-import googleAuthRouter from "./routes/google-auth.routes.js";
-import otpAuthRouter from "./routes/otp-auth.routes.js";
-import googleAlternativeApiAuthRouter from "./routes/api-auth.routes.js";
-import userGlobalRouter from "./routes/userGlobal.routes.js";
-import permissionRouter from "./role_based_access_control_service/routes/permission.routes.js";
-import userRoleRouter from "./role_based_access_control_service/routes/userRole.routes.js";
-import salesOrderRoutes from "./bb3_sales_management_service/routes/bb3SalesOrder.routes.js";
-import aiRoutes from "./chatgpt_ai_service/routes/ai.routes.js";
-import siteRoutes from "./bb1_inventory_management_service/routes/bb1.site.routes.js";
-import multer from "multer";
+import connectToDb from './database/mongoDb.js';
+import userGroupRouter from './routes/userGroupRoutes.js';
+import userRouter from './routes/userRoutes.js';
+import { companyRouter } from './routes/company.routes.js';
+import { customerRouter } from './routes/customer.routes.js';
+import { itemRouter } from './routes/item.routes.js';
+import { salesOrderRouter } from './routes/salesorder.routes.js';
+import { vendorRouter } from './routes/vendor.routes.js';
+import { purchaseOrderRouter } from './routes/purchaseorder.routes.js';
+import logger from './utility/logger.util.js';
+import { requestTimer } from './middleware/requestTimer.js';
+import googleAuthRouter from './routes/google-auth.routes.js';
+import otpAuthRouter from './routes/otp-auth.routes.js';
+import googleAlternativeApiAuthRouter from './routes/api-auth.routes.js';
+import userGlobalRouter from './routes/userGlobal.routes.js';
+import permissionRouter from './role_based_access_control_service/routes/permission.routes.js';
+import userRoleRouter from './role_based_access_control_service/routes/userRole.routes.js';
+import salesOrderRoutes from './bb3_sales_management_service/routes/bb3SalesOrder.routes.js';
+import aiRoutes from './chatgpt_ai_service/routes/ai.routes.js';
+import siteRoutes from './bb1_inventory_management_service/routes/bb1.site.routes.js';
+import multer from 'multer';
 // import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
 // import { uploadMulter } from "./middleware/uploadMulterConfig.js";
 // import { SalesOrderModel } from "./bb3_sales_management_service/models/bb3SalesOrder.model.js";
-import { fileRouter } from "./shared_service/routes/fileUploadViaMulter.routes.js";
-import { siteRouter } from "./routes/sites.routes.js";
+import { fileRouter } from './shared_service/routes/fileUploadViaMulter.routes.js';
+import { siteRouter } from './routes/sites.routes.js';
 // import printRoutes from "./routes/print.routes.js";
-import whRouter from "./routes/warehouse.routes.js";
-import zoneRouter from "./routes/zone.routes.js";
-import locationRouter from "./routes/location.routes.js";
-import rackRouter from "./routes/rack.routes.js";
-import shelfRouter from "./routes/shelf.routes.js";
-import binRouter from "./routes/bin.routes.js";
-import configRouter from "./routes/productDimConfig.routes.js";
-import colorRouter from "./routes/productDimColor.routes.js";
-import sizeRouter from "./routes/productDimSize.routes.js";
-import styleRouter from "./routes/productDimStyle.routes.js";
-import versionRouter from "./routes/productDimVersion.routes.js";
-import batchRouter from "./routes/trackingDimBatch.routes.js";
-import serialRouter from "./routes/trackingDimSerial.routes.js";
-import aisleRouter from "./routes/aisle.routes.js";
+import whRouter from './routes/warehouse.routes.js';
+import zoneRouter from './routes/zone.routes.js';
+import locationRouter from './routes/location.routes.js';
+import rackRouter from './routes/rack.routes.js';
+import shelfRouter from './routes/shelf.routes.js';
+import binRouter from './routes/bin.routes.js';
+import configRouter from './routes/productDimConfig.routes.js';
+import colorRouter from './routes/productDimColor.routes.js';
+import sizeRouter from './routes/productDimSize.routes.js';
+import styleRouter from './routes/productDimStyle.routes.js';
+import versionRouter from './routes/productDimVersion.routes.js';
+import batchRouter from './routes/trackingDimBatch.routes.js';
+import serialRouter from './routes/trackingDimSerial.routes.js';
+import aisleRouter from './routes/aisle.routes.js';
 
-import inventJournalRouter from "./routes/inventJournal.routes.js";
-import stockBalanceRouter from "./routes/inventStockBalance.routes.js";
-import ledgerAccountRouter from "./routes/account.routes.js";
-import { recordApiFlow } from "./middleware/recordApiFlow.js";
-import glJournalRouter from "./routes/glJournal.routes.js";
-import glJournalTemplateRouter from "./routes/journalTemplate.routes.js";
-import bankRouter from "./routes/bank.routes.js";
-import subledgerRouter from "./routes/subledgerTxn.routes.js";
+import inventJournalRouter from './routes/inventJournal.routes.js';
+import stockBalanceRouter from './routes/inventStockBalance.routes.js';
+import ledgerAccountRouter from './routes/account.routes.js';
+import { recordApiFlow } from './middleware/recordApiFlow.js';
+import glJournalRouter from './routes/glJournal.routes.js';
+import glJournalTemplateRouter from './routes/journalTemplate.routes.js';
+import bankRouter from './routes/bank.routes.js';
+import subledgerRouter from './routes/subledgerTxn.routes.js';
 
 // import redisClient from "./middleware/redisClient.js";
 
@@ -121,72 +121,72 @@ import subledgerRouter from "./routes/subledgerTxn.routes.js";
 const PORT = process.env.PORT || 3000;
 
 // console.log("This index.js file is working as expected");
-dbgServer("Index.js loaded, ENV port=%s", process.env.PORT);
+dbgServer('Index.js loaded, ENV port=%s', process.env.PORT);
 
 // // Middleware
 const AumMrigahApp = expressAumMrigah();
 
-if (process.env.NODE_ENV !== "test") AumMrigahApp.use(recordApiFlow); // Skip during tests
+if (process.env.NODE_ENV !== 'test') AumMrigahApp.use(recordApiFlow); // Skip during tests
 
 // AFTER your API prefix: serve the static files under the same /bb/api/v3/uploads path
-dbgRoutesBB3("Mounting static routs-BB3 router on /uploads");
+dbgRoutesBB3('Mounting static routs-BB3 router on /uploads');
 AumMrigahApp.use(
-  "/uploads",
-  expressAumMrigah.static(path.join(process.cwd(), "uploads"))
+  '/uploads',
+  expressAumMrigah.static(path.join(process.cwd(), 'uploads'))
 );
 
 AumMrigahApp.use(expressAumMrigah.json());
-dbgServer("json() enabled for secure headers");
+dbgServer('json() enabled for secure headers');
 
 AumMrigahApp.use(expressAumMrigah.urlencoded({ extended: true }));
-dbgServer("urlencoding enabled for secure headers");
+dbgServer('urlencoding enabled for secure headers');
 
 // // Express session middleware
 AumMrigahApp.use(
   session({
-    secret: process.env.SESSION_SECRET || "your_secret_key",
+    secret: process.env.SESSION_SECRET || 'your_secret_key',
     resave: false,
     saveUninitialized: false,
   })
 );
-dbgServer("session enabled for secure headers");
+dbgServer('session enabled for secure headers');
 
 // Initialize Passport and restore authentication state from session
 AumMrigahApp.use(passport.initialize());
-dbgServer("passport initialized ");
+dbgServer('passport initialized ');
 AumMrigahApp.use(passport.session());
-dbgServer("passport session initialized ");
+dbgServer('passport session initialized ');
 
 //// Security middleware
 AumMrigahApp.use(helmet()); // Secure HTTP headers
-dbgSecurity("Helmet enabled for secure headers");
+dbgSecurity('Helmet enabled for secure headers');
 AumMrigahApp.use(xss()); // Prevent XSS
-dbgSecurity("xss enabled for secure headers");
-AumMrigahApp.disable("x-powered-by"); // Hide the X-Powered-By header
-dbgSecurity("x-powered-by enabled for secure headers");
+dbgSecurity('xss enabled for secure headers');
+AumMrigahApp.disable('x-powered-by'); // Hide the X-Powered-By header
+dbgSecurity('x-powered-by enabled for secure headers');
 AumMrigahApp.use(ExpressMongoSanitize());
-dbgSecurity("Mongo Sanitize enabled for secure headers");
+dbgSecurity('Mongo Sanitize enabled for secure headers');
 AumMrigahApp.use(hpp());
-dbgSecurity("hpp enabled for secure headers");
+dbgSecurity('hpp enabled for secure headers');
 
 // Rate Limiter
 const limiter = rateLimit({
   windowMs: 30 * 60 * 1000,
   max: 100,
-  message: "Too many requests from this IP. Please try again later.",
+  message: 'Too many requests from this IP. Please try again later.',
 });
 //AumMrigahApp.use("/fms/api", limiter); // specific to router
 AumMrigahApp.use(limiter); // to everything
-dbgServer("limiter initialized ");
+dbgServer('limiter initialized ');
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",").map((ele) => {
-      return ele.trim();
-    })
+  ? process.env.ALLOWED_ORIGINS.split(',').map((ele) => {
+    return ele.trim();
+  })
   : [];
 
 // console.log("Allowed Origins", process.env.ALLOWED_ORIGINS);
-dbgServer("Allowed Origins: %O", allowedOrigins);
+dbgServer('Allowed Origins: %O', allowedOrigins);
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -194,18 +194,18 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true, // Allow cookies
 };
 
 AumMrigahApp.use(cors(corsOptions));
-dbgServer("cors control initialized ");
+dbgServer('cors control initialized ');
 
 AumMrigahApp.use(requestTimer); // 💥 log for all routes
-dbgMW("middleware requqest timer initialized ");
+dbgMW('middleware requqest timer initialized ');
 
 // we are using after the request processed through json and cors
 // Define a stream for morgan to use Winston
@@ -213,15 +213,15 @@ const stream = {
   write: (message) => logger.http(message.trim()),
 };
 
-AumMrigahApp.use(morgan("combined", { stream }));
-dbgServer("morgan logging initialized ");
+AumMrigahApp.use(morgan('combined', { stream }));
+dbgServer('morgan logging initialized ');
 
 // Serve everything under /uploads from the local uploads/ folder:
 // AumMrigahApp.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-dbgRoutes("Mounting default router on /");
-AumMrigahApp.get("/", (req, res) => {
+dbgRoutes('Mounting default router on /');
+AumMrigahApp.get('/', (req, res) => {
   res.send(`Hello from Express on Render at Port number ${PORT}!`);
 });
 
@@ -245,90 +245,90 @@ AumMrigahApp.get("/", (req, res) => {
 //   }
 // );
 // GL Accounting Modules
-dbgRoutes("Mounting userRouter router on /fms/api/v0/accounts");
-AumMrigahApp.use("/fms/api/v0/banks", bankRouter);
-AumMrigahApp.use("/fms/api/v0/accounts", ledgerAccountRouter);
-AumMrigahApp.use("/fms/api/v0/gl-journals", glJournalRouter);
-AumMrigahApp.use("/fms/api/v0/gl-journal-templates", glJournalTemplateRouter);
-AumMrigahApp.use("/fms/api/v0/subledgers", subledgerRouter);
+dbgRoutes('Mounting userRouter router on /fms/api/v0/accounts');
+AumMrigahApp.use('/fms/api/v0/banks', bankRouter);
+AumMrigahApp.use('/fms/api/v0/accounts', ledgerAccountRouter);
+AumMrigahApp.use('/fms/api/v0/gl-journals', glJournalRouter);
+AumMrigahApp.use('/fms/api/v0/gl-journal-templates', glJournalTemplateRouter);
+AumMrigahApp.use('/fms/api/v0/subledgers', subledgerRouter);
 
 // // Main Functional Modules
-dbgRoutes("Mounting userRouter router on /fms/api/v0/users");
-AumMrigahApp.use("/fms/api/v0/users", userRouter);
-dbgRoutes("Mounting userGroupRouter router on /fms/api/v0/userGroups");
-AumMrigahApp.use("/fms/api/v0/userGroups", userGroupRouter);
-dbgRoutes("Mounting customerRouter router on /fms/api/v0/customers");
-AumMrigahApp.use("/fms/api/v0/customers", customerRouter);
-dbgRoutes("Mounting vendorRouter router on /fms/api/v0/vendors");
-AumMrigahApp.use("/fms/api/v0/vendors", vendorRouter);
-dbgRoutes("Mounting itemRouter router on /fms/api/v0/items");
-AumMrigahApp.use("/fms/api/v0/items", itemRouter);
-dbgRoutes("Mounting companyRouter router on /fms/api/v0/companies");
-AumMrigahApp.use("/fms/api/v0/companies", companyRouter);
+dbgRoutes('Mounting userRouter router on /fms/api/v0/users');
+AumMrigahApp.use('/fms/api/v0/users', userRouter);
+dbgRoutes('Mounting userGroupRouter router on /fms/api/v0/userGroups');
+AumMrigahApp.use('/fms/api/v0/userGroups', userGroupRouter);
+dbgRoutes('Mounting customerRouter router on /fms/api/v0/customers');
+AumMrigahApp.use('/fms/api/v0/customers', customerRouter);
+dbgRoutes('Mounting vendorRouter router on /fms/api/v0/vendors');
+AumMrigahApp.use('/fms/api/v0/vendors', vendorRouter);
+dbgRoutes('Mounting itemRouter router on /fms/api/v0/items');
+AumMrigahApp.use('/fms/api/v0/items', itemRouter);
+dbgRoutes('Mounting companyRouter router on /fms/api/v0/companies');
+AumMrigahApp.use('/fms/api/v0/companies', companyRouter);
 
 // Sales and AR Module
-dbgRoutes("Mounting salesOrderRouter router on /fms/api/v0/salesorders");
-AumMrigahApp.use("/fms/api/v0/salesorders", salesOrderRouter);
+dbgRoutes('Mounting salesOrderRouter router on /fms/api/v0/salesorders');
+AumMrigahApp.use('/fms/api/v0/salesorders', salesOrderRouter);
 
 // Procurement Module and AP module
-dbgRoutes("Mounting purchaseOrderRouter router on /fms/api/v0/purchaseorders");
-AumMrigahApp.use("/fms/api/v0/purchaseorders", purchaseOrderRouter);
+dbgRoutes('Mounting purchaseOrderRouter router on /fms/api/v0/purchaseorders');
+AumMrigahApp.use('/fms/api/v0/purchaseorders', purchaseOrderRouter);
 
 // Inventory Management Module
 // --- Storage Dimensions -----//
-dbgRoutes("Mounting sites router on /fms/api/v0/sites");
-AumMrigahApp.use("/fms/api/v0/sites", siteRouter);
-dbgRoutes("Mounting warehouse router on /fms/api/v0/warehouses");
-AumMrigahApp.use("/fms/api/v0/warehouses", whRouter);
-dbgRoutes("Mounting zone router on /fms/api/v0/zones");
-AumMrigahApp.use("/fms/api/v0/zones", zoneRouter);
-dbgRoutes("Mounting location router on /fms/api/v0/locations");
-AumMrigahApp.use("/fms/api/v0/locations", locationRouter);
-dbgRoutes("Mounting rack router on /fms/api/v0/aisles");
-AumMrigahApp.use("/fms/api/v0/aisles", aisleRouter);
-dbgRoutes("Mounting rack router on /fms/api/v0/racks");
-AumMrigahApp.use("/fms/api/v0/racks", rackRouter);
-dbgRoutes("Mounting shelf router on /fms/api/v0/shelves");
-AumMrigahApp.use("/fms/api/v0/shelves", shelfRouter);
-dbgRoutes("Mounting bin router on /fms/api/v0/bins");
-AumMrigahApp.use("/fms/api/v0/bins", binRouter);
+dbgRoutes('Mounting sites router on /fms/api/v0/sites');
+AumMrigahApp.use('/fms/api/v0/sites', siteRouter);
+dbgRoutes('Mounting warehouse router on /fms/api/v0/warehouses');
+AumMrigahApp.use('/fms/api/v0/warehouses', whRouter);
+dbgRoutes('Mounting zone router on /fms/api/v0/zones');
+AumMrigahApp.use('/fms/api/v0/zones', zoneRouter);
+dbgRoutes('Mounting location router on /fms/api/v0/locations');
+AumMrigahApp.use('/fms/api/v0/locations', locationRouter);
+dbgRoutes('Mounting rack router on /fms/api/v0/aisles');
+AumMrigahApp.use('/fms/api/v0/aisles', aisleRouter);
+dbgRoutes('Mounting rack router on /fms/api/v0/racks');
+AumMrigahApp.use('/fms/api/v0/racks', rackRouter);
+dbgRoutes('Mounting shelf router on /fms/api/v0/shelves');
+AumMrigahApp.use('/fms/api/v0/shelves', shelfRouter);
+dbgRoutes('Mounting bin router on /fms/api/v0/bins');
+AumMrigahApp.use('/fms/api/v0/bins', binRouter);
 
 // --- Product Dimensions -----//
-dbgRoutes("Mounting sites router on /fms/api/v0/configurations");
-AumMrigahApp.use("/fms/api/v0/configurations", configRouter);
-dbgRoutes("Mounting color router on /fms/api/v0/colors");
-AumMrigahApp.use("/fms/api/v0/colors", colorRouter);
-dbgRoutes("Mounting size router on /fms/api/v0/sizes");
-AumMrigahApp.use("/fms/api/v0/sizes", sizeRouter);
-dbgRoutes("Mounting style router on /fms/api/v0/styles");
-AumMrigahApp.use("/fms/api/v0/styles", styleRouter);
-dbgRoutes("Mounting version router on /fms/api/v0/versions");
-AumMrigahApp.use("/fms/api/v0/versions", versionRouter);
+dbgRoutes('Mounting sites router on /fms/api/v0/configurations');
+AumMrigahApp.use('/fms/api/v0/configurations', configRouter);
+dbgRoutes('Mounting color router on /fms/api/v0/colors');
+AumMrigahApp.use('/fms/api/v0/colors', colorRouter);
+dbgRoutes('Mounting size router on /fms/api/v0/sizes');
+AumMrigahApp.use('/fms/api/v0/sizes', sizeRouter);
+dbgRoutes('Mounting style router on /fms/api/v0/styles');
+AumMrigahApp.use('/fms/api/v0/styles', styleRouter);
+dbgRoutes('Mounting version router on /fms/api/v0/versions');
+AumMrigahApp.use('/fms/api/v0/versions', versionRouter);
 
 // --- Tracking Dimensions -----//
-dbgRoutes("Mounting batch router on /fms/api/v0/batches");
-AumMrigahApp.use("/fms/api/v0/batches", batchRouter);
-dbgRoutes("Mounting serial router on /fms/api/v0/serials");
-AumMrigahApp.use("/fms/api/v0/serials", serialRouter);
+dbgRoutes('Mounting batch router on /fms/api/v0/batches');
+AumMrigahApp.use('/fms/api/v0/batches', batchRouter);
+dbgRoutes('Mounting serial router on /fms/api/v0/serials');
+AumMrigahApp.use('/fms/api/v0/serials', serialRouter);
 
 // --- Inventory Journals --- //
-dbgRoutes("Mounting inventory journal router on /fms/api/v0/invent-journals");
-AumMrigahApp.use("/fms/api/v0/invent-journals", inventJournalRouter);
+dbgRoutes('Mounting inventory journal router on /fms/api/v0/invent-journals');
+AumMrigahApp.use('/fms/api/v0/invent-journals', inventJournalRouter);
 
-dbgRoutes("Mounting stock-balances router on /fms/api/v0/stock-balances");
-AumMrigahApp.use("/fms/api/v0/stock-balances", stockBalanceRouter);
+dbgRoutes('Mounting stock-balances router on /fms/api/v0/stock-balances');
+AumMrigahApp.use('/fms/api/v0/stock-balances', stockBalanceRouter);
 
 // Sales Management Service -bb3
 dbgRoutesBB3(
-  "Mounting sale order Routes-BB3 router on /bb/api/v3/sales-orders"
+  'Mounting sale order Routes-BB3 router on /bb/api/v3/sales-orders'
 );
-AumMrigahApp.use("/fms/api/v0/sales-orders", salesOrderRoutes);
+AumMrigahApp.use('/fms/api/v0/sales-orders', salesOrderRoutes);
 // AumMrigahApp.use("/fms/api/v0/sales-orders", printRoutes);
 
 // dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
 // AumMrigahApp.use("/bb/api/v3/upload", genericUploadRouter);
 
-AumMrigahApp.use("/fms/api/v0/sales-orders", fileRouter);
+AumMrigahApp.use('/fms/api/v0/sales-orders', fileRouter);
 // 7a) Upload endpoint
 // AumMrigahApp.post(
 //   "/api/v0/sales-orders/:id/files-upload",
@@ -418,28 +418,28 @@ AumMrigahApp.use("/fms/api/v0/sales-orders", fileRouter);
 // );
 
 // // Inventory Management Service -bb1
-dbgRoutesBB1("Mounting siteRoutes-BB1 router on /bb/api/v1/sites");
-AumMrigahApp.use("/bb/api/v1/sites", siteRoutes);
+dbgRoutesBB1('Mounting siteRoutes-BB1 router on /bb/api/v1/sites');
+AumMrigahApp.use('/bb/api/v1/sites', siteRoutes);
 
 // // Chatgpt ai service - bb3
-dbgRoutesBB3("Mounting aiRoutes-BB3 router on /bb/api/v3/ai");
-AumMrigahApp.use("/bb/api/v3/ai", aiRoutes);
+dbgRoutesBB3('Mounting aiRoutes-BB3 router on /bb/api/v3/ai');
+AumMrigahApp.use('/bb/api/v3/ai', aiRoutes);
 
 //Authentication
 dbgRoutes(
-  "Mounting Google Authentication routers router on /auth and /api/auth and /fms/api/v0/otp-auth"
+  'Mounting Google Authentication routers router on /auth and /api/auth and /fms/api/v0/otp-auth'
 );
-AumMrigahApp.use("/auth", googleAuthRouter);
-AumMrigahApp.use("/api/auth", googleAlternativeApiAuthRouter);
-AumMrigahApp.use("/fms/api/v0/otp-auth", otpAuthRouter);
+AumMrigahApp.use('/auth', googleAuthRouter);
+AumMrigahApp.use('/api/auth', googleAlternativeApiAuthRouter);
+AumMrigahApp.use('/fms/api/v0/otp-auth', otpAuthRouter);
 
 // Authorization
 dbgRoutes(
-  "Mounting Authorization router on /fms/api/v0/user-globals or permissions or user-roles"
+  'Mounting Authorization router on /fms/api/v0/user-globals or permissions or user-roles'
 );
-AumMrigahApp.use("/fms/api/v0/user-globals", userGlobalRouter);
-AumMrigahApp.use("/fms/api/v0/permissions", permissionRouter);
-AumMrigahApp.use("/fms/api/v0/user-roles", userRoleRouter);
+AumMrigahApp.use('/fms/api/v0/user-globals', userGlobalRouter);
+AumMrigahApp.use('/fms/api/v0/permissions', permissionRouter);
+AumMrigahApp.use('/fms/api/v0/user-roles', userRoleRouter);
 
 // bull batch jobs helper ..
 /* ─────────────────────────────────────────────────────────
@@ -457,8 +457,8 @@ AumMrigahApp.use("/fms/api/v0/user-roles", userRoleRouter);
 // });
 
 /// environment check
-dbgRoutes("Mounting env router on /env");
-AumMrigahApp.get("/env", (req, res) => {
+dbgRoutes('Mounting env router on /env');
+AumMrigahApp.get('/env', (req, res) => {
   res.json({ allowedOrigins });
 });
 
@@ -466,53 +466,53 @@ AumMrigahApp.get("/env", (req, res) => {
 AumMrigahApp.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     let message = err.message;
-    if (err.code === "LIMIT_FILE_SIZE") {
-      message = "File too large (max 30 MB).";
-    } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
-      message = "Unexpected field: " + err.field;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'File too large (max 30 MB).';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = 'Unexpected field: ' + err.field;
     }
     return res
       .status(400)
-      .json({ status: "failure in multer uploading index.js", message });
+      .json({ status: 'failure in multer uploading index.js', message });
   }
   // non‐Multer errors:
   next(err);
 });
 
 //Global error handler (optional but recommended)
-dbgRoutes("Mounting global error handler on ");
+dbgRoutes('Mounting global error handler on ');
 AumMrigahApp.use((err, req, res, next) => {
-  logger.error("Global Error Handler", { error: err });
+  logger.error('Global Error Handler', { error: err });
   res.status(500).send({
-    status: "failure",
-    message: "An unexpected error occurred from the Backend for launch-app-fms",
+    status: 'failure',
+    message: 'An unexpected error occurred from the Backend for launch-app-fms',
   });
 });
 
 // final route
-dbgRoutes("Mounting final route  on /* not found rout");
+dbgRoutes('Mounting final route  on /* not found rout');
 AumMrigahApp.use((req, res) => {
   res
     .status(400)
     .send(
-      `This is final and invalid path coming from node js backend launch-app-fms`
+      'This is final and invalid path coming from node js backend launch-app-fms'
     );
 });
 
 const startServer = async () => {
   try {
-    dbgDB("🔹Connecting to MongoDB at", process.env.ATLAS_URI);
+    dbgDB('🔹Connecting to MongoDB at', process.env.ATLAS_URI);
     await connectToDb();
-    dbgDB("✅ MongoDB connection established");
+    dbgDB('✅ MongoDB connection established');
     AumMrigahApp.listen(PORT, () => {
       console.log(
         `The Node Launch FMS backend server 1.0.0 has been now running at ${PORT} with the cloud Mongo db`
       );
-      dbgServer("🚀 Server listening on port ", PORT);
+      dbgServer('🚀 Server listening on port ', PORT);
     });
   } catch (error) {
     console.error(`Server is unable to start due to some error : ${error}`);
-    dbgDB("❌ DB connection failed: ", error);
+    dbgDB('❌ DB connection failed: ', error);
     process.exit(1);
   }
 };
@@ -558,11 +558,11 @@ startServer();
 // });
 
 // 1) Print raw uncaught exceptions to console immediately
-process.on("uncaughtException", (err) => {
-  console.error("💥 Uncaught Exception:", err.stack || err);
+process.on('uncaughtException', (err) => {
+  console.error('💥 Uncaught Exception:', err.stack || err);
   // Also log via your logger if you still want, but include stack manually:
-  if (typeof logger !== "undefined") {
-    logger.error("💥 Uncaught Exception", {
+  if (typeof logger !== 'undefined') {
+    logger.error('💥 Uncaught Exception', {
       message: err.message,
       stack: err.stack,
     });
@@ -571,15 +571,15 @@ process.on("uncaughtException", (err) => {
 });
 
 // 2) Print raw unhandled rejections
-process.on("unhandledRejection", (reason, promise) => {
+process.on('unhandledRejection', (reason, promise) => {
   console.error(
-    "⚠️ Unhandled Rejection at:",
+    '⚠️ Unhandled Rejection at:',
     promise,
-    "\nReason:",
+    '\nReason:',
     reason.stack || reason
   );
-  if (typeof logger !== "undefined") {
-    logger.error("⚠️ Unhandled Rejection", {
+  if (typeof logger !== 'undefined') {
+    logger.error('⚠️ Unhandled Rejection', {
       message: reason?.message || reason,
       stack: reason?.stack,
     });

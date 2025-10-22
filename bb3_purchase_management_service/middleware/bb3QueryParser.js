@@ -14,21 +14,21 @@ export default function queryParser(req, res, next) {
     archived,
     page = 1,
     limit = 20,
-    sort = "createdAt:desc",
+    sort = 'createdAt:desc',
   } = req.query;
 
   // --- FILTER ---
   const filter = {};
-  if (status && status !== "ALL") filter.status = status;
-  if (archived !== undefined) filter.archived = archived === "true";
+  if (status && status !== 'ALL') filter.status = status;
+  if (archived !== undefined) filter.archived = archived === 'true';
 
   // text search across a few string fields
   if (search) {
-    const regex = new RegExp(search, "i");
+    const regex = new RegExp(search, 'i');
     filter.$or = [
       { orderNum: regex },
-      { "customer.name": regex },
-      { "customer.code": regex },
+      { 'customer.name': regex },
+      { 'customer.code': regex },
     ];
   }
 
@@ -37,9 +37,9 @@ export default function queryParser(req, res, next) {
     page: Math.max(1, +page),
     limit: Math.min(100, +limit),
     sort: Object.fromEntries(
-      sort.split(",").map((pair) => {
-        const [k, dir] = pair.split(":");
-        return [k.trim(), dir === "asc" ? 1 : -1];
+      sort.split(',').map((pair) => {
+        const [k, dir] = pair.split(':');
+        return [k.trim(), dir === 'asc' ? 1 : -1];
       })
     ),
   };

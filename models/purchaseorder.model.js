@@ -1,64 +1,64 @@
-import mongoose, { Schema, model } from "mongoose";
-import { PurchaseOrderCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { PurchaseOrderCounterModel } from './counter.model.js';
 
 // Define allowed status transitions
 const STATUS_TRANSITIONS1 = {
-  Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
-  Confirmed: ["Shipped", "Cancelled", "AdminMode", "AnyMode"],
-  Shipped: ["Delivered", "Cancelled", "AdminMode", "AnyMode"],
-  Delivered: ["Invoiced", "AdminMode", "AnyMode"],
-  Invoiced: ["AdminMode", "AnyMode"],
-  Cancelled: ["AdminMode", "AnyMode"],
-  AdminMode: ["Draft", "AnyMode"],
+  Draft: ['Confirmed', 'Cancelled', 'AdminMode', 'AnyMode'],
+  Confirmed: ['Shipped', 'Cancelled', 'AdminMode', 'AnyMode'],
+  Shipped: ['Delivered', 'Cancelled', 'AdminMode', 'AnyMode'],
+  Delivered: ['Invoiced', 'AdminMode', 'AnyMode'],
+  Invoiced: ['AdminMode', 'AnyMode'],
+  Cancelled: ['AdminMode', 'AnyMode'],
+  AdminMode: ['Draft', 'AnyMode'],
   AnyMode: [
-    "Draft",
-    "Confirmed",
-    "Shipped",
-    "Delivered",
-    "Invoiced",
-    "Cancelled",
-    "AdminMode",
+    'Draft',
+    'Confirmed',
+    'Shipped',
+    'Delivered',
+    'Invoiced',
+    'Cancelled',
+    'AdminMode',
   ],
 };
 
 export const STATUS_TRANSITIONS = {
-  Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
+  Draft: ['Confirmed', 'Cancelled', 'AdminMode', 'AnyMode'],
   Confirmed: [
-    "Draft",
-    "Confirmed",
-    "Cancelled",
-    "Invoiced",
-    "AdminMode",
-    "AnyMode",
+    'Draft',
+    'Confirmed',
+    'Cancelled',
+    'Invoiced',
+    'AdminMode',
+    'AnyMode',
   ],
-  Invoiced: ["AdminMode", "AnyMode"],
-  Cancelled: ["AdminMode", "AnyMode"],
-  AdminMode: ["Draft", "AnyMode"],
-  AnyMode: ["Draft", "Confirmed", "Invoiced", "Cancelled", "AdminMode"],
+  Invoiced: ['AdminMode', 'AnyMode'],
+  Cancelled: ['AdminMode', 'AnyMode'],
+  AdminMode: ['Draft', 'AnyMode'],
+  AnyMode: ['Draft', 'Confirmed', 'Invoiced', 'Cancelled', 'AdminMode'],
 };
 
 // Suppose you have a function getDaysFromPaymentTerm that returns the day offset:
 function getDaysFromPaymentTerm(paymentTerm) {
   switch (paymentTerm) {
-    case "Net7D":
-      return 7;
-    case "Net15D":
-      return 15;
-    case "Net30D":
-      return 30;
-    case "Net45D":
-      return 45;
-    case "Net60D":
-      return 60;
-    case "Net90D":
-      return 90;
-    case "COD":
-      return 0;
-    case "Advance":
-      // Possibly 0 or handle differently if “advance” is a special case
-      return 0;
-    default:
-      return 0;
+  case 'Net7D':
+    return 7;
+  case 'Net15D':
+    return 15;
+  case 'Net30D':
+    return 30;
+  case 'Net45D':
+    return 45;
+  case 'Net60D':
+    return 60;
+  case 'Net90D':
+    return 90;
+  case 'COD':
+    return 0;
+  case 'Advance':
+    // Possibly 0 or handle differently if “advance” is a special case
+    return 0;
+  default:
+    return 0;
   }
 }
 
@@ -74,17 +74,17 @@ const purchaseOrderSchema1C1I = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Purchase", "Return"],
+        values: ['Purchase', 'Return'],
         message:
-          "⚠️ {VALUE} is not a valid order type. Use case-sensitive value among these only 'Purchase','Return'.",
+          '⚠️ {VALUE} is not a valid order type. Use case-sensitive value among these only \'Purchase\',\'Return\'.',
       },
-      default: "Purchase",
+      default: 'Purchase',
     },
     invoiceNum: {
       type: String,
       required: false,
       //unique: true,
-      default: "NA",
+      default: 'NA',
     },
     // ***** NEW FIELDS ADDED *****
     invoiceDate: {
@@ -99,72 +99,72 @@ const purchaseOrderSchema1C1I = new Schema(
     // ******************************
     vendor: {
       type: Schema.Types.ObjectId,
-      ref: "Vendors", // Reference to the Vendor model
+      ref: 'Vendors', // Reference to the Vendor model
       required: true,
     },
     item: {
       type: Schema.Types.ObjectId,
-      ref: "Items", // Reference to the Item model
+      ref: 'Items', // Reference to the Item model
       required: true,
     },
-    site: { type: Schema.Types.ObjectId, ref: "Sites", required: false },
+    site: { type: Schema.Types.ObjectId, ref: 'Sites', required: false },
     warehouse: {
       type: Schema.Types.ObjectId,
-      ref: "Warehouses",
+      ref: 'Warehouses',
       required: false,
     },
     // … include zone, location, aisle, rack, shelf, bin, config, color, size, style, version, batch, serial …
     zone: {
       type: Schema.Types.ObjectId,
-      ref: "Zones", // from zone.model.js
+      ref: 'Zones', // from zone.model.js
     },
     location: {
       type: Schema.Types.ObjectId,
-      ref: "Locations", // from location.model.js
+      ref: 'Locations', // from location.model.js
     },
     aisle: {
       type: Schema.Types.ObjectId,
-      ref: "Aisles", // from aisle.model.js
+      ref: 'Aisles', // from aisle.model.js
     },
     rack: {
       type: Schema.Types.ObjectId,
-      ref: "Racks", // from rack.model.js
+      ref: 'Racks', // from rack.model.js
     },
     shelf: {
       type: Schema.Types.ObjectId,
-      ref: "Shelves", // from shelf.model.js
+      ref: 'Shelves', // from shelf.model.js
     },
     bin: {
       type: Schema.Types.ObjectId,
-      ref: "Bins", // from bin.model.js
+      ref: 'Bins', // from bin.model.js
     },
     config: {
       type: Schema.Types.ObjectId,
-      ref: "Configurations", // from config.model.js
+      ref: 'Configurations', // from config.model.js
     },
     color: {
       type: Schema.Types.ObjectId,
-      ref: "Colors", // from color.model.js
+      ref: 'Colors', // from color.model.js
     },
     size: {
       type: Schema.Types.ObjectId,
-      ref: "Sizes", // from size.model.js
+      ref: 'Sizes', // from size.model.js
     },
     style: {
       type: Schema.Types.ObjectId,
-      ref: "Styles", // from style.model.js
+      ref: 'Styles', // from style.model.js
     },
     version: {
       type: Schema.Types.ObjectId,
-      ref: "Versions", // from version.model.js
+      ref: 'Versions', // from version.model.js
     },
     batch: {
       type: Schema.Types.ObjectId,
-      ref: "Batches", // from batch.model.js
+      ref: 'Batches', // from batch.model.js
     },
     serial: {
       type: Schema.Types.ObjectId,
-      ref: "Serials", // from serial.model.js
+      ref: 'Serials', // from serial.model.js
     },
     purchaseAddress: {
       type: String, // Adjust the type if address is more complex
@@ -202,11 +202,11 @@ const purchaseOrderSchema1C1I = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["INR", "USD", "EUR", "GBP"],
+        values: ['INR', 'USD', 'EUR', 'GBP'],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only\'INR\',\'USD\',\'EUR\',\'GBP\'.',
       },
-      default: "INR",
+      default: 'INR',
     },
 
     charges: {
@@ -221,8 +221,8 @@ const purchaseOrderSchema1C1I = new Schema(
       type: Number,
       required: true,
       default: 0.0,
-      min: [0, "⚠️ Discount cannot be negative"],
-      max: [100, "⚠️ Discount cannot exceed 100%"],
+      min: [0, '⚠️ Discount cannot be negative'],
+      max: [100, '⚠️ Discount cannot exceed 100%'],
       set: function (v) {
         return Math.round(v * 100) / 100;
       },
@@ -231,8 +231,8 @@ const purchaseOrderSchema1C1I = new Schema(
       type: Number,
       required: true,
       default: 0.0,
-      min: [0, "⚠️ Tax cannot be negative"],
-      max: [100, "⚠️ Tax cannot exceed 100%"],
+      min: [0, '⚠️ Tax cannot be negative'],
+      max: [100, '⚠️ Tax cannot exceed 100%'],
       set: function (v) {
         return Math.round(v * 100) / 100;
       },
@@ -241,8 +241,8 @@ const purchaseOrderSchema1C1I = new Schema(
       type: Number,
       required: true,
       default: 0.0,
-      min: [0, "⚠️ Withholding Tax cannot be negative"],
-      max: [100, "⚠️ Withholding Tax cannot exceed 100%"],
+      min: [0, '⚠️ Withholding Tax cannot be negative'],
+      max: [100, '⚠️ Withholding Tax cannot exceed 100%'],
       set: function (v) {
         return Math.round(v * 100) / 100;
       },
@@ -297,19 +297,19 @@ const purchaseOrderSchema1C1I = new Schema(
       required: true,
       enum: {
         values: [
-          "COD",
-          "Net30D",
-          "Net7D",
-          "Net15D",
-          "Net45D",
-          "Net60D",
-          "Net90D",
-          "Advance",
+          'COD',
+          'Net30D',
+          'Net7D',
+          'Net15D',
+          'Net45D',
+          'Net60D',
+          'Net90D',
+          'Advance',
         ],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.',
       },
-      default: "Net30D",
+      default: 'Net30D',
       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
     },
 
@@ -515,17 +515,17 @@ const purchaseOrderSchema1C1I = new Schema(
           required: false,
           enum: {
             values: [
-              "Cash",
-              "CreditCard",
-              "DebitCard",
-              "Online",
-              "UPI",
-              "Crypto",
-              "Barter",
+              'Cash',
+              'CreditCard',
+              'DebitCard',
+              'Online',
+              'UPI',
+              'Crypto',
+              'Barter',
             ],
-            message: "⚠️ {VALUE} is not a supported payment mode.",
+            message: '⚠️ {VALUE} is not a supported payment mode.',
           },
-          default: "Cash",
+          default: 'Cash',
         },
       },
     ],
@@ -547,52 +547,52 @@ const purchaseOrderSchema1C1I = new Schema(
       required: true,
       enum: {
         values: [
-          "Draft",
-          "Approved",
-          "Confirmed",
-          "Shipped", // Outbound Transit
-          "Delivered",
-          "Invoiced",
-          "Cancelled",
-          "AdminMode",
-          "AnyMode",
+          'Draft',
+          'Approved',
+          'Confirmed',
+          'Shipped', // Outbound Transit
+          'Delivered',
+          'Invoiced',
+          'Cancelled',
+          'AdminMode',
+          'AnyMode',
         ],
         message:
-          "⚠️ {VALUE} is not a valid status . Use among these only'Draft','Cancelled','Confirmed','Shipped'.'Delivered','Invoiced','AdminMode','AnyMode'.",
+          '⚠️ {VALUE} is not a valid status . Use among these only\'Draft\',\'Cancelled\',\'Confirmed\',\'Shipped\'.\'Delivered\',\'Invoiced\',\'AdminMode\',\'AnyMode\'.',
       },
-      default: "Draft",
+      default: 'Draft',
     },
     settlementStatus: {
       type: String,
       required: true,
       enum: {
         values: [
-          "PAYMENT_PENDING", // no advance and payment yet to be initiated
-          "PAYMENT_PARTIAL", // not considering the exisitng advance or advance is zero
-          "PAYMENT_FULL", // payment plus exisitng advance matches the net AR
-          "PAYMENT_FAILED", // payment failed
-          "PAYMENT_FULL_CARRY_FORWARD_ADVANCE", // payment current plus existing advance exceeds the net AR
+          'PAYMENT_PENDING', // no advance and payment yet to be initiated
+          'PAYMENT_PARTIAL', // not considering the exisitng advance or advance is zero
+          'PAYMENT_FULL', // payment plus exisitng advance matches the net AR
+          'PAYMENT_FAILED', // payment failed
+          'PAYMENT_FULL_CARRY_FORWARD_ADVANCE', // payment current plus existing advance exceeds the net AR
         ],
         message:
-          "⚠️ {VALUE} is not a valid status .Use  Case-sensitive among these only'PAYMENT_PENDING','PAYMENT_PARTIAL','PAYMENT_FULL','PAYMENT_FAILED'.",
+          '⚠️ {VALUE} is not a valid status .Use  Case-sensitive among these only\'PAYMENT_PENDING\',\'PAYMENT_PARTIAL\',\'PAYMENT_FULL\',\'PAYMENT_FAILED\'.',
       },
-      default: "PAYMENT_PENDING",
+      default: 'PAYMENT_PENDING',
     },
     archived: { type: Boolean, default: false }, // New field
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     createdBy: {
       type: String,
       required: true,
-      default: "SystemPOCreation",
+      default: 'SystemPOCreation',
     },
     updatedBy: {
       type: String,
@@ -641,22 +641,22 @@ const purchaseOrderSchema1C1I = new Schema(
 );
 
 // Virtual to calculate the total paid from the paidAmt array
-purchaseOrderSchema1C1I.virtual("totalPaid").get(function () {
+purchaseOrderSchema1C1I.virtual('totalPaid').get(function () {
   return this.paidAmt && this.paidAmt.length
     ? Math.round(
-        this.paidAmt.reduce((sum, payment) => sum + payment.amount, 0) * 100
-      ) / 100
+      this.paidAmt.reduce((sum, payment) => sum + payment.amount, 0) * 100
+    ) / 100
     : 0;
 });
 
 // Virtual to calculate the total paid from the paidAmt array
-purchaseOrderSchema1C1I.virtual("combinedPaid").get(function () {
+purchaseOrderSchema1C1I.virtual('combinedPaid').get(function () {
   return (this.paidAmt && this.paidAmt.length) || this.advance
     ? Math.round(
-        (this.advance +
+      (this.advance +
           this.paidAmt.reduce((sum, payment) => sum + payment.amount, 0)) *
           100
-      ) / 100
+    ) / 100
     : 0;
 });
 
@@ -665,22 +665,22 @@ purchaseOrderSchema1C1I.methods.updateSettlementStatus = function () {
   const totalPaid = this.totalPaid;
   const combined = this.advance + totalPaid;
   if (combined === this.netAR) {
-    this.settlementStatus = "PAYMENT_FULL";
+    this.settlementStatus = 'PAYMENT_FULL';
     this.carryForwardAdvance = 0;
   } else if (combined > this.netAR) {
-    this.settlementStatus = "PAYMENT_FULL_CARRY_FORWARD_ADVANCE";
+    this.settlementStatus = 'PAYMENT_FULL_CARRY_FORWARD_ADVANCE';
     this.carryForwardAdvance = Math.round((combined - this.netAR) * 100) / 100;
   } else if (combined > 0) {
-    this.settlementStatus = "PAYMENT_PARTIAL";
+    this.settlementStatus = 'PAYMENT_PARTIAL';
     this.carryForwardAdvance = 0;
   } else {
-    this.settlementStatus = "PAYMENT_PENDING";
+    this.settlementStatus = 'PAYMENT_PENDING';
     this.carryForwardAdvance = 0;
   }
 };
 
 // Pre-save hook to generate order number
-purchaseOrderSchema1C1I.pre("save", async function (next) {
+purchaseOrderSchema1C1I.pre('save', async function (next) {
   const doc = this;
 
   if (!doc.isNew) {
@@ -692,9 +692,9 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
     if (!doc.purchaseAddress || !doc.currency) {
       // Fetch the vendor document to get the address and currency
       const vendor = await mongoose
-        .model("Vendors")
+        .model('Vendors')
         .findById(doc.vendor)
-        .select("address currency");
+        .select('address currency');
 
       if (!vendor) {
         throw new Error(`❌ Vendor with ID ${doc.vendor} not found.`);
@@ -775,18 +775,18 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
     await doc.validate();
 
     const dbResponse = await PurchaseOrderCounterModel.findByIdAndUpdate(
-      { _id: "purchaseOrderCode" },
+      { _id: 'purchaseOrderCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
 
-    console.log("ℹ️ Counter increment result", dbResponse);
+    console.log('ℹ️ Counter increment result', dbResponse);
 
     if (!dbResponse || dbResponse.seq === undefined) {
-      throw new Error("❌ Failed to generate purchase order number");
+      throw new Error('❌ Failed to generate purchase order number');
     }
 
-    const seqNumber = dbResponse.seq.toString().padStart(6, "0");
+    const seqNumber = dbResponse.seq.toString().padStart(6, '0');
     doc.orderNum = `PO_${seqNumber}`;
 
     // ================================
@@ -818,7 +818,7 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
     // }
 
     // paidAmt
-    if (doc.isModified("paidAmt") && doc.paidAmt) {
+    if (doc.isModified('paidAmt') && doc.paidAmt) {
       for (const paym of doc.paidAmt) {
         if (!paym.paymentId) {
           paym.paymentId = await generatePaymentId();
@@ -841,7 +841,7 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
 
     next();
   } catch (error) {
-    console.log("❌ Error caught during PO presave", error.stack);
+    console.log('❌ Error caught during PO presave', error.stack);
     next(error);
   }
 });
@@ -850,21 +850,21 @@ purchaseOrderSchema1C1I.pre("save", async function (next) {
 
 purchaseOrderSchema1C1I.pre(/^find/, function (next) {
   this.populate(
-    "vendor",
-    "code name contactNum address currency registrationNum panNum active"
-  ).populate("item", "code name price type unit");
+    'vendor',
+    'code name contactNum address currency registrationNum panNum active'
+  ).populate('item', 'code name price type unit');
   next();
 });
 
 // Calculate Line Amount Automatically
-purchaseOrderSchema1C1I.pre("validate", function (next) {
+purchaseOrderSchema1C1I.pre('validate', function (next) {
   const initialAmt = this.quantity * this.price;
   const discountAmt = Math.round(this.discount * initialAmt) / 100;
   this.lineAmt = this.quantity * this.price - discountAmt + this.charges;
   next();
 });
 
-purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
+purchaseOrderSchema1C1I.pre('findOneAndUpdate', async function (next) {
   const update = this.getUpdate();
 
   // Extract newStatus from either update.status or update.$set.status
@@ -874,7 +874,7 @@ purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
     // Validate existence of the vendor
     if (update.vendor) {
       const vendorExists = await mongoose
-        .model("Vendors")
+        .model('Vendors')
         .findById(update.vendor);
       if (!vendorExists) {
         throw new Error(`❌ Vendor with ID ${update.vendor} does not exist.`);
@@ -883,7 +883,7 @@ purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
 
     // Validate existence of the item
     if (update.item) {
-      const itemExists = await mongoose.model("Items").findById(update.item);
+      const itemExists = await mongoose.model('Items').findById(update.item);
       if (!itemExists) {
         throw new Error(`❌ Item with ID ${update.item} does not exist.`);
       }
@@ -954,31 +954,31 @@ purchaseOrderSchema1C1I.pre("findOneAndUpdate", async function (next) {
 
     // Handle status reversion to Draft on modifications
     const fieldsBeingUpdated = [
-      "orderType",
-      "vendor",
-      "item",
-      "purchaseAddress",
-      "advance",
-      "quantity",
-      "price",
-      "currency",
-      "discount",
-      "charges",
-      "tax",
-      "withholdingTax",
-      "settlementStatus",
-      "archived",
-      "createdBy",
-      "updatedBy",
-      "active",
-      "files",
+      'orderType',
+      'vendor',
+      'item',
+      'purchaseAddress',
+      'advance',
+      'quantity',
+      'price',
+      'currency',
+      'discount',
+      'charges',
+      'tax',
+      'withholdingTax',
+      'settlementStatus',
+      'archived',
+      'createdBy',
+      'updatedBy',
+      'active',
+      'files',
     ];
 
     const isModifying = fieldsBeingUpdated.some((field) => field in update);
 
     if (isModifying) {
       // Set status back to Draft
-      update.status = "Draft";
+      update.status = 'Draft';
     }
 
     // -------------- NEW LOGIC --------------
@@ -1103,4 +1103,4 @@ purchaseOrderSchema1C1I.index({ orderNum: 1, vendor: 1, item: 1 });
 
 export const PurchaseOrderModel =
   mongoose.models.PurchaseOrders ||
-  model("PurchaseOrders", purchaseOrderSchema1C1I);
+  model('PurchaseOrders', purchaseOrderSchema1C1I);

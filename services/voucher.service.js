@@ -1,21 +1,21 @@
 // services/voucher.service.js
 
-import { VoucherModel } from "../models/voucher.model.js";
-import { FinancialVoucherCounterModel } from "../models/counter.model.js";
-import { SubledgerTransactionModel } from "../models/subledgerTxn.model.js";
+import { VoucherModel } from '../models/voucher.model.js';
+import { FinancialVoucherCounterModel } from '../models/counter.model.js';
+import { SubledgerTransactionModel } from '../models/subledgerTxn.model.js';
 
 class VoucherService {
   static async getNextVoucherNo() {
     const ctr = await FinancialVoucherCounterModel.findByIdAndUpdate(
-      { _id: "voucherCode" },
+      { _id: 'voucherCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
 
     if (!ctr || ctr.seq === undefined) {
-      throw new Error("❌ Failed to generate financial voucher number");
+      throw new Error('❌ Failed to generate financial voucher number');
     }
-    return `FVCHR_${ctr.seq.toString().padStart(6, "0")}`;
+    return `FVCHR_${ctr.seq.toString().padStart(6, '0')}`;
   }
 
   /**
@@ -40,7 +40,7 @@ class VoucherService {
       const gross = tx.qty * tx.salesPrice; // e.g. 10×120 = 1,200
       const cogs = tx.qty * tx.costPrice; // e.g. 10×50  = 500
       lines.push({
-        accountCode: "INVENTORY",
+        accountCode: 'INVENTORY',
         debit: 0,
         credit: cogs,
         currency,
@@ -48,20 +48,20 @@ class VoucherService {
         localAmount: L(-cogs),
         dims: tx.dims,
         subledger: {
-          sourceType: "INVENTORY",
+          sourceType: 'INVENTORY',
           txnId: tx._id,
           lineNum: tx.sourceLine,
         },
       });
       lines.push({
-        accountCode: "COGS",
+        accountCode: 'COGS',
         debit: cogs,
         credit: 0,
         currency,
         exchangeRate: rate,
         localAmount: L(cogs),
         subledger: {
-          sourceType: "INVENTORY",
+          sourceType: 'INVENTORY',
           txnId: tx._id,
           lineNum: tx.sourceLine,
         },
@@ -73,7 +73,7 @@ class VoucherService {
         (tx.extras.discountAmt || 0) +
         (tx.extras.chargedAmt || 0);
       lines.push({
-        accountCode: "SALES_REVENUE",
+        accountCode: 'SALES_REVENUE',
         debit: 0,
         credit: netRev,
         currency,
@@ -81,7 +81,7 @@ class VoucherService {
         localAmount: L(-netRev),
         dims: tx.dims,
         subledger: {
-          sourceType: "INVENTORY",
+          sourceType: 'INVENTORY',
           txnId: tx._id,
           lineNum: tx.sourceLine,
         },
@@ -90,14 +90,14 @@ class VoucherService {
       // if you bill any line-level charges:
       if (tx.extras.chargedAmt) {
         lines.push({
-          accountCode: "CHARGES_REVENUE",
+          accountCode: 'CHARGES_REVENUE',
           debit: 0,
           credit: tx.extras.chargedAmt,
           currency,
           exchangeRate: rate,
           localAmount: L(-tx.extras.chargedAmt),
           subledger: {
-            sourceType: "INVENTORY",
+            sourceType: 'INVENTORY',
             txnId: tx._id,
             lineNum: tx.sourceLine,
           },
@@ -107,14 +107,14 @@ class VoucherService {
       // if you allowed any line-level discount:
       if (tx.extras.discountAmt) {
         lines.push({
-          accountCode: "DISCOUNT_ALLOWED",
+          accountCode: 'DISCOUNT_ALLOWED',
           debit: tx.extras.discountAmt,
           credit: 0,
           currency,
           exchangeRate: rate,
           localAmount: L(tx.extras.discountAmt),
           subledger: {
-            sourceType: "INVENTORY",
+            sourceType: 'INVENTORY',
             txnId: tx._id,
             lineNum: tx.sourceLine,
           },
@@ -127,14 +127,14 @@ class VoucherService {
         Math.round(gstBase * (tx.extras.gstPercent || 0) * 100) / 100;
       if (gstAmt) {
         lines.push({
-          accountCode: "GST_PAYABLE",
+          accountCode: 'GST_PAYABLE',
           debit: 0,
           credit: gstAmt,
           currency,
           exchangeRate: rate,
           localAmount: L(-gstAmt),
           subledger: {
-            sourceType: "INVENTORY",
+            sourceType: 'INVENTORY',
             txnId: tx._id,
             lineNum: tx.sourceLine,
           },
@@ -147,13 +147,13 @@ class VoucherService {
     //    * use the AR sub-ledger you already created in your controller
     //
     lines.push({
-      accountCode: "ACCOUNTS_RECEIVABLE",
+      accountCode: 'ACCOUNTS_RECEIVABLE',
       debit: arTxn.amount,
       credit: 0,
       currency,
       exchangeRate: rate,
       localAmount: L(arTxn.amount),
-      subledger: { sourceType: "AR", txnId: arTxn._id, lineNum: 1 },
+      subledger: { sourceType: 'AR', txnId: arTxn._id, lineNum: 1 },
     });
 
     //
@@ -161,13 +161,13 @@ class VoucherService {
     //
     if (taxTxn?.amount) {
       lines.push({
-        accountCode: "TAX_PAYABLE",
+        accountCode: 'TAX_PAYABLE',
         debit: 0,
         credit: taxTxn.amount,
         currency,
         exchangeRate: rate,
         localAmount: L(-taxTxn.amount),
-        subledger: { sourceType: "TAX", txnId: taxTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'TAX', txnId: taxTxn._id, lineNum: 1 },
       });
     }
 
@@ -177,23 +177,23 @@ class VoucherService {
     if (whtTxn?.amount) {
       // – debit TDS receivable
       lines.push({
-        accountCode: "TDS_RECEIVABLE",
+        accountCode: 'TDS_RECEIVABLE',
         debit: whtTxn.amount,
         credit: 0,
         currency,
         exchangeRate: rate,
         localAmount: L(whtTxn.amount),
-        subledger: { sourceType: "WHT", txnId: whtTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'WHT', txnId: whtTxn._id, lineNum: 1 },
       });
       // – credit AR
       lines.push({
-        accountCode: "ACCOUNTS_RECEIVABLE",
+        accountCode: 'ACCOUNTS_RECEIVABLE',
         debit: 0,
         credit: whtTxn.amount,
         currency,
         exchangeRate: rate,
         localAmount: L(-whtTxn.amount),
-        subledger: { sourceType: "WHT", txnId: whtTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'WHT', txnId: whtTxn._id, lineNum: 1 },
       });
     }
 
@@ -202,22 +202,22 @@ class VoucherService {
     //
     if (discTxn?.amount) {
       lines.push({
-        accountCode: "DISCOUNT_ALLOWED",
+        accountCode: 'DISCOUNT_ALLOWED',
         debit: discTxn.amount,
         credit: 0,
         currency,
         exchangeRate: rate,
         localAmount: L(discTxn.amount),
-        subledger: { sourceType: "DISCOUNT", txnId: discTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'DISCOUNT', txnId: discTxn._id, lineNum: 1 },
       });
       lines.push({
-        accountCode: "ACCOUNTS_RECEIVABLE",
+        accountCode: 'ACCOUNTS_RECEIVABLE',
         debit: 0,
         credit: discTxn.amount,
         currency,
         exchangeRate: rate,
         localAmount: L(-discTxn.amount),
-        subledger: { sourceType: "DISCOUNT", txnId: discTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'DISCOUNT', txnId: discTxn._id, lineNum: 1 },
       });
     }
 
@@ -226,22 +226,22 @@ class VoucherService {
     //
     if (chargesTxn?.amount) {
       lines.push({
-        accountCode: "CHARGES_EXPENSE",
+        accountCode: 'CHARGES_EXPENSE',
         debit: chargesTxn.amount,
         credit: 0,
         currency,
         exchangeRate: rate,
         localAmount: L(chargesTxn.amount),
-        subledger: { sourceType: "CHARGES", txnId: chargesTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'CHARGES', txnId: chargesTxn._id, lineNum: 1 },
       });
       lines.push({
-        accountCode: "ACCOUNTS_RECEIVABLE",
+        accountCode: 'ACCOUNTS_RECEIVABLE',
         debit: 0,
         credit: chargesTxn.amount,
         currency,
         exchangeRate: rate,
         localAmount: L(-chargesTxn.amount),
-        subledger: { sourceType: "CHARGES", txnId: chargesTxn._id, lineNum: 1 },
+        subledger: { sourceType: 'CHARGES', txnId: chargesTxn._id, lineNum: 1 },
       });
     }
 
@@ -255,14 +255,14 @@ class VoucherService {
     if (Math.abs(totalLocal) > 0.01) {
       const isLoss = totalLocal > 0;
       lines.push({
-        accountCode: isLoss ? "FX_LOSS" : "FX_GAIN",
+        accountCode: isLoss ? 'FX_LOSS' : 'FX_GAIN',
         debit: isLoss ? Math.abs(totalLocal) : 0,
         credit: isLoss ? 0 : Math.abs(totalLocal),
         currency,
         exchangeRate: rate,
         localAmount: -Math.round(totalLocal * 100) / 100,
-        subledger: { sourceType: "FX", txnId: order._id, lineNum: 1 },
-        extras: { note: "Auto FX balancing" },
+        subledger: { sourceType: 'FX', txnId: order._id, lineNum: 1 },
+        extras: { note: 'Auto FX balancing' },
       });
     }
 
@@ -272,7 +272,7 @@ class VoucherService {
     const voucher = new VoucherModel({
       voucherNo,
       voucherDate: order.invoiceDate,
-      sourceType: "SALES_INVOICE",
+      sourceType: 'SALES_INVOICE',
       sourceId: order._id,
       invoiceRef: {
         invoiceId: order._id,
@@ -294,7 +294,7 @@ class VoucherService {
     glJournal,
     session,
     subTxnRefs = [],
-    paramPostingEventType = "NONE"
+    paramPostingEventType = 'NONE'
   ) {
     const voucherNo = await this.getNextVoucherNo(session);
 
@@ -302,7 +302,7 @@ class VoucherService {
     const subMap = new Map(subTxnRefs.map((r) => [r.lineNum, r.id]));
 
     // 1) pull in the accountCode strings
-    await glJournal.populate("lines.account");
+    await glJournal.populate('lines.account');
     // let sblCode;
     const lines = glJournal.lines.map((l) => ({
       accountCode: l.account.accountCode, // <--- now filled
@@ -310,12 +310,12 @@ class VoucherService {
       subledgerCode: l.customer
         ? l.customer
         : l.vendor
-        ? l.vendor
-        : l.item
-        ? l.item
-        : l.bankAccount
-        ? l.bankAccount
-        : l.account, // this can be customer or vendor or bank or ledger or item..
+          ? l.vendor
+          : l.item
+            ? l.item
+            : l.bankAccount
+              ? l.bankAccount
+              : l.account, // this can be customer or vendor or bank or ledger or item..
       debit: l.debit,
       credit: l.credit,
       currency: l.currency,
@@ -328,7 +328,7 @@ class VoucherService {
       // },
       // now subledger.txnId points at the subledger transaction
       subledger: {
-        sourceType: "JOURNAL",
+        sourceType: 'JOURNAL',
         txnId: subMap.get(l.lineNum),
         lineNum: l.lineNum,
       },
@@ -341,7 +341,7 @@ class VoucherService {
       voucherNo,
       postingEventType: paramPostingEventType,
       voucherDate: glJournal.journalDate,
-      sourceType: "JOURNAL",
+      sourceType: 'JOURNAL',
       sourceId: glJournal._id,
       invoiceRef: {
         invoiceId: glJournal._id,

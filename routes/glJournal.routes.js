@@ -1,8 +1,8 @@
 // routes/glJournal.routes.js
 
-import express from "express";
+import express from 'express';
 
-import * as WF from "../controllers/glWorkflow.controller.js";
+import * as WF from '../controllers/glWorkflow.controller.js';
 import {
   createGLJournal,
   // getAccountLedger,
@@ -15,7 +15,7 @@ import {
   // listGLJournalWorkflows,
   postGLJournal,
   postGLJournalFinancial,
-} from "../controllers/glJournal.controller.js";
+} from '../controllers/glJournal.controller.js';
 
 const glJournalRouter = express.Router();
 
@@ -24,9 +24,9 @@ const glJournalRouter = express.Router();
  * @desc    Create a new General Ledger Journal (balanced)
  * @access  Private (attach auth middleware if available)
  */
-glJournalRouter.post("/", createGLJournal);
-glJournalRouter.post("/:id/post", postGLJournal);
-glJournalRouter.post("/:id/post-financial", postGLJournalFinancial);
+glJournalRouter.post('/', createGLJournal);
+glJournalRouter.post('/:id/post', postGLJournal);
+glJournalRouter.post('/:id/post-financial', postGLJournalFinancial);
 /**
  * @route   GET /api/v1/gl-journals
  * @desc    List / filter GL Journals (paginated)

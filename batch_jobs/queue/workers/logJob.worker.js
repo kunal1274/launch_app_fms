@@ -1,4 +1,4 @@
-import { createQueue } from "../bullHelper.js";
+import { createQueue } from '../bullHelper.js';
 
 // // a trivial job that just logs the payload
 // export const logQueue = createQueue("logJobs", async (job) => {

@@ -2,7 +2,7 @@
 export const requestTimer = (req, res, next) => {
   const start = Date.now();
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const duration = Date.now() - start;
     console.log(
       `[${req.method}] ${req.originalUrl} - ${res.statusCode} - ${duration}ms`

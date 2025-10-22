@@ -1,5 +1,5 @@
 // routes/authRoutes.js
-import express from "express";
+import express from 'express';
 import {
   sendOtp,
   verifyOtp,
@@ -8,24 +8,24 @@ import {
   getOtpById,
   updateOtp,
   deleteOtp,
-} from "../controllers/userOtp.controller.js";
-import { authenticateJWT } from "../middleware/authJwtHandler.js";
-import { UserGlobalModel } from "../models/userGlobal.model.js";
+} from '../controllers/userOtp.controller.js';
+import { authenticateJWT } from '../middleware/authJwtHandler.js';
+import { UserGlobalModel } from '../models/userGlobal.model.js';
 import {
   getLocalTimeString,
   getFormattedLocalDateTime,
-} from "../utility/getLocalTime.js";
+} from '../utility/getLocalTime.js';
 
 const otpAuthRouter = express.Router();
 
 // Route to send OTP
-otpAuthRouter.post("/send-otp", sendOtp);
+otpAuthRouter.post('/send-otp', sendOtp);
 
 // Route to verify OTP
-otpAuthRouter.post("/verify-otp", verifyOtp);
+otpAuthRouter.post('/verify-otp', verifyOtp);
 
 // Validate token route
-otpAuthRouter.post("/me", authenticateJWT, async (req, res) => {
+otpAuthRouter.post('/me', authenticateJWT, async (req, res) => {
   // If token is valid, req.user is set by the authenticateJWT middleware
   // Return user info or a success message
   const existingUserGlobal = await UserGlobalModel.findOne({
@@ -39,10 +39,10 @@ otpAuthRouter.post("/me", authenticateJWT, async (req, res) => {
 });
 
 // BASIC CRUD
-otpAuthRouter.post("/", createOtp);
-otpAuthRouter.get("/", getAllOtps);
-otpAuthRouter.get("/:id", getOtpById);
-otpAuthRouter.patch("/:id", updateOtp);
-otpAuthRouter.delete("/:id", deleteOtp);
+otpAuthRouter.post('/', createOtp);
+otpAuthRouter.get('/', getAllOtps);
+otpAuthRouter.get('/:id', getOtpById);
+otpAuthRouter.patch('/:id', updateOtp);
+otpAuthRouter.delete('/:id', deleteOtp);
 
 export default otpAuthRouter;

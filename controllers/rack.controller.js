@@ -1,29 +1,29 @@
 // controllers/rack.controller.js
 
-import mongoose from "mongoose";
-import { RackModel } from "../models/rack.model.js";
+import mongoose from 'mongoose';
+import { RackModel } from '../models/rack.model.js';
 import {
   BinCounterModel,
   RackCounterModel,
   ShelfCounterModel,
-} from "../models/counter.model.js";
-import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
-import logger, { logStackError } from "../utility/logger.util.js";
-import { winstonLogger, logError } from "../utility/logError.utils.js";
-import { AisleModel } from "../models/aisle.model.js";
-import { ShelfModel } from "../models/shelf.model.js";
-import { BinModel } from "../models/bin.model.js";
+} from '../models/counter.model.js';
+import { createAuditLog } from '../audit_logging_service/utils/auditLogger.utils.js';
+import redisClient from '../middleware/redisClient.js';
+import logger, { logStackError } from '../utility/logger.util.js';
+import { winstonLogger, logError } from '../utility/logError.utils.js';
+import { AisleModel } from '../models/aisle.model.js';
+import { ShelfModel } from '../models/shelf.model.js';
+import { BinModel } from '../models/bin.model.js';
 
 /** Helper: clear Redis cache for racks */
-const invalidateRackCache = async (key = "/fms/api/v0/racks") => {
+const invalidateRackCache = async (key = '/fms/api/v0/racks') => {
   try {
     await redisClient.del(key);
     logger.info(`Cache invalidated: ${key}`, {
-      context: "invalidateRackCache",
+      context: 'invalidateRackCache',
     });
   } catch (err) {
-    logStackError("❌ Rack cache invalidation failed", err);
+    logStackError('❌ Rack cache invalidation failed', err);
   }
 };
 
@@ -46,20 +46,20 @@ export const createRack = async (req, res) => {
 
     // require name, type, and location
     if (!name || !type || !aisle) {
-      logger.warn("Rack Creation - Missing fields - name , type and aisle ", {
-        context: "createRack",
+      logger.warn('Rack Creation - Missing fields - name , type and aisle ', {
+        context: 'createRack',
         body: req.body,
       });
       return res.status(422).json({
-        status: "failure",
-        message: "⚠️ name, type, and aisle are required.",
+        status: 'failure',
+        message: '⚠️ name, type, and aisle are required.',
       });
     }
 
     const ai = await AisleModel.findById(aisle);
     if (!ai) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Aisle ${aisle} not found.`,
       });
     }
@@ -76,13 +76,13 @@ export const createRack = async (req, res) => {
       files,
       extras,
       active,
-      createdBy: req.user?.username || "SystemRackCreation",
+      createdBy: req.user?.username || 'SystemRackCreation',
     });
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Rack",
-      action: "CREATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Rack',
+      action: 'CREATE',
       recordId: rack._id,
       changes: { newData: rack },
     });
@@ -91,28 +91,28 @@ export const createRack = async (req, res) => {
 
     winstonLogger.info(`✅ Rack created: ${rack._id}`);
     return res.status(201).json({
-      status: "success",
-      message: "✅ Rack created successfully.",
+      status: 'success',
+      message: '✅ Rack created successfully.',
       data: rack,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("❌ Rack Validation Error", error);
+      logStackError('❌ Rack Validation Error', error);
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     if (error.code === 11000) {
-      logStackError("❌ Rack Duplicate Error", error);
+      logStackError('❌ Rack Duplicate Error', error);
       return res.status(409).json({
-        status: "failure",
-        message: "A rack with that code or name already exists.",
+        status: 'failure',
+        message: 'A rack with that code or name already exists.',
       });
     }
-    logStackError("❌ Rack Creation Error", error);
+    logStackError('❌ Rack Creation Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -127,16 +127,16 @@ export const getAllRacks = async (req, res) => {
 
     winstonLogger.info(`✅ Fetched all racks (${list.length})`);
     return res.status(200).json({
-      status: "success",
-      message: "✅ Racks retrieved successfully.",
+      status: 'success',
+      message: '✅ Racks retrieved successfully.',
       count: list.length,
       data: list,
     });
   } catch (error) {
-    logStackError("❌ Get All Racks Error", error);
+    logStackError('❌ Get All Racks Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -148,15 +148,15 @@ export const getArchivedRacks = async (req, res) => {
     const archived = await RackModel.find({ archived: true });
     winstonLogger.info(`ℹ️ Retrieved ${archived.length} archived racks.`);
     return res.status(200).json({
-      status: "success",
-      message: "✅ Archived racks retrieved.",
+      status: 'success',
+      message: '✅ Archived racks retrieved.',
       data: archived,
     });
   } catch (error) {
-    logError("❌ Get Archived Racks", error);
+    logError('❌ Get Archived Racks', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -170,17 +170,17 @@ export const getRackById = async (req, res) => {
     if (!rack) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Rack not found." });
+        .json({ status: 'failure', message: '⚠️ Rack not found.' });
     }
     winstonLogger.info(`✅ Retrieved rack: ${rackId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Rack retrieved.", data: rack });
+      .json({ status: 'success', message: '✅ Rack retrieved.', data: rack });
   } catch (error) {
-    logError("❌ Get Rack By ID", error);
+    logError('❌ Get Rack By ID', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -193,13 +193,13 @@ export const updateRackById = async (req, res) => {
     const updateData = {
       ...req.body,
       // aisle,
-      updatedBy: req.user?.username || "Unknown",
+      updatedBy: req.user?.username || 'Unknown',
     };
 
     const ai = await AisleModel.findById(req.body.aisle);
     if (!ai) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Aisle ${req.body.aisle} not found.`,
       });
     }
@@ -211,13 +211,13 @@ export const updateRackById = async (req, res) => {
     if (!rack) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Rack not found." });
+        .json({ status: 'failure', message: '⚠️ Rack not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Rack",
-      action: "UPDATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Rack',
+      action: 'UPDATE',
       recordId: rack._id,
       changes: { newData: rack },
     });
@@ -227,17 +227,17 @@ export const updateRackById = async (req, res) => {
     winstonLogger.info(`ℹ️ Updated rack: ${rackId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Rack updated.", data: rack });
+      .json({ status: 'success', message: '✅ Rack updated.', data: rack });
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logError("❌ Update Rack", error);
+    logError('❌ Update Rack', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -251,13 +251,13 @@ export const deleteRackById = async (req, res) => {
     if (!rack) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Rack not found." });
+        .json({ status: 'failure', message: '⚠️ Rack not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Rack",
-      action: "DELETE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Rack',
+      action: 'DELETE',
       recordId: rack._id,
       changes: null,
     });
@@ -267,12 +267,12 @@ export const deleteRackById = async (req, res) => {
     winstonLogger.info(`ℹ️ Deleted rack: ${rackId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Rack deleted." });
+      .json({ status: 'success', message: '✅ Rack deleted.' });
   } catch (error) {
-    logError("❌ Delete Rack", error);
+    logError('❌ Delete Rack', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -284,19 +284,19 @@ export const archiveRackById = async (req, res) => {
     const { rackId } = req.params;
     const rack = await RackModel.findByIdAndUpdate(
       rackId,
-      { archived: true, updatedBy: req.user?.username || "Unknown" },
+      { archived: true, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!rack) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Rack not found." });
+        .json({ status: 'failure', message: '⚠️ Rack not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Rack",
-      action: "ARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Rack',
+      action: 'ARCHIVE',
       recordId: rack._id,
       changes: { newData: rack },
     });
@@ -305,12 +305,12 @@ export const archiveRackById = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Rack archived.", data: rack });
+      .json({ status: 'success', message: '✅ Rack archived.', data: rack });
   } catch (error) {
-    logError("❌ Archive Rack", error);
+    logError('❌ Archive Rack', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -321,19 +321,19 @@ export const unarchiveRackById = async (req, res) => {
     const { rackId } = req.params;
     const rack = await RackModel.findByIdAndUpdate(
       rackId,
-      { archived: false, updatedBy: req.user?.username || "Unknown" },
+      { archived: false, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!rack) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Rack not found." });
+        .json({ status: 'failure', message: '⚠️ Rack not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Rack",
-      action: "UNARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Rack',
+      action: 'UNARCHIVE',
       recordId: rack._id,
       changes: { newData: rack },
     });
@@ -342,12 +342,12 @@ export const unarchiveRackById = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Rack unarchived.", data: rack });
+      .json({ status: 'success', message: '✅ Rack unarchived.', data: rack });
   } catch (error) {
-    logError("❌ Unarchive Rack", error);
+    logError('❌ Unarchive Rack', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -358,8 +358,8 @@ export const bulkCreateRacks = async (req, res) => {
   const docs = req.body;
   if (!Array.isArray(docs) || docs.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Request body must be a non-empty array of rack objects.",
+      status: 'failure',
+      message: '⚠️ Request body must be a non-empty array of rack objects.',
     });
   }
 
@@ -383,10 +383,10 @@ export const bulkCreateRacks = async (req, res) => {
   });
   if (dupes.length) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Duplicate rack name+aisle in request: " +
-        [...new Set(dupes.map((d) => `${d.name}@${d.aisle}`))].join(", "),
+        'Duplicate rack name+aisle in request: ' +
+        [...new Set(dupes.map((d) => `${d.name}@${d.aisle}`))].join(', '),
     });
   }
 
@@ -395,26 +395,26 @@ export const bulkCreateRacks = async (req, res) => {
   if (aisleIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
     return res
       .status(400)
-      .json({ status: "failure", message: "One or more invalid aisle IDs." });
+      .json({ status: 'failure', message: 'One or more invalid aisle IDs.' });
   }
   const countA = await AisleModel.countDocuments({ _id: { $in: aisleIds } });
   if (countA !== aisleIds.length) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Some parent aisles not found." });
+      .json({ status: 'failure', message: 'Some parent aisles not found.' });
   }
 
   // 3) DB‐wide uniqueness: no existing rack with same name+aisle
   const conflictQ = combos.map(({ name, aisle }) => ({ name, aisle }));
   const conflicts = await RackModel.find({ $or: conflictQ })
-    .select("name aisle")
+    .select('name aisle')
     .lean();
   if (conflicts.length) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "These rack name+aisle already exist: " +
-        conflicts.map((c) => `${c.name}@${c.aisle}`).join(", "),
+        'These rack name+aisle already exist: ' +
+        conflicts.map((c) => `${c.name}@${c.aisle}`).join(', '),
     });
   }
 
@@ -424,13 +424,13 @@ export const bulkCreateRacks = async (req, res) => {
   session.startTransaction();
   try {
     const n = docs.length;
-    logger.info("💾 Bulk create: reserving rack codes", {
-      context: "bulkCreateRacks",
+    logger.info('💾 Bulk create: reserving rack codes', {
+      context: 'bulkCreateRacks',
       count: n,
     });
 
     const counter = await RackCounterModel.findOneAndUpdate(
-      { _id: "rackCode" },
+      { _id: 'rackCode' },
       { $inc: { seq: n } },
       { new: true, upsert: true, session }
     );
@@ -438,9 +438,9 @@ export const bulkCreateRacks = async (req, res) => {
     const start = end - n + 1;
 
     docs.forEach((d, i) => {
-      const seq = (start + i).toString().padStart(3, "0");
+      const seq = (start + i).toString().padStart(3, '0');
       d.code = `RK_${seq}`;
-      d.createdBy = req.user?.username || "SystemRackCreation";
+      d.createdBy = req.user?.username || 'SystemRackCreation';
     });
 
     const created = await RackModel.insertMany(docs, { session });
@@ -448,9 +448,9 @@ export const bulkCreateRacks = async (req, res) => {
     await Promise.all(
       created.map((rk) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Rack",
-          action: "BULK_CREATE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Rack',
+          action: 'BULK_CREATE',
           recordId: rk._id,
           changes: { newData: rk },
         })
@@ -462,17 +462,17 @@ export const bulkCreateRacks = async (req, res) => {
     await invalidateRackCache();
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${created.length} racks created successfully.`,
       data: created,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk create racks error", error);
+    logStackError('❌ Bulk create racks error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk rack creation.",
+      status: 'failure',
+      message: 'Error during bulk rack creation.',
       error: error.message,
     });
   }
@@ -483,9 +483,9 @@ export const bulkUpdateRacks = async (req, res) => {
   const updates = req.body;
   if (!Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "⚠️ Request body must be a non-empty array of {id or _id, update}.",
+        '⚠️ Request body must be a non-empty array of {id or _id, update}.',
     });
   }
 
@@ -496,7 +496,7 @@ export const bulkUpdateRacks = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(docId)) {
       return res
         .status(400)
-        .json({ status: "failure", message: `Invalid rack ID: ${docId}` });
+        .json({ status: 'failure', message: `Invalid rack ID: ${docId}` });
     }
     if (update.name || update.aisle) {
       toCheck.push({ id: docId, name: update.name, aisle: update.aisle });
@@ -506,7 +506,7 @@ export const bulkUpdateRacks = async (req, res) => {
   // 2) Load originals
   const ids = toCheck.map((c) => c.id);
   const originals = await RackModel.find({ _id: { $in: ids } })
-    .select("name aisle")
+    .select('name aisle')
     .lean();
   const origMap = new Map(originals.map((o) => [o._id.toString(), o]));
 
@@ -525,10 +525,10 @@ export const bulkUpdateRacks = async (req, res) => {
   });
   if (dupes2.length) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Duplicate rack name+aisle in request: " +
-        [...new Set(dupes2.map((d) => `${d.name}@${d.aisle}`))].join(", "),
+        'Duplicate rack name+aisle in request: ' +
+        [...new Set(dupes2.map((d) => `${d.name}@${d.aisle}`))].join(', '),
     });
   }
 
@@ -538,13 +538,13 @@ export const bulkUpdateRacks = async (req, res) => {
     if (newAisleIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid aisle IDs in update." });
+        .json({ status: 'failure', message: 'Invalid aisle IDs in update.' });
     }
     const cnt2 = await AisleModel.countDocuments({ _id: { $in: newAisleIds } });
     if (cnt2 !== newAisleIds.length) {
       return res.status(404).json({
-        status: "failure",
-        message: "Some target aisles do not exist.",
+        status: 'failure',
+        message: 'Some target aisles do not exist.',
       });
     }
   }
@@ -556,14 +556,14 @@ export const bulkUpdateRacks = async (req, res) => {
     aisle,
   }));
   const conflicts2 = await RackModel.find({ $or: conflictQs2 })
-    .select("name aisle")
+    .select('name aisle')
     .lean();
   if (conflicts2.length) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "These rack name+aisle pairs already exist: " +
-        conflicts2.map((c) => `${c.name}@${c.aisle}`).join(", "),
+        'These rack name+aisle pairs already exist: ' +
+        conflicts2.map((c) => `${c.name}@${c.aisle}`).join(', '),
     });
   }
 
@@ -572,8 +572,8 @@ export const bulkUpdateRacks = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    logger.info("🔄 Bulk update racks", {
-      context: "bulkUpdateRacks",
+    logger.info('🔄 Bulk update racks', {
+      context: 'bulkUpdateRacks',
       count: updates.length,
     });
 
@@ -585,15 +585,15 @@ export const bulkUpdateRacks = async (req, res) => {
 
       const rk = await RackModel.findByIdAndUpdate(
         id,
-        { ...entry.update, updatedBy: req.user?.username || "Unknown" },
+        { ...entry.update, updatedBy: req.user?.username || 'Unknown' },
         { new: true, runValidators: true, session }
       );
       if (!rk) throw new Error(`Rack not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "Rack",
-        action: "BULK_UPDATE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'Rack',
+        action: 'BULK_UPDATE',
         recordId: rk._id,
         changes: { newData: rk },
       });
@@ -606,17 +606,17 @@ export const bulkUpdateRacks = async (req, res) => {
     await invalidateRackCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${results.length} racks updated successfully.`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk update racks error", error);
+    logStackError('❌ Bulk update racks error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk rack update.",
+      status: 'failure',
+      message: 'Error during bulk rack update.',
       error: error.message,
     });
   }
@@ -627,16 +627,16 @@ export const bulkDeleteRacks = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Request body must include a non-empty array of ids.",
+      status: 'failure',
+      message: '⚠️ Request body must include a non-empty array of ids.',
     });
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    logger.info("🗑️ Bulk delete racks", {
-      context: "bulkDeleteRacks",
+    logger.info('🗑️ Bulk delete racks', {
+      context: 'bulkDeleteRacks',
       count: ids.length,
     });
 
@@ -644,14 +644,14 @@ export const bulkDeleteRacks = async (req, res) => {
       { _id: { $in: ids } },
       { session }
     );
-    if (deletedCount === 0) throw new Error("No racks deleted.");
+    if (deletedCount === 0) throw new Error('No racks deleted.');
 
     await Promise.all(
       ids.map((id) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Rack",
-          action: "BULK_DELETE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Rack',
+          action: 'BULK_DELETE',
           recordId: id,
           changes: null,
         })
@@ -663,16 +663,16 @@ export const bulkDeleteRacks = async (req, res) => {
     await invalidateRackCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${deletedCount} racks deleted successfully.`,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk delete racks error", error);
+    logStackError('❌ Bulk delete racks error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk rack deletion.",
+      status: 'failure',
+      message: 'Error during bulk rack deletion.',
       error: error.message,
     });
   }
@@ -684,19 +684,19 @@ export const bulkDeleteRacks = async (req, res) => {
 export const bulkAllDeleteRacks = async (req, res) => {
   try {
     // 1. Find all rack IDs that have at least one Shelf
-    const racksWithChildren = await ShelfModel.distinct("rack");
+    const racksWithChildren = await ShelfModel.distinct('rack');
 
     // 2. Leaf‐racks are those NOT in that list
     const leafRacks = await RackModel.find({
       _id: { $nin: racksWithChildren },
     })
-      .select("_id code name")
+      .select('_id code name')
       .lean();
 
     if (leafRacks.length === 0) {
       return res.status(200).json({
-        status: "success",
-        message: "No leaf racks to delete; every rack has child shelves.",
+        status: 'success',
+        message: 'No leaf racks to delete; every rack has child shelves.',
         skippedDueToShelves: racksWithChildren,
       });
     }
@@ -708,7 +708,7 @@ export const bulkAllDeleteRacks = async (req, res) => {
     });
 
     // 4. Recompute highest sequence from remaining codes
-    const remaining = await RackModel.find({}, "code").lean();
+    const remaining = await RackModel.find({}, 'code').lean();
     let maxSeq = 0;
     remaining.forEach(({ code }) => {
       const m = code.match(/(\d+)$/);
@@ -720,23 +720,23 @@ export const bulkAllDeleteRacks = async (req, res) => {
 
     // 5. Reset the rackCode counter to maxSeq
     const resetCounter = await RackCounterModel.findByIdAndUpdate(
-      { _id: "rackCode" },
+      { _id: 'rackCode' },
       { seq: maxSeq },
       { new: true, upsert: true }
     );
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Deleted ${deleted.deletedCount} leaf rack(s).`,
       deletedRacks: leafRacks,
       skippedDueToShelves: racksWithChildren,
       counter: resetCounter,
     });
   } catch (err) {
-    console.error("❌ bulkAllDeleteRacks error:", err);
+    console.error('❌ bulkAllDeleteRacks error:', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error in bulkAllDeleteRacks",
+      status: 'failure',
+      message: 'Error in bulkAllDeleteRacks',
       error: err.message,
     });
   }
@@ -750,7 +750,7 @@ export const bulkAllDeleteRacksCascade = async (req, res) => {
   session.startTransaction();
   try {
     // 1. Gather all Rack IDs
-    const allRacks = await RackModel.find({}, "_id").session(session).lean();
+    const allRacks = await RackModel.find({}, '_id').session(session).lean();
     const rackIds = allRacks.map((r) => r._id);
 
     if (rackIds.length === 0) {
@@ -758,11 +758,11 @@ export const bulkAllDeleteRacksCascade = async (req, res) => {
       session.endSession();
       return res
         .status(200)
-        .json({ status: "success", message: "No racks to delete." });
+        .json({ status: 'success', message: 'No racks to delete.' });
     }
 
     // 2. Delete child Shelves
-    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, "_id")
+    const shelfDocs = await ShelfModel.find({ rack: { $in: rackIds } }, '_id')
       .session(session)
       .lean();
     const shelfIds = shelfDocs.map((s) => s._id);
@@ -779,17 +779,17 @@ export const bulkAllDeleteRacksCascade = async (req, res) => {
     // 5. Reset all relevant counters back to 0
     const [resetRackCtr, resetShelfCtr, resetBinCtr] = await Promise.all([
       RackCounterModel.findByIdAndUpdate(
-        { _id: "rackCode" },
+        { _id: 'rackCode' },
         { seq: 0 },
         { new: true, upsert: true, session }
       ),
       ShelfCounterModel.findByIdAndUpdate(
-        { _id: "shelfCode" },
+        { _id: 'shelfCode' },
         { seq: 0 },
         { new: true, upsert: true, session }
       ),
       BinCounterModel.findByIdAndUpdate(
-        { _id: "binCode" },
+        { _id: 'binCode' },
         { seq: 0 },
         { new: true, upsert: true, session }
       ),
@@ -799,7 +799,7 @@ export const bulkAllDeleteRacksCascade = async (req, res) => {
     session.endSession();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Cascade-deleted ${deletedRacks.deletedCount} rack(s) + all descendants.`,
       counter: {
         rack: resetRackCtr,
@@ -810,10 +810,10 @@ export const bulkAllDeleteRacksCascade = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ bulkAllDeleteRacksCascade error:", err);
+    console.error('❌ bulkAllDeleteRacksCascade error:', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error in bulkAllDeleteRacksCascade",
+      status: 'failure',
+      message: 'Error in bulkAllDeleteRacksCascade',
       error: err.message,
     });
   }

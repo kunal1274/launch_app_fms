@@ -1,5 +1,5 @@
 // models/User.js
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const UserGoogleSchema = new Schema(
@@ -39,7 +39,7 @@ const UserGoogleSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
   },
@@ -47,4 +47,4 @@ const UserGoogleSchema = new Schema(
 );
 
 export const UserGoogleModel =
-  mongoose.models.UserGoogle || model("UserGoogle", UserGoogleSchema);
+  mongoose.models.UserGoogle || model('UserGoogle', UserGoogleSchema);

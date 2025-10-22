@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 /**
@@ -10,7 +10,7 @@ const auditLogSchema = new Schema(
       // Typically references a User model. If you only have a username,
       // store it as a string. If you have a real user collection, do:
       type: Schema.Types.ObjectId,
-      ref: "UserGlobal",
+      ref: 'UserGlobal',
       //type: String,
       required: false,
       // default: "UnknownUser",
@@ -44,4 +44,4 @@ const auditLogSchema = new Schema(
 );
 
 export const AuditLogModel =
-  mongoose.models.BB1AuditLogs || model("BB1AuditLogs", auditLogSchema);
+  mongoose.models.BB1AuditLogs || model('BB1AuditLogs', auditLogSchema);

@@ -1,5 +1,5 @@
 // models/voucher.model.js
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 // Sub-schema for each GL line
 const voucherLineSchema = new Schema({
@@ -12,37 +12,37 @@ const voucherLineSchema = new Schema({
   localAmount: { type: Number, required: false, default: 0 }, // = (dr - cr) * exchangeRate
   // optional storage/product dims for inventory lines:
   dims: {
-    site: { type: Schema.Types.ObjectId, ref: "Sites" },
-    warehouse: { type: Schema.Types.ObjectId, ref: "Warehouses" },
-    zone: { type: Schema.Types.ObjectId, ref: "Zones" },
-    location: { type: Schema.Types.ObjectId, ref: "Locations" },
-    aisle: { type: Schema.Types.ObjectId, ref: "Aisles" },
-    rack: { type: Schema.Types.ObjectId, ref: "Racks" },
-    shelf: { type: Schema.Types.ObjectId, ref: "Shelves" },
-    bin: { type: Schema.Types.ObjectId, ref: "Bins" },
-    config: { type: Schema.Types.ObjectId, ref: "Configurations" },
-    color: { type: Schema.Types.ObjectId, ref: "Colors" },
-    size: { type: Schema.Types.ObjectId, ref: "Sizes" },
-    style: { type: Schema.Types.ObjectId, ref: "Styles" },
-    version: { type: Schema.Types.ObjectId, ref: "Versions" },
-    batch: { type: Schema.Types.ObjectId, ref: "Batches" },
-    serial: { type: Schema.Types.ObjectId, ref: "Serials" },
+    site: { type: Schema.Types.ObjectId, ref: 'Sites' },
+    warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouses' },
+    zone: { type: Schema.Types.ObjectId, ref: 'Zones' },
+    location: { type: Schema.Types.ObjectId, ref: 'Locations' },
+    aisle: { type: Schema.Types.ObjectId, ref: 'Aisles' },
+    rack: { type: Schema.Types.ObjectId, ref: 'Racks' },
+    shelf: { type: Schema.Types.ObjectId, ref: 'Shelves' },
+    bin: { type: Schema.Types.ObjectId, ref: 'Bins' },
+    config: { type: Schema.Types.ObjectId, ref: 'Configurations' },
+    color: { type: Schema.Types.ObjectId, ref: 'Colors' },
+    size: { type: Schema.Types.ObjectId, ref: 'Sizes' },
+    style: { type: Schema.Types.ObjectId, ref: 'Styles' },
+    version: { type: Schema.Types.ObjectId, ref: 'Versions' },
+    batch: { type: Schema.Types.ObjectId, ref: 'Batches' },
+    serial: { type: Schema.Types.ObjectId, ref: 'Serials' },
   },
   // link back to sub-ledger txn
   subledger: {
     sourceType: {
       type: String,
       enum: [
-        "INVENTORY",
-        "AR",
-        "TAX",
-        "WHT",
-        "CHARGES",
-        "LINE_AR",
-        "FX",
-        "DISCOUNT",
-        "JOURNAL",
-        "LEDGER",
+        'INVENTORY',
+        'AR',
+        'TAX',
+        'WHT',
+        'CHARGES',
+        'LINE_AR',
+        'FX',
+        'DISCOUNT',
+        'JOURNAL',
+        'LEDGER',
       ],
       required: true,
     },
@@ -62,45 +62,45 @@ const voucherSchema = new Schema(
       type: String,
       required: true,
       enum: [
-        "NONE",
-        "POSITIONAL",
-        "PHYSICAL",
-        "MANAGEMENT",
-        "FINANCIAL",
-        "AUDIT",
+        'NONE',
+        'POSITIONAL',
+        'PHYSICAL',
+        'MANAGEMENT',
+        'FINANCIAL',
+        'AUDIT',
       ],
-      default: "NONE",
+      default: 'NONE',
     },
     postingEventType: {
       type: String,
       required: true,
       enum: [
-        "NONE",
-        "POSITIONAL",
-        "PHYSICAL",
-        "MANAGEMENT",
-        "FINANCIAL",
-        "AUDIT",
+        'NONE',
+        'POSITIONAL',
+        'PHYSICAL',
+        'MANAGEMENT',
+        'FINANCIAL',
+        'AUDIT',
       ],
-      default: "NONE",
+      default: 'NONE',
     },
     nextPostingEventType: {
       type: String,
       required: true,
       enum: [
-        "NONE",
-        "POSITIONAL",
-        "PHYSICAL",
-        "MANAGEMENT",
-        "FINANCIAL",
-        "AUDIT",
+        'NONE',
+        'POSITIONAL',
+        'PHYSICAL',
+        'MANAGEMENT',
+        'FINANCIAL',
+        'AUDIT',
       ],
-      default: "NONE",
+      default: 'NONE',
     },
     voucherDate: { type: Date, required: true, default: Date.now },
     sourceType: {
       type: String,
-      enum: ["SALES_ORDER", "SALES_INVOICE", "PURCHASE_ORDER", "JOURNAL"],
+      enum: ['SALES_ORDER', 'SALES_INVOICE', 'PURCHASE_ORDER', 'JOURNAL'],
       required: true,
     },
     sourceId: { type: Schema.Types.ObjectId, required: true },
@@ -108,7 +108,7 @@ const voucherSchema = new Schema(
     invoiceRef: {
       invoiceId: {
         type: Schema.Types.ObjectId,
-        ref: "SalesOrders",
+        ref: 'SalesOrders',
         required: true,
       },
       invoiceNum: { type: String, required: true },
@@ -118,7 +118,7 @@ const voucherSchema = new Schema(
   { timestamps: true }
 );
 
-voucherSchema.pre("save", function (next) {
+voucherSchema.pre('save', function (next) {
   this.lines = this.lines.map((l) => {
     l.localAmount =
       Math.round((l.debit - l.credit) * l.exchangeRate * 100) / 100;
@@ -129,4 +129,4 @@ voucherSchema.pre("save", function (next) {
 
 export const VoucherModel =
   mongoose.models.FinancialVouchers ||
-  model("FinancialVouchers", voucherSchema);
+  model('FinancialVouchers', voucherSchema);

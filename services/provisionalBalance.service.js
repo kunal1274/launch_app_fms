@@ -1,4 +1,4 @@
-import { ProvisionalBalanceModel } from "../models/provisionalBalance.model.js";
+import { ProvisionalBalanceModel } from '../models/provisionalBalance.model.js';
 
 export default class ProvisionalBalanceService {
   /**
@@ -35,9 +35,9 @@ export default class ProvisionalBalanceService {
           totalReserveValue: value,
         },
         $set: {
-          "extras.refType": "JOURNAL",
-          "extras.refId": journal._id.toString(),
-          "extras.refNum": journal.code,
+          'extras.refType': 'JOURNAL',
+          'extras.refId': journal._id.toString(),
+          'extras.refNum': journal.code,
         },
       };
 

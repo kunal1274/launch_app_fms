@@ -1,6 +1,6 @@
 // routes/productDimStyle.routes.js
 
-import express from "express";
+import express from 'express';
 import {
   createStyleConfig,
   getAllStyleConfigs,
@@ -14,26 +14,26 @@ import {
   bulkUpdateStyleConfigs,
   bulkDeleteStyleConfigs,
   appendStyleValues,
-} from "../controllers/productDimStyle.controller.js";
+} from '../controllers/productDimStyle.controller.js';
 
 const styleRouter = express.Router();
 
 // Bulk operations first
-styleRouter.post("/bulk", bulkCreateStyleConfigs);
-styleRouter.put("/bulk", bulkUpdateStyleConfigs);
-styleRouter.delete("/bulk", bulkDeleteStyleConfigs);
+styleRouter.post('/bulk', bulkCreateStyleConfigs);
+styleRouter.put('/bulk', bulkUpdateStyleConfigs);
+styleRouter.delete('/bulk', bulkDeleteStyleConfigs);
 
 // Collection endpoints
-styleRouter.get("/", getAllStyleConfigs);
-styleRouter.get("/archived", getArchivedStyleConfigs);
-styleRouter.post("/", createStyleConfig);
+styleRouter.get('/', getAllStyleConfigs);
+styleRouter.get('/archived', getArchivedStyleConfigs);
+styleRouter.post('/', createStyleConfig);
 
 // Single-item & archive toggles
-styleRouter.get("/:styleId", getStyleConfigById);
-styleRouter.put("/:styleId", updateStyleConfigById);
-styleRouter.patch("/:styleId/values", appendStyleValues);
-styleRouter.delete("/:styleId", deleteStyleConfigById);
-styleRouter.patch("/:styleId/archive", archiveStyleConfigById);
-styleRouter.patch("/:styleId/unarchive", unarchiveStyleConfigById);
+styleRouter.get('/:styleId', getStyleConfigById);
+styleRouter.put('/:styleId', updateStyleConfigById);
+styleRouter.patch('/:styleId/values', appendStyleValues);
+styleRouter.delete('/:styleId', deleteStyleConfigById);
+styleRouter.patch('/:styleId/archive', archiveStyleConfigById);
+styleRouter.patch('/:styleId/unarchive', unarchiveStyleConfigById);
 
 export default styleRouter;

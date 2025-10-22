@@ -1,22 +1,22 @@
 // controllers/productDimSize.controller.js
 
-import mongoose from "mongoose";
-import { ProductDimSizeModel } from "../models/productDimSize.model.js";
-import { ProductDimSizeCounterModel } from "../models/counter.model.js";
-import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
-import logger, { logStackError } from "../utility/logger.util.js";
-import { winstonLogger, logError } from "../utility/logError.utils.js";
+import mongoose from 'mongoose';
+import { ProductDimSizeModel } from '../models/productDimSize.model.js';
+import { ProductDimSizeCounterModel } from '../models/counter.model.js';
+import { createAuditLog } from '../audit_logging_service/utils/auditLogger.utils.js';
+import redisClient from '../middleware/redisClient.js';
+import logger, { logStackError } from '../utility/logger.util.js';
+import { winstonLogger, logError } from '../utility/logError.utils.js';
 
 // Helper: invalidate size configs cache
-const invalidateSizeCache = async (key = "/fms/api/v0/sizes") => {
+const invalidateSizeCache = async (key = '/fms/api/v0/sizes') => {
   try {
     await redisClient.del(key);
     logger.info(`Cache invalidated: ${key}`, {
-      context: "invalidateSizeCache",
+      context: 'invalidateSizeCache',
     });
   } catch (err) {
-    logStackError("❌ Size cache invalidation failed", err);
+    logStackError('❌ Size cache invalidation failed', err);
   }
 };
 
@@ -40,8 +40,8 @@ export const createSizeConfig = async (req, res) => {
     } = req.body;
     if (!name || !type || !Array.isArray(values) || values.length === 0) {
       return res.status(422).json({
-        status: "failure",
-        message: "⚠️ name, type and a non-empty values array are required.",
+        status: 'failure',
+        message: '⚠️ name, type and a non-empty values array are required.',
       });
     }
 
@@ -58,9 +58,9 @@ export const createSizeConfig = async (req, res) => {
     });
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "ProductDimSize",
-      action: "CREATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'ProductDimSize',
+      action: 'CREATE',
       recordId: sizeCfg._id,
       changes: { newData: sizeCfg },
     });
@@ -69,25 +69,25 @@ export const createSizeConfig = async (req, res) => {
     winstonLogger.info(`✅ Size config created: ${sizeCfg._id}`);
 
     return res.status(201).json({
-      status: "success",
-      message: "✅ Size configuration created successfully.",
+      status: 'success',
+      message: '✅ Size configuration created successfully.',
       data: sizeCfg,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     if (error.code === 11000) {
       return res
         .status(409)
-        .json({ status: "failure", message: "Duplicate code or name." });
+        .json({ status: 'failure', message: 'Duplicate code or name.' });
     }
-    logStackError("❌ Size creation error", error);
+    logStackError('❌ Size creation error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -104,12 +104,12 @@ export const appendSizeValues = async (req, res) => {
     if (!isValidObjectId(sizeId)) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid size ID" });
+        .json({ status: 'failure', message: 'Invalid size ID' });
     }
     if (!Array.isArray(values) || values.length === 0) {
       return res.status(422).json({
-        status: "failure",
-        message: "⚠️ `values` must be a non-empty array of strings.",
+        status: 'failure',
+        message: '⚠️ `values` must be a non-empty array of strings.',
       });
     }
 
@@ -123,27 +123,27 @@ export const appendSizeValues = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!sze) {
-      return res.status(404).json({ status: "failure", message: "Not found." });
+      return res.status(404).json({ status: 'failure', message: 'Not found.' });
     }
 
     await createAuditLog({
       user: req.user?.username,
-      module: "ProductDimSize",
-      action: "APPEND_VALUES",
+      module: 'ProductDimSize',
+      action: 'APPEND_VALUES',
       recordId: sze._id,
       changes: { appended: values },
     });
     await invalidateSizeCache();
 
-    return res.status(200).json({ status: "success", data: sze });
+    return res.status(200).json({ status: 'success', data: sze });
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      return res.status(422).json({ status: "failure", message: err.message });
+      return res.status(422).json({ status: 'failure', message: err.message });
     }
-    logError("❌ Append values error", err);
+    logError('❌ Append values error', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: err.message,
     });
   }
@@ -158,15 +158,15 @@ export const getAllSizeConfigs = async (req, res) => {
 
     winstonLogger.info(`✅ Fetched all size configs (${list.length})`);
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       count: list.length,
       data: list,
     });
   } catch (error) {
-    logStackError("❌ Get all size configs error", error);
+    logStackError('❌ Get all size configs error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -177,14 +177,14 @@ export const getArchivedSizeConfigs = async (req, res) => {
   try {
     const archived = await ProductDimSizeModel.find({ archived: true });
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       data: archived,
     });
   } catch (error) {
-    logError("❌ Get archived size configs error", error);
+    logError('❌ Get archived size configs error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -198,14 +198,14 @@ export const getSizeConfigById = async (req, res) => {
     if (!cfg) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Not found." });
+        .json({ status: 'failure', message: '⚠️ Not found.' });
     }
-    return res.status(200).json({ status: "success", data: cfg });
+    return res.status(200).json({ status: 'success', data: cfg });
   } catch (error) {
-    logError("❌ Get size config by ID error", error);
+    logError('❌ Get size config by ID error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -217,7 +217,7 @@ export const updateSizeConfigById = async (req, res) => {
     const { sizeId } = req.params;
     const updateData = {
       ...req.body,
-      updatedBy: req.user?.username || "Unknown",
+      updatedBy: req.user?.username || 'Unknown',
     };
     const cfg = await ProductDimSizeModel.findByIdAndUpdate(
       sizeId,
@@ -230,29 +230,29 @@ export const updateSizeConfigById = async (req, res) => {
     if (!cfg) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Not found." });
+        .json({ status: 'failure', message: '⚠️ Not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "ProductDimSize",
-      action: "UPDATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'ProductDimSize',
+      action: 'UPDATE',
       recordId: cfg._1d,
       changes: { newData: cfg },
     });
 
     await invalidateSizeCache();
-    return res.status(200).json({ status: "success", data: cfg });
+    return res.status(200).json({ status: 'success', data: cfg });
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logError("❌ Update size config error", error);
+    logError('❌ Update size config error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -266,23 +266,23 @@ export const deleteSizeConfigById = async (req, res) => {
     if (!cfg) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Not found." });
+        .json({ status: 'failure', message: '⚠️ Not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "ProductDimSize",
-      action: "DELETE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'ProductDimSize',
+      action: 'DELETE',
       recordId: cfg._id,
     });
 
     await invalidateSizeCache();
-    return res.status(200).json({ status: "success", message: "✅ Deleted." });
+    return res.status(200).json({ status: 'success', message: '✅ Deleted.' });
   } catch (error) {
-    logError("❌ Delete size config error", error);
+    logError('❌ Delete size config error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -294,29 +294,29 @@ export const archiveSizeConfigById = async (req, res) => {
     const { sizeId } = req.params;
     const cfg = await ProductDimSizeModel.findByIdAndUpdate(
       sizeId,
-      { archived: true, updatedBy: req.user?.username || "Unknown" },
+      { archived: true, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!cfg) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Not found." });
+        .json({ status: 'failure', message: '⚠️ Not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "ProductDimSize",
-      action: "ARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'ProductDimSize',
+      action: 'ARCHIVE',
       recordId: cfg._id,
     });
 
     await invalidateSizeCache();
-    return res.status(200).json({ status: "success", data: cfg });
+    return res.status(200).json({ status: 'success', data: cfg });
   } catch (error) {
-    logError("❌ Archive size config error", error);
+    logError('❌ Archive size config error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -327,29 +327,29 @@ export const unarchiveSizeConfigById = async (req, res) => {
     const { sizeId } = req.params;
     const cfg = await ProductDimSizeModel.findByIdAndUpdate(
       sizeId,
-      { archived: false, updatedBy: req.user?.username || "Unknown" },
+      { archived: false, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!cfg) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Not found." });
+        .json({ status: 'failure', message: '⚠️ Not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "ProductDimSize",
-      action: "UNARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'ProductDimSize',
+      action: 'UNARCHIVE',
       recordId: cfg._id,
     });
 
     await invalidateSizeCache();
-    return res.status(200).json({ status: "success", data: cfg });
+    return res.status(200).json({ status: 'success', data: cfg });
   } catch (error) {
-    logError("❌ Unarchive size config error", error);
+    logError('❌ Unarchive size config error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -360,8 +360,8 @@ export const bulkCreateSizeConfigs = async (req, res) => {
   const docs = req.body;
   if (!Array.isArray(docs) || docs.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide a non-empty array of size configs.",
+      status: 'failure',
+      message: '⚠️ Provide a non-empty array of size configs.',
     });
   }
 
@@ -370,7 +370,7 @@ export const bulkCreateSizeConfigs = async (req, res) => {
   try {
     const n = docs.length;
     const counter = await ProductDimSizeCounterModel.findOneAndUpdate(
-      { _id: "sizeCode" },
+      { _id: 'sizeCode' },
       { $inc: { seq: n } },
       { new: true, upsert: true, session }
     );
@@ -378,16 +378,16 @@ export const bulkCreateSizeConfigs = async (req, res) => {
       start = end - n + 1;
 
     docs.forEach((d, i) => {
-      d.code = `SIZ_${(start + i).toString().padStart(3, "0")}`;
+      d.code = `SIZ_${(start + i).toString().padStart(3, '0')}`;
     });
 
     const created = await ProductDimSizeModel.insertMany(docs, { session });
     await Promise.all(
       created.map((cfg) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "ProductDimSize",
-          action: "BULK_CREATE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'ProductDimSize',
+          action: 'BULK_CREATE',
           recordId: cfg._id,
           changes: { newData: cfg },
         })
@@ -399,17 +399,17 @@ export const bulkCreateSizeConfigs = async (req, res) => {
     await invalidateSizeCache();
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${created.length} size configs created.`,
       data: created,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk create size configs error", error);
+    logStackError('❌ Bulk create size configs error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk creation.",
+      status: 'failure',
+      message: 'Error during bulk creation.',
       error: error.message,
     });
   }
@@ -419,8 +419,8 @@ export const bulkUpdateSizeConfigs = async (req, res) => {
   const updates = req.body;
   if (!Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide a non-empty array of { id or _id, update }.",
+      status: 'failure',
+      message: '⚠️ Provide a non-empty array of { id or _id, update }.',
     });
   }
 
@@ -435,15 +435,15 @@ export const bulkUpdateSizeConfigs = async (req, res) => {
       }
       const cfg = await ProductDimSizeModel.findByIdAndUpdate(
         id,
-        { ...entry.update, updatedBy: req.user?.username || "Unknown" },
+        { ...entry.update, updatedBy: req.user?.username || 'Unknown' },
         { new: true, runValidators: true, session }
       );
       if (!cfg) throw new Error(`Not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "ProductDimSize",
-        action: "BULK_UPDATE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'ProductDimSize',
+        action: 'BULK_UPDATE',
         recordId: cfg._id,
         changes: { newData: cfg },
       });
@@ -455,17 +455,17 @@ export const bulkUpdateSizeConfigs = async (req, res) => {
     await invalidateSizeCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${results.length} updated successfully.`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk update size configs error", error);
+    logStackError('❌ Bulk update size configs error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk update.",
+      status: 'failure',
+      message: 'Error during bulk update.',
       error: error.message,
     });
   }
@@ -475,8 +475,8 @@ export const bulkDeleteSizeConfigs = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide a non-empty array of ids.",
+      status: 'failure',
+      message: '⚠️ Provide a non-empty array of ids.',
     });
   }
 
@@ -487,14 +487,14 @@ export const bulkDeleteSizeConfigs = async (req, res) => {
       { _id: { $in: ids } },
       { session }
     );
-    if (deletedCount === 0) throw new Error("No configs deleted.");
+    if (deletedCount === 0) throw new Error('No configs deleted.');
 
     await Promise.all(
       ids.map((id) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "ProductDimSize",
-          action: "BULK_DELETE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'ProductDimSize',
+          action: 'BULK_DELETE',
           recordId: id,
         })
       )
@@ -505,16 +505,16 @@ export const bulkDeleteSizeConfigs = async (req, res) => {
     await invalidateSizeCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${deletedCount} configs deleted.`,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk delete size configs error", error);
+    logStackError('❌ Bulk delete size configs error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk delete.",
+      status: 'failure',
+      message: 'Error during bulk delete.',
       error: error.message,
     });
   }

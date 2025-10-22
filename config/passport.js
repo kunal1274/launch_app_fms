@@ -1,10 +1,10 @@
 // config/passport.js
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import dotenv from "dotenv";
-import { UserGoogleModel } from "../models/userGoogle.model.js";
-import { UserGlobalModel } from "../models/userGlobal.model.js";
-import createGlobalPartyId from "../shared_service/utility/createGlobalParty.utility.js";
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import dotenv from 'dotenv';
+import { UserGoogleModel } from '../models/userGoogle.model.js';
+import { UserGlobalModel } from '../models/userGlobal.model.js';
+import createGlobalPartyId from '../shared_service/utility/createGlobalParty.utility.js';
 
 dotenv.config();
 
@@ -43,7 +43,7 @@ passport.use(
 
         if (userGlobal && !userGlobal.globalPartyId) {
           const partyIdForExistingRecord = await createGlobalPartyId(
-            "User",
+            'User',
             null,
             user.email
           );
@@ -53,14 +53,14 @@ passport.use(
 
         if (!userGlobal) {
           const partyIdNew = await createGlobalPartyId(
-            "User",
+            'User',
             null,
             user.email
           );
           await UserGlobalModel.create({
             email: profile.emails[0].value,
-            method: "email",
-            signInMethod: "gmail",
+            method: 'email',
+            signInMethod: 'gmail',
             globalPartyId: partyIdNew,
           });
         }

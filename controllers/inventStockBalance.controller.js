@@ -1,20 +1,20 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
-import logger, { logStackError } from "../utility/logger.util.js";
-import { StockBalanceModel } from "../models/inventStockBalance.model.js";
-import { InventoryJournalModel } from "../models/inventJournal.model.js";
-import { getStockTransactionsPerBalance } from "../services/getStockTransactionsPerBalance.service.js";
+import { createAuditLog } from '../audit_logging_service/utils/auditLogger.utils.js';
+import redisClient from '../middleware/redisClient.js';
+import logger, { logStackError } from '../utility/logger.util.js';
+import { StockBalanceModel } from '../models/inventStockBalance.model.js';
+import { InventoryJournalModel } from '../models/inventJournal.model.js';
+import { getStockTransactionsPerBalance } from '../services/getStockTransactionsPerBalance.service.js';
 
 async function invalidateStockBalanceCache() {
   try {
-    await redisClient.del("/fms/api/v0/stock-balances");
-    logger.info("Cache invalidated: /fms/api/v0/stock-balances", {
-      context: "invalidateStockBalanceCache",
+    await redisClient.del('/fms/api/v0/stock-balances');
+    logger.info('Cache invalidated: /fms/api/v0/stock-balances', {
+      context: 'invalidateStockBalanceCache',
     });
   } catch (err) {
-    logStackError("❌ StockBalance cache invalidation failed", err);
+    logStackError('❌ StockBalance cache invalidation failed', err);
   }
 }
 
@@ -26,38 +26,38 @@ export const createStockBalance = async (req, res) => {
     const data = req.body;
     if (!data.item || !data.site || !data.warehouse) {
       return res.status(422).json({
-        status: "failure",
-        message: "item, site and warehouse are required.",
+        status: 'failure',
+        message: 'item, site and warehouse are required.',
       });
     }
 
     const sb = await StockBalanceModel.create(data);
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "StockBalance",
-      action: "CREATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'StockBalance',
+      action: 'CREATE',
       recordId: sb._id,
       changes: { newData: sb },
     });
     await invalidateStockBalanceCache();
 
     return res.status(201).json({
-      status: "success",
-      message: "✅ StockBalance created successfully.",
+      status: 'success',
+      message: '✅ StockBalance created successfully.',
       data: sb,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("❌ StockBalance Validation Error", error);
+      logStackError('❌ StockBalance Validation Error', error);
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logStackError("❌ StockBalance Creation Error", error);
+    logStackError('❌ StockBalance Creation Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -71,9 +71,9 @@ export const bulkCreateStockBalances = async (req, res) => {
   const docs = req.body;
   if (!Array.isArray(docs) || docs.length === 0) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Request body must be a non-empty array of stockBalance objects.",
+        'Request body must be a non-empty array of stockBalance objects.',
     });
   }
 
@@ -85,9 +85,9 @@ export const bulkCreateStockBalances = async (req, res) => {
     await Promise.all(
       created.map((sb) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "StockBalance",
-          action: "BULK_CREATE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'StockBalance',
+          action: 'BULK_CREATE',
           recordId: sb._id,
           changes: { newData: sb },
         })
@@ -99,17 +99,17 @@ export const bulkCreateStockBalances = async (req, res) => {
     await invalidateStockBalanceCache();
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${created.length} stock balances created successfully.`,
       data: created,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk create stockBalance error", error);
+    logStackError('❌ Bulk create stockBalance error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk stockBalance creation.",
+      status: 'failure',
+      message: 'Error during bulk stockBalance creation.',
       error: error.message,
     });
   }
@@ -124,12 +124,12 @@ export const getAllStockBalances = async (req, res) => {
     await redisClient.set(req.originalUrl, JSON.stringify(list), { EX: 300 });
     return res
       .status(200)
-      .json({ status: "success", count: list.length, data: list });
+      .json({ status: 'success', count: list.length, data: list });
   } catch (error) {
-    logStackError("❌ Get All StockBalances Error", error);
+    logStackError('❌ Get All StockBalances Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -145,14 +145,14 @@ export const getStockBalanceById = async (req, res) => {
     if (!sb) {
       return res
         .status(404)
-        .json({ status: "failure", message: "StockBalance not found." });
+        .json({ status: 'failure', message: 'StockBalance not found.' });
     }
-    return res.status(200).json({ status: "success", data: sb });
+    return res.status(200).json({ status: 'success', data: sb });
   } catch (error) {
-    logStackError("❌ Get StockBalance By ID Error", error);
+    logStackError('❌ Get StockBalance By ID Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -173,33 +173,33 @@ export const updateStockBalanceById = async (req, res) => {
     if (!sb) {
       return res
         .status(404)
-        .json({ status: "failure", message: "StockBalance not found." });
+        .json({ status: 'failure', message: 'StockBalance not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "StockBalance",
-      action: "UPDATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'StockBalance',
+      action: 'UPDATE',
       recordId: sb._id,
       changes: { newData: sb },
     });
     await invalidateStockBalanceCache();
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ StockBalance updated successfully.",
+      status: 'success',
+      message: '✅ StockBalance updated successfully.',
       data: sb,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logStackError("❌ Update StockBalance Error", error);
+    logStackError('❌ Update StockBalance Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -213,8 +213,8 @@ export const bulkUpdateStockBalances = async (req, res) => {
   const updates = req.body;
   if (!Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "Request body must be a non-empty array of { _id, update }.  ",
+      status: 'failure',
+      message: 'Request body must be a non-empty array of { _id, update }.  ',
     });
   }
 
@@ -231,9 +231,9 @@ export const bulkUpdateStockBalances = async (req, res) => {
       if (!sb) throw new Error(`StockBalance not found: ${_id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "StockBalance",
-        action: "BULK_UPDATE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'StockBalance',
+        action: 'BULK_UPDATE',
         recordId: sb._id,
         changes: { newData: sb },
       });
@@ -245,17 +245,17 @@ export const bulkUpdateStockBalances = async (req, res) => {
     await invalidateStockBalanceCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${results.length} stock balances updated successfully.`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk update stockBalance error", error);
+    logStackError('❌ Bulk update stockBalance error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk stockBalance update.",
+      status: 'failure',
+      message: 'Error during bulk stockBalance update.',
       error: error.message,
     });
   }
@@ -271,25 +271,25 @@ export const deleteStockBalanceById = async (req, res) => {
     if (!sb) {
       return res
         .status(404)
-        .json({ status: "failure", message: "StockBalance not found." });
+        .json({ status: 'failure', message: 'StockBalance not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "StockBalance",
-      action: "DELETE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'StockBalance',
+      action: 'DELETE',
       recordId: sb._id,
     });
     await invalidateStockBalanceCache();
 
     return res
       .status(200)
-      .json({ status: "success", message: "✅ StockBalance deleted." });
+      .json({ status: 'success', message: '✅ StockBalance deleted.' });
   } catch (error) {
-    logStackError("❌ Delete StockBalance Error", error);
+    logStackError('❌ Delete StockBalance Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -303,8 +303,8 @@ export const bulkDeleteStockBalances = async (req, res) => {
   const ids = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "Request body must be a non-empty array of IDs.",
+      status: 'failure',
+      message: 'Request body must be a non-empty array of IDs.',
     });
   }
 
@@ -316,9 +316,9 @@ export const bulkDeleteStockBalances = async (req, res) => {
       if (!sb) throw new Error(`StockBalance not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "StockBalance",
-        action: "BULK_DELETE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'StockBalance',
+        action: 'BULK_DELETE',
         recordId: sb._id,
       });
     }
@@ -328,16 +328,16 @@ export const bulkDeleteStockBalances = async (req, res) => {
     await invalidateStockBalanceCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${ids.length} stock balances deleted successfully.`,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk delete stockBalance error", error);
+    logStackError('❌ Bulk delete stockBalance error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk stockBalance delete.",
+      status: 'failure',
+      message: 'Error during bulk stockBalance delete.',
       error: error.message,
     });
   }
@@ -354,12 +354,12 @@ export const bulkDeleteStockBalances = async (req, res) => {
  *  • The provisional metrics = posted + draft Δ
  */
 export const getProvisionalStockBalances = async (req, res) => {
-  const cacheKey = "stockBalances:provisional";
+  const cacheKey = 'stockBalances:provisional';
   try {
     // 1) Try Redis first
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      logger.info("✅ Serving provisional balances from cache");
+      logger.info('✅ Serving provisional balances from cache');
       return res.status(200).json(JSON.parse(cached));
     }
     // 1) Load all _posted_ stock balances from the DB
@@ -367,7 +367,7 @@ export const getProvisionalStockBalances = async (req, res) => {
 
     // 2) Load all journals in DRAFT status
     const drafts = await InventoryJournalModel.find({
-      status: { $in: ["DRAFT", "CONFIRMED"] },
+      status: { $in: ['DRAFT', 'CONFIRMED'] },
     }).lean();
 
     // 3) A helper to build a unique map‐key from any "balance"‐like object
@@ -392,7 +392,7 @@ export const getProvisionalStockBalances = async (req, res) => {
         o.serial,
       ]
         .filter(Boolean)
-        .join("|");
+        .join('|');
 
     // 4) We'll accumulate all draft changes in this Map
     //    key ⇒ { dims, deltaQty, deltaPurchaseValue, deltaRevenueValue, deltaCostValue, contributors[] }
@@ -406,7 +406,7 @@ export const getProvisionalStockBalances = async (req, res) => {
         //     Other journals have a single leg.
         const legs = [];
 
-        if (journal.type === "TRANSFER") {
+        if (journal.type === 'TRANSFER') {
           // Leg 1: remove from the origin bin
           legs.push({
             dims: {
@@ -429,7 +429,7 @@ export const getProvisionalStockBalances = async (req, res) => {
             },
             qtyDelta: -line.quantity,
             // priceSource = "from" indicates: “pull costPrice from this same from‐bin”
-            priceSource: "from",
+            priceSource: 'from',
             journalCode: journal.code,
             lineNum: line.lineNum,
           });
@@ -456,7 +456,7 @@ export const getProvisionalStockBalances = async (req, res) => {
             },
             qtyDelta: +line.quantity,
             // still priceSource="from" ⇒ even the “to” leg uses the costPrice from the from‐bin
-            priceSource: "from",
+            priceSource: 'from',
             journalCode: journal.code,
             lineNum: line.lineNum,
           });
@@ -490,7 +490,7 @@ export const getProvisionalStockBalances = async (req, res) => {
               journalCode: journal.code,
               lineNum: line.lineNum,
             });
-          } else if (journal.type === "COUNTING") {
+          } else if (journal.type === 'COUNTING') {
             // counting only changes quantity
             legs.push({
               dims,
@@ -535,7 +535,7 @@ export const getProvisionalStockBalances = async (req, res) => {
             costDelta = line.loadOnInventoryValue;
           } else if (leg.isCounting) {
             // counting only changes quantity
-          } else if (journal.type === "TRANSFER") {
+          } else if (journal.type === 'TRANSFER') {
             // always use costPrice from the “from” bin, even for the to‐leg
             const fromBin = await StockBalanceModel.findOne({
               ...leg.dims,
@@ -629,20 +629,20 @@ export const getProvisionalStockBalances = async (req, res) => {
     //   data: result,
     // });
 
-    const response = { status: "success", count: result.length, data: result };
+    const response = { status: 'success', count: result.length, data: result };
 
     // 3) Cache in Redis for 60s
     await redisClient.set(cacheKey, JSON.stringify(response), {
       EX: 60, // seconds
     });
 
-    logger.info("✅ Computed & cached provisional balances");
+    logger.info('✅ Computed & cached provisional balances');
     return res.status(200).json(response);
   } catch (err) {
-    logStackError("❌ Provisional Balances Error", err);
+    logStackError('❌ Provisional Balances Error', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error computing provisional balances.",
+      status: 'failure',
+      message: 'Error computing provisional balances.',
       error: err.message,
     });
   }
@@ -657,45 +657,45 @@ export const getStockTransactions = async (req, res) => {
     // 1) Build a match‐function from query‐string dims:
     const dims = {};
     [
-      "item",
-      "site",
-      "warehouse",
-      "zone",
-      "location",
-      "aisle",
-      "rack",
-      "shelf",
-      "bin",
-      "config",
-      "color",
-      "size",
-      "style",
-      "version",
-      "batch",
-      "serial",
+      'item',
+      'site',
+      'warehouse',
+      'zone',
+      'location',
+      'aisle',
+      'rack',
+      'shelf',
+      'bin',
+      'config',
+      'color',
+      'size',
+      'style',
+      'version',
+      'batch',
+      'serial',
     ].forEach((key) => {
       if (req.query[key]) dims[key] = req.query[key];
     });
 
     // 2) Build a stable cache key from those dims
     const cacheKey =
-      "stockTx:" +
+      'stockTx:' +
       Object.entries(dims)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([k, v]) => `${k}=${v}`)
-        .join("&");
+        .join('&');
 
     // 3) Try to serve from Redis
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      logger.info("✅ Served stock transactions from cache");
+      logger.info('✅ Served stock transactions from cache');
       return res.status(200).json(JSON.parse(cached));
     }
 
     // 2) Fetch all journals (posted + draft) that have at least one line matching dims
     //    We do a broad find, then filter in‐JS on the flattened lines.
     const journals = await InventoryJournalModel.find({
-      "lines.item": dims.item || { $exists: true },
+      'lines.item': dims.item || { $exists: true },
     }).lean();
 
     // 3) Flatten matching lines into a unified array
@@ -707,18 +707,18 @@ export const getStockTransactions = async (req, res) => {
         for (const [k, v] of Object.entries(dims)) {
           // line.from/line.to for storage dims; top‐level for others
           const val = [
-            "site",
-            "warehouse",
-            "zone",
-            "location",
-            "aisle",
-            "rack",
-            "shelf",
-            "bin",
+            'site',
+            'warehouse',
+            'zone',
+            'location',
+            'aisle',
+            'rack',
+            'shelf',
+            'bin',
           ].includes(k)
-            ? journal.type === "TRANSFER"
+            ? journal.type === 'TRANSFER'
               ? // for TRANSFER, both legs matter, but we'll just include the line once
-                line.from[k] || line.to[k]
+              line.from[k] || line.to[k]
               : line.from[k] || line.to[k]
             : line[k];
           if (!val || val.toString() !== v) {
@@ -729,9 +729,9 @@ export const getStockTransactions = async (req, res) => {
         if (!ok) continue;
 
         const qty = line.quantity;
-        const posted = journal.status === "POSTED";
+        const posted = journal.status === 'POSTED';
         const draft =
-          journal.status === "DRAFT" || journal.status === "CONFIRMED";
+          journal.status === 'DRAFT' || journal.status === 'CONFIRMED';
         //const draft = ["DRAFT", "CONFIRMED"].includes(journal.status);
         const inQty = qty > 0 ? qty : 0;
         const outQty = qty < 0 ? -qty : 0;
@@ -805,19 +805,19 @@ export const getStockTransactions = async (req, res) => {
 
     // 7) Build response & cache it
     const response = {
-      status: "success",
+      status: 'success',
       count: ledger.length,
       data: ledger,
     };
     await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 });
-    logger.info("✅ Computed & cached stock transactions");
+    logger.info('✅ Computed & cached stock transactions');
 
     return res.status(200).json(response);
   } catch (err) {
-    logStackError("❌ Stock Transactions Error", err);
+    logStackError('❌ Stock Transactions Error', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Could not assemble transaction ledger.",
+      status: 'failure',
+      message: 'Could not assemble transaction ledger.',
       error: err.message,
     });
   }
@@ -832,7 +832,7 @@ export const getStockTransactionsForBalance1 = async (req, res) => {
     if (!sb) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Stock balance not found." });
+        .json({ status: 'failure', message: 'Stock balance not found.' });
     }
 
     // 2) Build a dims‐object exactly like our ledger builder expects
@@ -875,15 +875,15 @@ export const getStockTransactionsForBalance1 = async (req, res) => {
 
     // 4) Return it
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       balance: sb,
       transactions: ledgerPayload.data,
     });
   } catch (err) {
-    logger.error("❌ getStockTransactionsForBalance", err);
+    logger.error('❌ getStockTransactionsForBalance', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error fetching transactions for this balance.",
+      status: 'failure',
+      message: 'Error fetching transactions for this balance.',
       error: err.message,
     });
   }
@@ -898,7 +898,7 @@ export const getStockTransactionsForBalance = async (req, res) => {
     // 1) Try cache first
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      logger.info("✅ Served balance‐transactions from Redis cache", {
+      logger.info('✅ Served balance‐transactions from Redis cache', {
         balanceId,
       });
       return res.status(200).json(JSON.parse(cached));
@@ -909,7 +909,7 @@ export const getStockTransactionsForBalance = async (req, res) => {
     if (!sb) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Stock balance not found." });
+        .json({ status: 'failure', message: 'Stock balance not found.' });
     }
 
     // 2) Build the exact dims object from that balance
@@ -947,21 +947,21 @@ export const getStockTransactionsForBalance = async (req, res) => {
 
     // 5) Build the full response
     const response = {
-      status: "success",
+      status: 'success',
       balance: sb,
       transactions: ledger,
     };
 
     // 6) Cache it for 60 seconds
     await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 });
-    logger.info("✅ Cached balance‐transactions in Redis", { balanceId });
+    logger.info('✅ Cached balance‐transactions in Redis', { balanceId });
 
     return res.status(200).json(response);
   } catch (err) {
-    logStackError("❌ getStockTransactionsForBalance", err);
+    logStackError('❌ getStockTransactionsForBalance', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error fetching transactions for this balance.",
+      status: 'failure',
+      message: 'Error fetching transactions for this balance.',
       error: err.message,
     });
   }

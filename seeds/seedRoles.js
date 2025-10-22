@@ -1,11 +1,11 @@
 // node scripts/seedRoles.js
 
 // scripts/seedJournalTemplateRoles.js
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-import dotenv from "dotenv";
-import { PermissionModel } from "../role_based_access_control_service/models/permission.model";
-import { UserRoleModel } from "../role_based_access_control_service/models/userRole.model";
+import dotenv from 'dotenv';
+import { PermissionModel } from '../role_based_access_control_service/models/permission.model';
+import { UserRoleModel } from '../role_based_access_control_service/models/userRole.model';
 dotenv.config();
 
 async function seedJournalTemplateRoles() {
@@ -13,13 +13,13 @@ async function seedJournalTemplateRoles() {
 
   // 1. Define the permission keys we care about
   const KEYS = [
-    "TEMPLATE_VIEW",
-    "TEMPLATE_VIEW_OWN",
-    "TEMPLATE_CREATE",
-    "TEMPLATE_UPDATE",
-    "TEMPLATE_UPDATE_OWN",
-    "TEMPLATE_DELETE",
-    "TEMPLATE_DELETE_OWN",
+    'TEMPLATE_VIEW',
+    'TEMPLATE_VIEW_OWN',
+    'TEMPLATE_CREATE',
+    'TEMPLATE_UPDATE',
+    'TEMPLATE_UPDATE_OWN',
+    'TEMPLATE_DELETE',
+    'TEMPLATE_DELETE_OWN',
   ];
 
   // 2. Fetch those Permission docs
@@ -32,23 +32,23 @@ async function seedJournalTemplateRoles() {
   // 3. Define roles → their permission‐key lists
   const ROLES = [
     {
-      name: "JournalTemplateViewer",
-      keys: ["TEMPLATE_VIEW", "TEMPLATE_VIEW_OWN"],
+      name: 'JournalTemplateViewer',
+      keys: ['TEMPLATE_VIEW', 'TEMPLATE_VIEW_OWN'],
     },
     {
-      name: "JournalTemplateCreator",
-      keys: ["TEMPLATE_CREATE"],
+      name: 'JournalTemplateCreator',
+      keys: ['TEMPLATE_CREATE'],
     },
     {
-      name: "JournalTemplateEditor",
-      keys: ["TEMPLATE_UPDATE", "TEMPLATE_UPDATE_OWN"],
+      name: 'JournalTemplateEditor',
+      keys: ['TEMPLATE_UPDATE', 'TEMPLATE_UPDATE_OWN'],
     },
     {
-      name: "JournalTemplateDeleter",
-      keys: ["TEMPLATE_DELETE", "TEMPLATE_DELETE_OWN"],
+      name: 'JournalTemplateDeleter',
+      keys: ['TEMPLATE_DELETE', 'TEMPLATE_DELETE_OWN'],
     },
     {
-      name: "JournalTemplateAdmin",
+      name: 'JournalTemplateAdmin',
       keys: KEYS, // all of them
     },
   ];
@@ -65,7 +65,7 @@ async function seedJournalTemplateRoles() {
     console.log(`✅ Role '${name}' seeded (${permIds.length} perms)`);
   }
 
-  console.log("✅ All JournalTemplate roles seeded.");
+  console.log('✅ All JournalTemplate roles seeded.');
   process.exit(0);
 }
 

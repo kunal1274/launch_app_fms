@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
 /**
  * Subschema for Bank Account Details.
@@ -82,7 +82,7 @@ const CompanySchema = new Schema(
       validate: {
         validator: (v) => /^[A-Za-z0-9_-]+$/.test(v),
         message:
-          "⚠️ Company Code can only contain alphanumeric characters, dashes, or underscores.",
+          '⚠️ Company Code can only contain alphanumeric characters, dashes, or underscores.',
       },
       // You can enforce uppercase if needed by using a pre-save hook.
     },
@@ -93,7 +93,7 @@ const CompanySchema = new Schema(
     },
     globalPartyId: {
       type: Schema.Types.ObjectId,
-      ref: "BB1GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      ref: 'BB1GlobalParties', // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
       required: false,
       unique: true, //ensures only 1 user doc can point to the same globalParty
     },
@@ -102,30 +102,30 @@ const CompanySchema = new Schema(
       required: true,
       enum: {
         values: [
-          "Individual",
-          "Community",
-          "Manufacturing",
-          "ServiceProvider",
-          "Trading",
-          "Distributor",
-          "Retailer",
-          "Wholesaler",
-          "Others",
+          'Individual',
+          'Community',
+          'Manufacturing',
+          'ServiceProvider',
+          'Trading',
+          'Distributor',
+          'Retailer',
+          'Wholesaler',
+          'Others',
         ],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.',
       },
-      default: "Trading",
+      default: 'Trading',
     },
     currency: {
       type: String,
       required: true,
       enum: {
-        values: ["INR", "USD", "EUR", "GBP"],
+        values: ['INR', 'USD', 'EUR', 'GBP'],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only\'INR\',\'USD\',\'EUR\',\'GBP\'.',
       },
-      default: "INR",
+      default: 'INR',
     },
     primaryGSTAddress: {
       type: String,
@@ -172,7 +172,7 @@ const CompanySchema = new Schema(
     createdBy: {
       type: String,
       required: true,
-      default: "SystemCompanyCreation",
+      default: 'SystemCompanyCreation',
     },
     updatedBy: {
       type: String,
@@ -185,7 +185,7 @@ const CompanySchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "BB1GlobalGroups", // from group.model.js
+        ref: 'BB1GlobalGroups', // from group.model.js
       },
     ],
     files: [
@@ -227,7 +227,7 @@ const CompanySchema = new Schema(
  * Pre-save hook to normalize and validate fields.
  * For example, we ensure that email is lowercase and trim companyCode.
  */
-CompanySchema.pre("save", function (next) {
+CompanySchema.pre('save', function (next) {
   // Ensure email is lowercase (this is already done by the schema 'lowercase' option)
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
@@ -263,4 +263,4 @@ CompanySchema.pre("save", function (next) {
 // CompanySchema.index({ email: 1 });
 
 export const CompanyModel =
-  mongoose.models.BB1Companies || model("BB1Companies", CompanySchema);
+  mongoose.models.BB1Companies || model('BB1Companies', CompanySchema);

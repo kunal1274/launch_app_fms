@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { VendorCounterModel } from "./counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { VendorCounterModel } from './counter.model.js';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,7 +12,7 @@ const vendorSchema = new Schema(
     },
     globalPartyId: {
       type: Schema.Types.ObjectId,
-      ref: "GlobalParties", // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
+      ref: 'GlobalParties', // Reference to the Party model. Party model can generate a party id which can be a customer and/or vendor and/or employee and/or worker and/or contractor and/or contact person and/or any person and/or organization like company and/or operating units etc.
       required: false,
       unique: true, //ensures only 1 Customer doc can point to the same globalParty
     },
@@ -21,19 +21,19 @@ const vendorSchema = new Schema(
       required: true,
       enum: {
         values: [
-          "Individual",
-          "Manufacturing",
-          "ServiceProvider",
-          "Trading",
-          "Distributor",
-          "Retailer",
-          "Wholesaler",
-          "Others",
+          'Individual',
+          'Manufacturing',
+          'ServiceProvider',
+          'Trading',
+          'Distributor',
+          'Retailer',
+          'Wholesaler',
+          'Others',
         ],
         message:
-          "⚠️ {VALUE} is not a valid business type. Use among these only Individual, Manufacturing, Service Provider, Trading, Distributor, Retailer, Wholesaler, or Others.",
+          '⚠️ {VALUE} is not a valid business type. Use among these only Individual, Manufacturing, Service Provider, Trading, Distributor, Retailer, Wholesaler, or Others.',
       },
-      default: "Trading",
+      default: 'Trading',
     },
     name: {
       type: String,
@@ -41,24 +41,24 @@ const vendorSchema = new Schema(
     },
     contactNum: {
       type: String,
-      required: [true, "⚠️ Contact number is required."],
+      required: [true, '⚠️ Contact number is required.'],
       // unique: true,
       minlength: [
         10,
-        "⚠️ The phone number should be exactly 10 digits without country code.",
+        '⚠️ The phone number should be exactly 10 digits without country code.',
       ],
-      maxlength: [10, "⚠️ The phone number should be exactly 10 digits."],
+      maxlength: [10, '⚠️ The phone number should be exactly 10 digits.'],
       validate: {
         validator: function (v) {
           return /^\d{10}$/.test(v); // Only allows exactly 10 digits
         },
         message:
-          "⚠️ Contact number must be a 10-digit number without any letters or special characters.",
+          '⚠️ Contact number must be a 10-digit number without any letters or special characters.',
       },
     },
     email: {
       type: String,
-      required: [false, "⚠️ Email is not mandatory but recommended."],
+      required: [false, '⚠️ Email is not mandatory but recommended.'],
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"
@@ -66,31 +66,31 @@ const vendorSchema = new Schema(
           // "!v ||" allows empty if 'required: false'
         },
         message:
-          "⚠️ Email must be a valid email format (e.g. user@example.com).",
+          '⚠️ Email must be a valid email format (e.g. user@example.com).',
       },
-      default: "",
+      default: '',
     },
     contactPersonName: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     contactPersonPhone: {
       type: String,
-      required: [false, "Contact number is required."],
+      required: [false, 'Contact number is required.'],
 
       validate: {
         validator: function (v) {
           return !v || /^\d{10}$/.test(v); // Only allows exactly 10 digits
         },
         message:
-          "⚠️ Contact number must be a 10-digit number without any letters or special characters.",
+          '⚠️ Contact number must be a 10-digit number without any letters or special characters.',
       },
-      default: "",
+      default: '',
     },
     contactPersonEmail: {
       type: String,
-      required: [false, "👍 Email is not mandatory but recommended."],
+      required: [false, '👍 Email is not mandatory but recommended.'],
       validate: {
         validator: function (v) {
           // Simple pattern: "something@something.something"
@@ -98,38 +98,38 @@ const vendorSchema = new Schema(
           // "!v ||" allows empty if 'required: false'
         },
         message:
-          "⚠️ Email must be a valid email format (e.g. user@example.com).",
+          '⚠️ Email must be a valid email format (e.g. user@example.com).',
       },
-      default: "",
+      default: '',
     },
     currency: {
       type: String,
       required: true,
       enum: {
-        values: ["INR", "USD", "EUR", "GBP"],
+        values: ['INR', 'USD', 'EUR', 'GBP'],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only'INR','USD','EUR','GBP'.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only\'INR\',\'USD\',\'EUR\',\'GBP\'.',
       },
-      default: "INR",
+      default: 'INR',
     },
     paymentTerms: {
       type: String,
       required: true,
       enum: {
         values: [
-          "COD",
-          "Net30D",
-          "Net7D",
-          "Net15D",
-          "Net45D",
-          "Net60D",
-          "Net90D",
-          "Advance",
+          'COD',
+          'Net30D',
+          'Net7D',
+          'Net15D',
+          'Net45D',
+          'Net60D',
+          'Net90D',
+          'Advance',
         ],
         message:
-          "⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.",
+          '⚠️ {VALUE} is not a valid currency. Use among these only COD,Net30D,Net7D,Net15D,Net45D,Net60D,Net90D,Advance.',
       },
-      default: "Net30D",
+      default: 'Net30D',
       // need validation on the sales order that if net 30 means the due date is invoice date plus 30 days , for net 90 invoice dt plus 90 days , for cod it is equal to invoice date.. how to implement this .
     },
     creditLimit: {
@@ -143,37 +143,37 @@ const vendorSchema = new Schema(
       required: false, // made it false to align if not required or if some business hs no registration num
       minLength: [
         15,
-        `⚠️ The registration number should be with min. 15 chars`,
+        '⚠️ The registration number should be with min. 15 chars',
       ],
       maxLength: [
         15,
-        `⚠️ The registration number cannot be greater than 15 chars.`,
+        '⚠️ The registration number cannot be greater than 15 chars.',
       ],
-      default: "",
+      default: '',
     },
     panNum: {
       type: String,
       required: false, // rt now kept it false
-      minLength: [10, `⚠️ The pan number should be with min. 10 chars`],
-      maxLength: [10, `⚠️ The pan number cannot be greater than 10 chars.`],
-      default: "",
+      minLength: [10, '⚠️ The pan number should be with min. 10 chars'],
+      maxLength: [10, '⚠️ The pan number cannot be greater than 10 chars.'],
+      default: '',
     },
     tanNum: {
       type: String,
       required: false,
-      minLength: [10, `⚠️ The tan number should be with min. 10 chars`],
-      maxLength: [10, `⚠️ The tan number cannot be greater than 10 chars.`],
-      default: "",
+      minLength: [10, '⚠️ The tan number should be with min. 10 chars'],
+      maxLength: [10, '⚠️ The tan number cannot be greater than 10 chars.'],
+      default: '',
     },
     address: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     remarks: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     active: {
       type: Boolean,
@@ -184,20 +184,20 @@ const vendorSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     linkedCoaAccount: {
       type: Schema.Types.ObjectId,
-      ref: "Accounts",
+      ref: 'Accounts',
       default: null,
       required: [
         false,
-        "Every Vendor should specify the corresponding leaf AccountModel _id",
+        'Every Vendor should specify the corresponding leaf AccountModel _id',
       ],
     },
     bankDetails: [
@@ -211,23 +211,23 @@ const vendorSchema = new Schema(
           type: String,
           required: true,
           enum: {
-            values: ["BankAndUpi", "Cash", "Bank", "UPI", "Crypto", "Barter"],
+            values: ['BankAndUpi', 'Cash', 'Bank', 'UPI', 'Crypto', 'Barter'],
             message:
-              "⚠️ {VALUE} is not a valid type. Use 'Cash' or 'Bank' or 'UPI' or 'Crypto' or 'Barter'.",
+              '⚠️ {VALUE} is not a valid type. Use \'Cash\' or \'Bank\' or \'UPI\' or \'Crypto\' or \'Barter\'.',
           },
-          default: "Bank",
+          default: 'Bank',
         },
         bankAccNum: {
           type: String,
           required: [
             false,
-            "⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique",
+            '⚠️ Bank Account or UPI or Crypto Number  is mandatory and it should be unique',
           ],
           // unique: true,
           validate: {
             validator: (v) => /^[A-Za-z0-9@._-]+$/.test(v), // Corrected regex
             message:
-              "⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .",
+              '⚠️ Bank Account or UPI or Crypto Number can only contain alphanumeric characters, dashes, or underscores or @ or .',
           },
         },
         upi: {
@@ -257,7 +257,7 @@ const vendorSchema = new Schema(
         },
         qrDetails: {
           type: String,
-          default: "",
+          default: '',
         },
       },
     ],
@@ -287,7 +287,7 @@ const vendorSchema = new Schema(
   }
 );
 
-vendorSchema.pre("save", async function (next) {
+vendorSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -306,66 +306,66 @@ vendorSchema.pre("save", async function (next) {
 
     // Increment counter within the transaction
     const dbResponseNewCounter = await VendorCounterModel.findOneAndUpdate(
-      { _id: "vendorCode" },
+      { _id: 'vendorCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
       //{ new: true, upsert: true, session }
     );
 
-    console.log("ℹ️ Counter increment result:", dbResponseNewCounter);
+    console.log('ℹ️ Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate vendor code");
+      throw new Error('❌ Failed to generate vendor code');
     }
 
     // Generate vendor code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(6, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(6, '0');
     this.code = `V_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during transaction:", error.stack);
+    console.error('❌ Error caught during transaction:', error.stack);
 
     // Decrement the counter in case of failure
     try {
       const isCounterIncremented =
-        error.message && !error.message.startsWith("Duplicate contact number");
+        error.message && !error.message.startsWith('Duplicate contact number');
       if (isCounterIncremented) {
         await VendorCounterModel.findByIdAndUpdate(
-          { _id: "vendorCode" },
+          { _id: 'vendorCode' },
           { $inc: { seq: -1 } }
         );
       }
     } catch (decrementError) {
-      console.error("❌ Error during counter decrement:", decrementError.stack);
+      console.error('❌ Error during counter decrement:', decrementError.stack);
     }
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally vendor counter closed");
+    console.log('ℹ️ Finally vendor counter closed');
   }
 });
 
-vendorSchema.pre("validate", function (next) {
+vendorSchema.pre('validate', function (next) {
   if (
     this.contactPersonName &&
     !this.contactPersonPhone &&
     !this.contactPersonEmail
   ) {
     this.invalidate(
-      "contactPersonPhone",
-      "⚠️ Either phone or email is required if contact person name is provided."
+      'contactPersonPhone',
+      '⚠️ Either phone or email is required if contact person name is provided.'
     );
     this.invalidate(
-      "contactPersonEmail",
-      "⚠️ Either phone or email is required if contact person name is provided."
+      'contactPersonEmail',
+      '⚠️ Either phone or email is required if contact person name is provided.'
     );
   }
   next();
 });
 
 vendorSchema.pre(/^find/, function (next) {
-  this.populate("globalPartyId", "code active");
+  this.populate('globalPartyId', 'code active');
   next();
 });
 
@@ -375,7 +375,7 @@ vendorSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      email: { $exists: true, $type: "string", $ne: "" },
+      email: { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
@@ -385,30 +385,30 @@ vendorSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      contactNum: { $exists: true, $type: "string", $ne: "" },
+      contactNum: { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 vendorSchema.index(
-  { "bankDetails.bankNum": 1 },
+  { 'bankDetails.bankNum': 1 },
   {
     unique: true,
     partialFilterExpression: {
-      "bankDetails.bankNum": { $exists: true, $type: "string", $ne: "" },
+      'bankDetails.bankNum': { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 vendorSchema.index(
-  { "bankDetails.code": 1 },
+  { 'bankDetails.code': 1 },
   {
     unique: true,
     partialFilterExpression: {
-      "bankDetails.code": { $exists: true, $type: "string", $ne: "" },
+      'bankDetails.code': { $exists: true, $type: 'string', $ne: '' },
     },
   }
 );
 
 export const VendorModel =
-  mongoose.models.Vendors || model("Vendors", vendorSchema);
+  mongoose.models.Vendors || model('Vendors', vendorSchema);

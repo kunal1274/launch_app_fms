@@ -1,6 +1,6 @@
-import createError from "http-errors";
-import XLSX from "xlsx";
-import path from "path";
+import createError from 'http-errors';
+import XLSX from 'xlsx';
+import path from 'path';
 import {
   SalesOrderModel,
   STATUS_TRANSITIONS,
@@ -9,21 +9,21 @@ import {
   generatePaymentId,
   getDaysFromPaymentTerm,
   generateShipmentId,
-} from "../models/bb3SalesOrder.model.js";
+} from '../models/bb3SalesOrder.model.js';
 // import { streamCSV, streamXLSX } from "../utils/exporter.js";
-import multer from "multer";
+import multer from 'multer';
 // import { importCSV, importXLSX } from "../utils/importer.js";
 //import { enqueue } from "../config/queue.js";
-import { computeStatus, totals } from "../utils/bb3OrderStatus.js";
+import { computeStatus, totals } from '../utils/bb3OrderStatus.js';
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: 'uploads/' });
 
 /*------------- helpers------------------------*/
 // helper to find one and attach to res.locals for downstream middleware
 export const loadById = async (req, res, next, id) => {
   try {
     const so = await SalesOrderModel.findById(id);
-    if (!so) return next(createError(404, "Sales order not found"));
+    if (!so) return next(createError(404, 'Sales order not found'));
     res.locals.currentSO = so;
     req.salesOrder = so;
     next();
@@ -40,14 +40,14 @@ async function mutateMovement(req, res, next, mutator) {
     const { id, col, rid } = req.params; // rid means row id .
 
     // ── 1) Validate which sub‑array you’re touching
-    if (!VALID_COL[col]) return next(createError(400, "bad collection"));
+    if (!VALID_COL[col]) return next(createError(400, 'bad collection'));
 
     // ── 2) Load the parent SalesOrder document
     const so = await SalesOrderModel.findById(id);
 
     // ── 3) Locate the exact sub‑document by its row id
     const row = so[col].id(rid);
-    if (!row) return next(createError(404, "row not found"));
+    if (!row) return next(createError(404, 'row not found'));
 
     // ── 4) Apply the custom mutation (post or cancel)
     mutator(row);
@@ -109,7 +109,7 @@ export const create = async (req, res, next) => {
 export const read = async (req, res, next) => {
   try {
     const so = req.salesOrder || res.locals.currentSO;
-    if (!so) return next(createError(404, "Sales order not found"));
+    if (!so) return next(createError(404, 'Sales order not found'));
     res.json(so);
   } catch (err) {
     next(err);
@@ -164,21 +164,21 @@ export const triggerAction = async (req, res, next) => {
   const so = req.salesOrder;
 
   const ACTION_MAP = {
-    approve: "Approved",
-    reject: "Rejected",
-    confirm: "Confirmed",
-    ship: "Shipped", // track partial shipped based on shipping qty vs so qty
-    deliver: "Delivered", // track partial delivery based on delivery qty vs shipping qty
-    invoice: "Invoiced", // track partial invoicing based on invoice qty vs delivery qty
-    cancel: "Cancelled",
-    admin: "AdminMode",
-    any: "AnyMode",
-    draft: "Draft",
-    none: "None",
+    approve: 'Approved',
+    reject: 'Rejected',
+    confirm: 'Confirmed',
+    ship: 'Shipped', // track partial shipped based on shipping qty vs so qty
+    deliver: 'Delivered', // track partial delivery based on delivery qty vs shipping qty
+    invoice: 'Invoiced', // track partial invoicing based on invoice qty vs delivery qty
+    cancel: 'Cancelled',
+    admin: 'AdminMode',
+    any: 'AnyMode',
+    draft: 'Draft',
+    none: 'None',
   };
 
   const nextStatus = ACTION_MAP[actionName];
-  if (!nextStatus) return next(createError(400, "⚠️ Unknown action"));
+  if (!nextStatus) return next(createError(400, '⚠️ Unknown action'));
 
   // custom guard
   if (!STATUS_TRANSITIONS[so.status]?.includes(nextStatus))
@@ -187,7 +187,7 @@ export const triggerAction = async (req, res, next) => {
   /* if computation says we are partial, override */
   const dynStatus = computeStatus(totals(so));
   if (
-    ["PartiallyShipped", "PartiallyDelivered", "PartiallyInvoiced"].includes(
+    ['PartiallyShipped', 'PartiallyDelivered', 'PartiallyInvoiced'].includes(
       dynStatus
     )
   ) {
@@ -213,12 +213,12 @@ export const triggerActionWithData_V1 = async (req, res, next) => {
     const { qty, mode, ref, date } = req.body;
     const so = req.salesOrder; // loaded via .param
     const map = {
-      ship: { key: "shippingQty", status: "Shipped" },
-      deliver: { key: "deliveringQty", status: "Delivered" },
-      invoice: { key: "invoicingQty", status: "Invoiced" },
+      ship: { key: 'shippingQty', status: 'Shipped' },
+      deliver: { key: 'deliveringQty', status: 'Delivered' },
+      invoice: { key: 'invoicingQty', status: 'Invoiced' },
     };
     const cfg = map[actionName];
-    if (!cfg) return next(createError(400, "⚠️ Unknown action"));
+    if (!cfg) return next(createError(400, '⚠️ Unknown action'));
 
     /* transition guard */
     if (!STATUS_TRANSITIONS[so.status]?.includes(cfg.status))
@@ -229,11 +229,11 @@ export const triggerActionWithData_V1 = async (req, res, next) => {
     /* remaining qty check */
     const t = qtyTotals(so);
     const remain =
-      actionName === "ship"
+      actionName === 'ship'
         ? t.ordered - t.shipped
-        : actionName === "deliver"
-        ? t.shipped - t.delivered
-        : t.delivered - t.invoiced;
+        : actionName === 'deliver'
+          ? t.shipped - t.delivered
+          : t.delivered - t.invoiced;
 
     if (qty <= 0 || qty > remain)
       return next(
@@ -242,11 +242,11 @@ export const triggerActionWithData_V1 = async (req, res, next) => {
 
     /* compose sub‑doc */
     const sub =
-      actionName === "ship"
+      actionName === 'ship'
         ? { qty, shipmentMode: mode, extShipmentId: ref, date }
-        : actionName === "deliver"
-        ? { qty, deliveryMode: mode, extDeliveryId: ref, date }
-        : { qty, paymentTerms: mode, extInvoiceId: ref, invoiceDate: date };
+        : actionName === 'deliver'
+          ? { qty, deliveryMode: mode, extDeliveryId: ref, date }
+          : { qty, paymentTerms: mode, extInvoiceId: ref, invoiceDate: date };
 
     so[cfg.key].push(sub);
     so.status = cfg.status;
@@ -265,22 +265,22 @@ export const triggerActionWithData = async (req, res, next) => {
     const so = req.salesOrder; // loaded via .param
 
     const ACTION_MAP = {
-      approve: "Approved",
-      reject: "Rejected",
-      confirm: "Confirmed",
-      ship: "Shipped" || "PartiallyShipped", // track partial shipped based on shipping qty vs so qty
-      deliver: "Delivered", // track partial delivery based on delivery qty vs shipping qty
-      invoice: "Invoiced", // track partial invoicing based on invoice qty vs delivery qty
-      cancel: "Cancelled",
-      admin: "AdminMode",
-      any: "AnyMode",
-      draft: "Draft",
-      none: "None",
+      approve: 'Approved',
+      reject: 'Rejected',
+      confirm: 'Confirmed',
+      ship: 'Shipped' || 'PartiallyShipped', // track partial shipped based on shipping qty vs so qty
+      deliver: 'Delivered', // track partial delivery based on delivery qty vs shipping qty
+      invoice: 'Invoiced', // track partial invoicing based on invoice qty vs delivery qty
+      cancel: 'Cancelled',
+      admin: 'AdminMode',
+      any: 'AnyMode',
+      draft: 'Draft',
+      none: 'None',
     };
 
     const nextStatus = ACTION_MAP[actionName];
     if (!nextStatus)
-      return next(createError(400, "⚠️ Unknown action in Action Mapping"));
+      return next(createError(400, '⚠️ Unknown action in Action Mapping'));
 
     // custom guard
     if (!STATUS_TRANSITIONS[so.status]?.includes(nextStatus))
@@ -291,27 +291,27 @@ export const triggerActionWithData = async (req, res, next) => {
     /* map action -> collection helpers */
     const MAP = {
       ship: {
-        col: "shippingQty",
+        col: 'shippingQty',
         genId: generateShipmentId,
-        modeKey: "shipmentMode",
-        refKey: "extShipmentId",
+        modeKey: 'shipmentMode',
+        refKey: 'extShipmentId',
       },
       deliver: {
-        col: "deliveringQty",
+        col: 'deliveringQty',
         genId: generateDeliveryId,
-        modeKey: "deliveryMode",
-        refKey: "extDeliveryId",
+        modeKey: 'deliveryMode',
+        refKey: 'extDeliveryId',
       },
       invoice: {
-        col: "invoicingQty",
+        col: 'invoicingQty',
         genId: generateInvoicingId,
-        modeKey: "paymentTerms",
-        refKey: "extInvoiceId",
+        modeKey: 'paymentTerms',
+        refKey: 'extInvoiceId',
       },
     };
     const cfg = MAP[actionName];
     if (!cfg)
-      return next(createError(400, "⚠️ Unknown action in Movement Mapping"));
+      return next(createError(400, '⚠️ Unknown action in Movement Mapping'));
 
     // /* transition guard */
     // if (!STATUS_TRANSITIONS[so.status]?.includes(cfg.status))
@@ -331,11 +331,11 @@ export const triggerActionWithData = async (req, res, next) => {
     /* remaining qty check – only POSTED movements reduce remaining */
     const t = totals(so);
     const remain =
-      actionName === "ship"
+      actionName === 'ship'
         ? t.ordered - t.shipped
-        : actionName === "deliver"
-        ? t.shipped - t.delivered
-        : t.delivered - t.invoiced;
+        : actionName === 'deliver'
+          ? t.shipped - t.delivered
+          : t.delivered - t.invoiced;
 
     //previous version
     // if (qty <= 0 || qty > remain)
@@ -360,17 +360,17 @@ export const triggerActionWithData = async (req, res, next) => {
     const sub = {
       qty,
       [cfg.modeKey]: mode,
-      [cfg.refKey]: ref || "NA",
+      [cfg.refKey]: ref || 'NA',
       date: date || new Date(),
-      status: autoPost ? "Posted" : "Draft",
+      status: autoPost ? 'Posted' : 'Draft',
       ...((await cfg.genId())
         ? {
-            [cfg.col === "shippingQty"
-              ? "shipmentId"
-              : cfg.col === "deliveringQty"
-              ? "deliveryId"
-              : "invoicingId"]: await cfg.genId(),
-          }
+          [cfg.col === 'shippingQty'
+            ? 'shipmentId'
+            : cfg.col === 'deliveringQty'
+              ? 'deliveryId'
+              : 'invoicingId']: await cfg.genId(),
+        }
         : {}),
     };
 
@@ -393,7 +393,7 @@ export const triggerActionWithData = async (req, res, next) => {
 export const addPayment = async (req, res, next) => {
   try {
     const { amount, paymentMode, transactionId, date = new Date() } = req.body;
-    if (!amount || amount <= 0) return next(createError(400, "⚠️ amount?"));
+    if (!amount || amount <= 0) return next(createError(400, '⚠️ amount?'));
 
     const so = req.salesOrder;
     so.paidAmt.push({ amount, paymentMode, transactionId, date });
@@ -409,8 +409,8 @@ export const addPayment = async (req, res, next) => {
 export const postMovement = async (req, res, next) => {
   mutateMovement(req, res, next, (row) => {
     // only flip a “Draft” row to “Posted”
-    if (row.status === "Draft") {
-      row.status = "Posted";
+    if (row.status === 'Draft') {
+      row.status = 'Posted';
     }
   });
 };
@@ -419,7 +419,7 @@ export const postMovement = async (req, res, next) => {
 export const cancelMovement = async (req, res, next) => {
   mutateMovement(req, res, next, (row) => {
     // unconditionally cancel it .
-    row.status = "Cancelled";
+    row.status = 'Cancelled';
   });
 };
 
@@ -438,26 +438,26 @@ export const exportAll = async (req, res, next) => {
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(data);
-  XLSX.utils.book_append_sheet(wb, ws, "SalesOrders");
+  XLSX.utils.book_append_sheet(wb, ws, 'SalesOrders');
 
-  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
   res.setHeader(
-    "Content-Disposition",
-    "attachment; filename=sales-orders.xlsx"
+    'Content-Disposition',
+    'attachment; filename=sales-orders.xlsx'
   );
-  res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.send(buf);
 };
 
 /* ────────── 2 ▶ Import bulk ────────── */
 export const importBulk = async (req, res, next) => {
-  if (!req.file) return res.status(400).json({ message: "No file" });
+  if (!req.file) return res.status(400).json({ message: 'No file' });
 
-  const wb = XLSX.read(req.file.buffer, { type: "buffer" });
+  const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws);
 
-  console.log("rows", rows);
+  console.log('rows', rows);
 
   let created = 0;
   const errors = [];
@@ -465,12 +465,12 @@ export const importBulk = async (req, res, next) => {
   for (const row of rows) {
     try {
       await SalesOrderModel.create({
-        orderType: "Sales",
+        orderType: 'Sales',
         customer: row.CustomerId, // map your fields as you like
         item: row.ItemId,
         quantity: row.Quantity,
         price: row.Price,
-        currency: row.Currency || "INR",
+        currency: row.Currency || 'INR',
       });
       created += 1;
     } catch (e) {
@@ -483,7 +483,7 @@ export const importBulk = async (req, res, next) => {
 /* ────────── 3 ▶ Duplicate one ────────── */
 export const duplicateOne = async (req, res, next) => {
   const orig = await SalesOrderModel.findById(req.params.id).lean();
-  if (!orig) return res.status(404).json({ message: "Not found" });
+  if (!orig) return res.status(404).json({ message: 'Not found' });
 
   const { _id, orderNum, createdAt, updatedAt, ...clone } = orig; // drop PK + meta
   const dupe = await SalesOrderModel.create(clone);
@@ -497,7 +497,7 @@ export const uploadFiles1 = async (req, res, next) => {
   try {
     const soId = req.params.id;
     const files = req.files;
-    if (!files?.length) return res.status(400).json({ message: "No files" });
+    if (!files?.length) return res.status(400).json({ message: 'No files' });
 
     const payload = files.map((f) => ({
       fileName: f.originalname,
@@ -510,8 +510,8 @@ export const uploadFiles1 = async (req, res, next) => {
       { $push: { files: { $each: payload } } },
       { new: true }
     );
-    if (!so) return res.status(404).json({ message: "Sales order not found" });
-    res.json({ message: "Uploaded Files to SO", data: so.files });
+    if (!so) return res.status(404).json({ message: 'Sales order not found' });
+    res.json({ message: 'Uploaded Files to SO', data: so.files });
   } catch (e) {
     next(e);
   }
@@ -524,8 +524,8 @@ export const uploadFiles = async (req, res) => {
 
     if (!Array.isArray(files) || files.length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "❌ No files uploaded",
+        status: 'failure',
+        message: '❌ No files uploaded',
       });
     }
 
@@ -546,21 +546,21 @@ export const uploadFiles = async (req, res) => {
 
     if (!so) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `❌ Sales order ${soId} not found`,
       });
     }
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ Files attached successfully",
+      status: 'success',
+      message: '✅ Files attached successfully',
       data: so,
     });
   } catch (error) {
-    console.error("Error uploading files for SalesOrder:", error);
+    console.error('Error uploading files for SalesOrder:', error);
     return res.status(500).json({
-      status: "failure",
-      message: "❌ Internal server error",
+      status: 'failure',
+      message: '❌ Internal server error',
       error: error.message,
     });
   }

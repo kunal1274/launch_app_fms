@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import { ProductDimColorCounterModel } from "./counter.model.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { ProductDimColorCounterModel } from './counter.model.js';
 
 const productDimColorSchema = new Schema(
   {
@@ -21,10 +21,10 @@ const productDimColorSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
     values: {
       type: [String],
@@ -39,12 +39,12 @@ const productDimColorSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     // New field for file uploads
     files: [
@@ -67,7 +67,7 @@ const productDimColorSchema = new Schema(
   }
 );
 
-productDimColorSchema.pre("save", async function (next) {
+productDimColorSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -80,7 +80,7 @@ productDimColorSchema.pre("save", async function (next) {
     const existingColor = await ProductDimColorModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -91,28 +91,28 @@ productDimColorSchema.pre("save", async function (next) {
     // Increment counter for item code
     const dbResponseNewCounter =
       await ProductDimColorCounterModel.findOneAndUpdate(
-        { _id: "colorCode" },
+        { _id: 'colorCode' },
         { $inc: { seq: 1 } },
         { new: true, upsert: true }
       );
 
-    console.log("Counter increment result:", dbResponseNewCounter);
+    console.log('Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate Color code");
+      throw new Error('❌ Failed to generate Color code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `COL_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during color save:", error.stack);
+    console.error('❌ Error caught during color save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally color counter closed");
+    console.log('ℹ️ Finally color counter closed');
   }
 });
 
@@ -121,4 +121,4 @@ productDimColorSchema.pre("save", async function (next) {
 // siteSchema.set("toJSON", { getters: true });
 
 export const ProductDimColorModel =
-  mongoose.models.Colors || model("Colors", productDimColorSchema);
+  mongoose.models.Colors || model('Colors', productDimColorSchema);

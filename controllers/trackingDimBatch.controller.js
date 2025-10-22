@@ -1,22 +1,22 @@
 // controllers/batch.controller.js
 
-import mongoose from "mongoose";
-import { BatchModel } from "../models/trackingDimBatch.model.js";
-import { BatchCounterModel } from "../models/counter.model.js";
-import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
-import logger, { logStackError } from "../utility/logger.util.js";
-import { winstonLogger, logError } from "../utility/logError.utils.js";
+import mongoose from 'mongoose';
+import { BatchModel } from '../models/trackingDimBatch.model.js';
+import { BatchCounterModel } from '../models/counter.model.js';
+import { createAuditLog } from '../audit_logging_service/utils/auditLogger.utils.js';
+import redisClient from '../middleware/redisClient.js';
+import logger, { logStackError } from '../utility/logger.util.js';
+import { winstonLogger, logError } from '../utility/logError.utils.js';
 
 // Helper: invalidate Cache
-const invalidateBatchCache = async (key = "/fms/api/v0/batches") => {
+const invalidateBatchCache = async (key = '/fms/api/v0/batches') => {
   try {
     await redisClient.del(key);
     logger.info(`Cache invalidated: ${key}`, {
-      context: "invalidateBatchCache",
+      context: 'invalidateBatchCache',
     });
   } catch (err) {
-    logStackError("❌ Batch cache invalidation failed", err);
+    logStackError('❌ Batch cache invalidation failed', err);
   }
 };
 
@@ -55,9 +55,9 @@ export const createBatch = async (req, res) => {
     });
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Batch",
-      action: "CREATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Batch',
+      action: 'CREATE',
       recordId: batch._id,
       changes: { newData: batch },
     });
@@ -66,27 +66,27 @@ export const createBatch = async (req, res) => {
     winstonLogger.info(`✅ Batch created: ${batch._id}`);
 
     return res.status(201).json({
-      status: "success",
-      message: "✅ Batch created successfully.",
+      status: 'success',
+      message: '✅ Batch created successfully.',
       data: batch,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("❌ Batch Validation Error", error);
+      logStackError('❌ Batch Validation Error', error);
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     if (error.code === 11000) {
-      logStackError("❌ Batch Duplicate Error", error);
+      logStackError('❌ Batch Duplicate Error', error);
       return res
         .status(409)
-        .json({ status: "failure", message: "Duplicate batch code." });
+        .json({ status: 'failure', message: 'Duplicate batch code.' });
     }
-    logStackError("❌ Batch Creation Error", error);
+    logStackError('❌ Batch Creation Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -104,12 +104,12 @@ export const getAllBatches = async (req, res) => {
     winstonLogger.info(`✅ Fetched all batches (${list.length})`);
     return res
       .status(200)
-      .json({ status: "success", count: list.length, data: list });
+      .json({ status: 'success', count: list.length, data: list });
   } catch (error) {
-    logStackError("❌ Get All Batches Error", error);
+    logStackError('❌ Get All Batches Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -119,12 +119,12 @@ export const getAllBatches = async (req, res) => {
 export const getArchivedBatches = async (req, res) => {
   try {
     const archived = await BatchModel.find({ archived: true });
-    return res.status(200).json({ status: "success", data: archived });
+    return res.status(200).json({ status: 'success', data: archived });
   } catch (error) {
-    logError("❌ Get Archived Batches Error", error);
+    logError('❌ Get Archived Batches Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -140,15 +140,15 @@ export const getBatchById = async (req, res) => {
     if (!batch) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Batch not found." });
+        .json({ status: 'failure', message: '⚠️ Batch not found.' });
     }
     winstonLogger.info(`✅ Retrieved batch: ${batchId}`);
-    return res.status(200).json({ status: "success", data: batch });
+    return res.status(200).json({ status: 'success', data: batch });
   } catch (error) {
-    logError("❌ Get Batch By ID Error", error);
+    logError('❌ Get Batch By ID Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -168,13 +168,13 @@ export const updateBatchById = async (req, res) => {
     if (!batch) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Batch not found." });
+        .json({ status: 'failure', message: '⚠️ Batch not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Batch",
-      action: "UPDATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Batch',
+      action: 'UPDATE',
       recordId: batch._id,
       changes: { newData: batch },
     });
@@ -183,17 +183,17 @@ export const updateBatchById = async (req, res) => {
     winstonLogger.info(`ℹ️ Updated batch: ${batchId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Batch updated.", data: batch });
+      .json({ status: 'success', message: '✅ Batch updated.', data: batch });
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logError("❌ Update Batch Error", error);
+    logError('❌ Update Batch Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -209,13 +209,13 @@ export const deleteBatchById = async (req, res) => {
     if (!batch) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Batch not found." });
+        .json({ status: 'failure', message: '⚠️ Batch not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Batch",
-      action: "DELETE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Batch',
+      action: 'DELETE',
       recordId: batch._id,
     });
 
@@ -223,12 +223,12 @@ export const deleteBatchById = async (req, res) => {
     winstonLogger.info(`ℹ️ Deleted batch: ${batchId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Batch deleted." });
+      .json({ status: 'success', message: '✅ Batch deleted.' });
   } catch (error) {
-    logError("❌ Delete Batch Error", error);
+    logError('❌ Delete Batch Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -246,27 +246,27 @@ export const archiveBatchById = async (req, res) => {
     if (!batchGroup) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Batch group not found." });
+        .json({ status: 'failure', message: '⚠️ Batch group not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Batch",
-      action: "ARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Batch',
+      action: 'ARCHIVE',
       recordId: batchGroup._id,
     });
 
     await invalidateBatchCache();
     return res.status(200).json({
-      status: "success",
-      message: "✅ Batch group archived.",
+      status: 'success',
+      message: '✅ Batch group archived.',
       data: batchGroup,
     });
   } catch (error) {
-    logError("❌ Archive Batch Error", error);
+    logError('❌ Archive Batch Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -284,27 +284,27 @@ export const unarchiveBatchById = async (req, res) => {
     if (!batchGroup) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Batch group not found." });
+        .json({ status: 'failure', message: '⚠️ Batch group not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Batch",
-      action: "UNARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Batch',
+      action: 'UNARCHIVE',
       recordId: batchGroup._id,
     });
 
     await invalidateBatchCache();
     return res.status(200).json({
-      status: "success",
-      message: "✅ Batch group unarchived.",
+      status: 'success',
+      message: '✅ Batch group unarchived.',
       data: batchGroup,
     });
   } catch (error) {
-    logError("❌ Unarchive Batch Error", error);
+    logError('❌ Unarchive Batch Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -318,8 +318,8 @@ export const bulkCreateBatches = async (req, res) => {
   const docs = req.body;
   if (!Array.isArray(docs) || docs.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide non-empty array of batches.",
+      status: 'failure',
+      message: '⚠️ Provide non-empty array of batches.',
     });
   }
 
@@ -328,7 +328,7 @@ export const bulkCreateBatches = async (req, res) => {
   try {
     const n = docs.length;
     const counter = await BatchCounterModel.findOneAndUpdate(
-      { _id: "batchCode" },
+      { _id: 'batchCode' },
       { $inc: { seq: n } },
       { new: true, upsert: true, session }
     );
@@ -336,16 +336,16 @@ export const bulkCreateBatches = async (req, res) => {
     const start = end - n + 1;
 
     docs.forEach((d, i) => {
-      d.code = `BC_${String(start + i).padStart(9, "0")}`;
+      d.code = `BC_${String(start + i).padStart(9, '0')}`;
     });
 
     const created = await BatchModel.insertMany(docs, { session });
     await Promise.all(
       created.map((b) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Batch",
-          action: "BULK_CREATE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Batch',
+          action: 'BULK_CREATE',
           recordId: b._id,
           changes: { newData: b },
         })
@@ -357,17 +357,17 @@ export const bulkCreateBatches = async (req, res) => {
     await invalidateBatchCache();
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${created.length} batches created.`,
       data: created,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk create batches error", error);
+    logStackError('❌ Bulk create batches error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk creation.",
+      status: 'failure',
+      message: 'Error during bulk creation.',
       error: error.message,
     });
   }
@@ -381,8 +381,8 @@ export const bulkUpdateBatches = async (req, res) => {
   const updates = req.body;
   if (!Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide non-empty array of updates.",
+      status: 'failure',
+      message: '⚠️ Provide non-empty array of updates.',
     });
   }
 
@@ -403,9 +403,9 @@ export const bulkUpdateBatches = async (req, res) => {
       if (!b) throw new Error(`Batch not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "Batch",
-        action: "BULK_UPDATE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'Batch',
+        action: 'BULK_UPDATE',
         recordId: b._id,
         changes: { newData: b },
       });
@@ -417,17 +417,17 @@ export const bulkUpdateBatches = async (req, res) => {
     await invalidateBatchCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${results.length} batches updated.`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk update batches error", error);
+    logStackError('❌ Bulk update batches error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk update.",
+      status: 'failure',
+      message: 'Error during bulk update.',
       error: error.message,
     });
   }
@@ -441,8 +441,8 @@ export const bulkDeleteBatches = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Provide non-empty array of ids.",
+      status: 'failure',
+      message: '⚠️ Provide non-empty array of ids.',
     });
   }
 
@@ -453,14 +453,14 @@ export const bulkDeleteBatches = async (req, res) => {
       { _id: { $in: ids } },
       { session }
     );
-    if (deletedCount === 0) throw new Error("No batches deleted.");
+    if (deletedCount === 0) throw new Error('No batches deleted.');
 
     await Promise.all(
       ids.map((id) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Batch",
-          action: "BULK_DELETE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Batch',
+          action: 'BULK_DELETE',
           recordId: id,
         })
       )
@@ -471,16 +471,16 @@ export const bulkDeleteBatches = async (req, res) => {
     await invalidateBatchCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${deletedCount} batches deleted.`,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk delete batches error", error);
+    logStackError('❌ Bulk delete batches error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk delete.",
+      status: 'failure',
+      message: 'Error during bulk delete.',
       error: error.message,
     });
   }

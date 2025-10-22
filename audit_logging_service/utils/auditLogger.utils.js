@@ -1,4 +1,4 @@
-import { AuditLogModel } from "../models/auditLog.model.js";
+import { AuditLogModel } from '../models/auditLog.model.js';
 
 /**
  * Create an audit log entry.
@@ -26,7 +26,7 @@ export async function createAuditLog({
     });
   } catch (error) {
     // Preferably you handle errors in a logger, not to break the main flow.
-    console.error("Failed to create audit log:", error);
+    console.error('Failed to create audit log:', error);
   }
 }
 

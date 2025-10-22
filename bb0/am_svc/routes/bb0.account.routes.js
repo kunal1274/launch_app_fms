@@ -1,6 +1,6 @@
 // routes/account.routes.js
 
-import express from "express";
+import express from 'express';
 import {
   // applyAccountTemplate,
   applyTemplate,
@@ -20,7 +20,7 @@ import {
   replicateAccountById,
   unarchiveAccountById,
   updateAccountById,
-} from "../controllers/bb0.account.controller.js";
+} from '../controllers/bb0.account.controller.js';
 // import {
 //   getAllAccounts,
 //   getAccountById,
@@ -80,31 +80,31 @@ import {
 
 const bb0_ledgerAccountRouter = express.Router();
 
-bb0_ledgerAccountRouter.post("/bulk", bulkCreateAccounts);
-bb0_ledgerAccountRouter.patch("/bulk", bulkUpdateAccounts);
-bb0_ledgerAccountRouter.patch("/bulk-archive", bulkArchiveAccounts);
-bb0_ledgerAccountRouter.delete("/bulk-leaf-delete", bulkAllDeleteAccounts);
+bb0_ledgerAccountRouter.post('/bulk', bulkCreateAccounts);
+bb0_ledgerAccountRouter.patch('/bulk', bulkUpdateAccounts);
+bb0_ledgerAccountRouter.patch('/bulk-archive', bulkArchiveAccounts);
+bb0_ledgerAccountRouter.delete('/bulk-leaf-delete', bulkAllDeleteAccounts);
 bb0_ledgerAccountRouter.delete(
-  "/bulk-cascade-delete",
+  '/bulk-cascade-delete',
   bulkAllDeleteAccountsCascade
 );
 
 // Create a new template
-bb0_ledgerAccountRouter.post("/account-templates", createTemplate);
+bb0_ledgerAccountRouter.post('/account-templates', createTemplate);
 
 // Apply a template to create an account
-bb0_ledgerAccountRouter.post("/account-templates/:id/apply", applyTemplate);
+bb0_ledgerAccountRouter.post('/account-templates/:id/apply', applyTemplate);
 // bb0_ledgerAccountRouter.post("/account-templates", createAccountTemplate);
 // bb0_ledgerAccountRouter.post("/apply-template", applyAccountTemplate);
 
-bb0_ledgerAccountRouter.post("/", createAccount);
-bb0_ledgerAccountRouter.get("/", getAllAccounts);
-bb0_ledgerAccountRouter.get("/:id", getAccountById);
-bb0_ledgerAccountRouter.post("/:id/duplicate", duplicateAccountById);
-bb0_ledgerAccountRouter.post("/:id/replicate", replicateAccountById);
-bb0_ledgerAccountRouter.put("/:id", updateAccountById);
-bb0_ledgerAccountRouter.patch("/:id/archive", archiveAccountById);
-bb0_ledgerAccountRouter.patch("/:id/unarchive", unarchiveAccountById);
-bb0_ledgerAccountRouter.delete("/:id", deleteAccountById);
+bb0_ledgerAccountRouter.post('/', createAccount);
+bb0_ledgerAccountRouter.get('/', getAllAccounts);
+bb0_ledgerAccountRouter.get('/:id', getAccountById);
+bb0_ledgerAccountRouter.post('/:id/duplicate', duplicateAccountById);
+bb0_ledgerAccountRouter.post('/:id/replicate', replicateAccountById);
+bb0_ledgerAccountRouter.put('/:id', updateAccountById);
+bb0_ledgerAccountRouter.patch('/:id/archive', archiveAccountById);
+bb0_ledgerAccountRouter.patch('/:id/unarchive', unarchiveAccountById);
+bb0_ledgerAccountRouter.delete('/:id', deleteAccountById);
 
 export default bb0_ledgerAccountRouter;

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 /**
@@ -7,10 +7,10 @@ const { Schema, model } = mongoose;
 const UserGroupSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    owner: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    secondOwner: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    thirdOwner: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    members: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    owner: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    secondOwner: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    thirdOwner: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     files: [
       {
         fileName: { type: String, required: true }, // Name of the file
@@ -28,7 +28,7 @@ const UserGroupSchema = new Schema(
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
   },
@@ -37,4 +37,4 @@ const UserGroupSchema = new Schema(
   }
 );
 
-export const UserGroupModel = mongoose.model("UserGroup", UserGroupSchema);
+export const UserGroupModel = mongoose.model('UserGroup', UserGroupSchema);

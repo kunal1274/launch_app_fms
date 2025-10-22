@@ -1,12 +1,12 @@
 // controllers/account.controller.js
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 // import redisClient from "../middleware/redisClient.js";
 
-import { BB0_AccountModel } from "../models/bb0.account.model.js";
-import { BB0_GlobalPartyModel } from "../../gm_svc/models/bb0.globalParty.model.js";
-import { BB0_LedgerAccountCounterModel } from "../../shm_svc/models/bb0.counter.model.js";
-import { BB0_AccountTemplateModel } from "../models/bb0.accountTemplate.model.js";
+import { BB0_AccountModel } from '../models/bb0.account.model.js';
+import { BB0_GlobalPartyModel } from '../../gm_svc/models/bb0.globalParty.model.js';
+import { BB0_LedgerAccountCounterModel } from '../../shm_svc/models/bb0.counter.model.js';
+import { BB0_AccountTemplateModel } from '../models/bb0.accountTemplate.model.js';
 
 /**
  * Utility: validate MongoDB ObjectId
@@ -37,7 +37,7 @@ export const getAllAccounts = async (req, res) => {
     const { includeArchived, hierarchy } = req.query;
     const filter = {};
 
-    if (includeArchived !== "true") {
+    if (includeArchived !== 'true') {
       // Only fetch non-archived by default
       filter.isArchived = false;
     }
@@ -48,7 +48,7 @@ export const getAllAccounts = async (req, res) => {
       .lean();
 
     // 2) If user wants a hierarchical tree, build it
-    if (hierarchy === "true") {
+    if (hierarchy === 'true') {
       // Build a map of id → node
       const nodeMap = {};
       accounts.forEach((acct) => {
@@ -83,16 +83,16 @@ export const getAllAccounts = async (req, res) => {
         }
       });
 
-      return res.status(200).json({ status: "success", data: roots });
+      return res.status(200).json({ status: 'success', data: roots });
     }
 
     // 3) Otherwise return flat list
-    return res.status(200).json({ status: "success", data: accounts });
+    return res.status(200).json({ status: 'success', data: accounts });
   } catch (error) {
-    console.error("❌ getAllAccounts Error:", error);
+    console.error('❌ getAllAccounts Error:', error);
     return res
       .status(500)
-      .json({ status: "failure", message: "Internal server error." });
+      .json({ status: 'failure', message: 'Internal server error.' });
   }
 };
 
@@ -102,22 +102,22 @@ export const getAllAccounts = async (req, res) => {
 export const getAccountById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id, "105");
+    console.log(id, '105');
     if (!isValidObjectId(id)) {
-      return res.status(400).json({ status: "failure", message: "Invalid ID" });
+      return res.status(400).json({ status: 'failure', message: 'Invalid ID' });
     }
     const acct = await BB0_AccountModel.findById(id).lean();
     if (!acct) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Account not found." });
+        .json({ status: 'failure', message: 'Account not found.' });
     }
-    return res.status(200).json({ status: "success", data: acct });
+    return res.status(200).json({ status: 'success', data: acct });
   } catch (error) {
     // console.error("❌ getAccountById Error:", error);
     return res
       .status(500)
-      .json({ status: "failure", message: "Internal server error." });
+      .json({ status: 'failure', message: 'Internal server error.' });
   }
 };
 
@@ -144,9 +144,9 @@ export const createAccount = async (req, res) => {
     // Basic validation
     if (!accountCode || !accountName || !accType || !normalBalance) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message:
-          "accountCode, accountName, accType, and normalBalance are required.",
+          'accountCode, accountName, accType, and normalBalance are required.',
       });
     }
 
@@ -156,12 +156,12 @@ export const createAccount = async (req, res) => {
       if (!parentAcct) {
         return res
           .status(404)
-          .json({ status: "failure", message: "Parent Account not found." });
+          .json({ status: 'failure', message: 'Parent Account not found.' });
       }
       if (parentAcct.isLeaf) {
         return res.status(422).json({
-          status: "failure",
-          message: "Parent Account cannot be a leaf.",
+          status: 'failure',
+          message: 'Parent Account cannot be a leaf.',
         });
       }
     }
@@ -173,7 +173,7 @@ export const createAccount = async (req, res) => {
     if (!globalPartyId) {
       const newParty = await BB0_GlobalPartyModel.create({
         name: accountCode, // or pass something else for .name
-        partyType: ["Account"], // force the array to have "Customer"
+        partyType: ['Account'], // force the array to have "Customer"
       });
       partyId = newParty._id;
     } else {
@@ -189,14 +189,14 @@ export const createAccount = async (req, res) => {
         // Option B: Or create a new GlobalParty doc with that _id (rarely recommended)
         // But usually you'd want to fail if the globalPartyId doesn't exist
         return res.status(404).json({
-          status: "failure",
+          status: 'failure',
           message: `⚠️ GlobalParty ${globalPartyId} not found. (Cannot create Account referencing missing party.)`,
         });
       }
 
       // 5) If found, ensure "Customer" is in the partyType array
-      if (!existingParty.partyType.includes("Account")) {
-        existingParty.partyType.push("Account");
+      if (!existingParty.partyType.includes('Account')) {
+        existingParty.partyType.push('Account');
         await existingParty.save();
       }
 
@@ -214,9 +214,9 @@ export const createAccount = async (req, res) => {
       normalBalance,
       isLeaf: isLeaf === false ? false : true, // default true
       allowManualPost: allowManualPost === false ? false : true,
-      currency: currency ? currency.trim() : "INR",
-      description: description || "",
-      group: group || "",
+      currency: currency ? currency.trim() : 'INR',
+      description: description || '',
+      group: group || '',
     });
 
     // console.log("new Acct ", newAcct);
@@ -224,7 +224,7 @@ export const createAccount = async (req, res) => {
     await newAcct.save();
     return res
       .status(201)
-      .json({ status: "success", message: "Account created.", data: newAcct });
+      .json({ status: 'success', message: 'Account created.', data: newAcct });
   } catch (error) {
     //console.error("❌ createAccount Error:", error);
     try {
@@ -233,23 +233,23 @@ export const createAccount = async (req, res) => {
       //   !error.message.startsWith("❌ Duplicate contact number");
       //if (isCounterIncremented) {
       await BB0_LedgerAccountCounterModel.findByIdAndUpdate(
-        { _id: "bb0_glAccCode" },
+        { _id: 'bb0_glAccCode' },
         { $inc: { seq: -1 } }
       );
       // }
     } catch (decrementError) {
-      console.error("❌ Error during counter decrement:", decrementError.stack);
+      console.error('❌ Error during counter decrement:', decrementError.stack);
     }
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     // show exactly which key is duplicated
     if (error.code === 11000) {
       // console.error("❌ Duplicate key details:", error.keyValue);
       return res.status(409).json({
-        status: "failure",
+        status: 'failure',
         message: `Duplicate ${Object.keys(error.keyValue)[0]}: ${
           Object.values(error.keyValue)[0]
         } already exists.`,
@@ -258,7 +258,7 @@ export const createAccount = async (req, res) => {
 
     return res
       .status(500)
-      .json({ status: "failure", message: "Internal server error." });
+      .json({ status: 'failure', message: 'Internal server error.' });
   }
 };
 
@@ -271,8 +271,8 @@ export const bulkCreateAccounts = async (req, res) => {
     const { data } = req.body;
     if (!Array.isArray(data) || data.length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "Request body must contain a non-empty `data` array.",
+        status: 'failure',
+        message: 'Request body must contain a non-empty `data` array.',
       });
     }
 
@@ -287,9 +287,9 @@ export const bulkCreateAccounts = async (req, res) => {
         !acct.normalBalance
       ) {
         return res.status(400).json({
-          status: "failure",
+          status: 'failure',
           message:
-            "accountCode, accountName, accType, and normalBalance are required.",
+            'accountCode, accountName, accType, and normalBalance are required.',
         });
       }
 
@@ -301,12 +301,12 @@ export const bulkCreateAccounts = async (req, res) => {
         if (!parent) {
           return res
             .status(404)
-            .json({ status: "failure", message: "Parent Account not found." });
+            .json({ status: 'failure', message: 'Parent Account not found.' });
         }
         if (parent.isLeaf) {
           return res.status(422).json({
-            status: "failure",
-            message: "Parent Account cannot be a leaf.",
+            status: 'failure',
+            message: 'Parent Account cannot be a leaf.',
           });
         }
       }
@@ -316,19 +316,19 @@ export const bulkCreateAccounts = async (req, res) => {
       if (!partyId) {
         const newParty = await BB0_GlobalPartyModel.create({
           name: acct.accountCode.trim(),
-          partyType: ["Account"],
+          partyType: ['Account'],
         });
         partyId = newParty._id;
       } else {
         const existingParty = await BB0_GlobalPartyModel.findById(partyId);
         if (!existingParty) {
           return res.status(404).json({
-            status: "failure",
+            status: 'failure',
             message: `GlobalParty ${partyId} not found.`,
           });
         }
-        if (!existingParty.partyType.includes("Account")) {
-          existingParty.partyType.push("Account");
+        if (!existingParty.partyType.includes('Account')) {
+          existingParty.partyType.push('Account');
           await existingParty.save();
         }
       }
@@ -343,9 +343,9 @@ export const bulkCreateAccounts = async (req, res) => {
         normalBalance: acct.normalBalance,
         isLeaf: acct.isLeaf === false ? false : true,
         allowManualPost: acct.allowManualPost === false ? false : true,
-        currency: acct.currency ? acct.currency.trim() : "INR",
-        description: acct.description || "",
-        group: acct.group || "",
+        currency: acct.currency ? acct.currency.trim() : 'INR',
+        description: acct.description || '',
+        group: acct.group || '',
       });
 
       await newAcct.save(); // ← this will run your counter hook & generate sysCode
@@ -353,14 +353,14 @@ export const bulkCreateAccounts = async (req, res) => {
     }
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `Inserted ${created.length} account(s).`,
       data: created,
     });
   } catch (error) {
-    console.error("❌ bulkCreateAccounts Error:", error);
+    console.error('❌ bulkCreateAccounts Error:', error);
     // If a validation error occurs, Mongoose may throw a BulkWriteError with details.
-    return res.status(400).json({ status: "failure", message: error.message });
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -371,7 +371,7 @@ export const updateAccountById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
-      return res.status(400).json({ status: "failure", message: "Invalid ID" });
+      return res.status(400).json({ status: 'failure', message: 'Invalid ID' });
     }
 
     // ← ADDED: If they're updating parentAccount, validate it first
@@ -382,12 +382,12 @@ export const updateAccountById = async (req, res) => {
       if (!parent) {
         return res
           .status(404)
-          .json({ status: "failure", message: "Parent Account not found." });
+          .json({ status: 'failure', message: 'Parent Account not found.' });
       }
       if (parent.isLeaf) {
         return res.status(422).json({
-          status: "failure",
-          message: "Parent Account cannot be a leaf.",
+          status: 'failure',
+          message: 'Parent Account cannot be a leaf.',
         });
       }
     }
@@ -395,16 +395,16 @@ export const updateAccountById = async (req, res) => {
     // Build an updates object only for allowed fields
     const updates = {};
     const allowedFields = [
-      "accountCode",
-      "accountName",
-      "accType",
-      "parentAccount",
-      "normalBalance",
-      "isLeaf",
-      "allowManualPost",
-      "currency",
-      "description",
-      "group",
+      'accountCode',
+      'accountName',
+      'accType',
+      'parentAccount',
+      'normalBalance',
+      'isLeaf',
+      'allowManualPost',
+      'currency',
+      'description',
+      'group',
     ];
     for (let f of allowedFields) {
       if (f in req.body) {
@@ -413,8 +413,8 @@ export const updateAccountById = async (req, res) => {
     }
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "No valid fields supplied for update.",
+        status: 'failure',
+        message: 'No valid fields supplied for update.',
       });
     }
 
@@ -425,16 +425,16 @@ export const updateAccountById = async (req, res) => {
     if (!updated) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Account not found." });
+        .json({ status: 'failure', message: 'Account not found.' });
     }
     return res.status(200).json({
-      status: "success",
-      message: "Account updated.",
+      status: 'success',
+      message: 'Account updated.',
       data: updated,
     });
   } catch (error) {
-    console.error("❌ updateAccountById Error:", error);
-    return res.status(400).json({ status: "failure", message: error.message });
+    console.error('❌ updateAccountById Error:', error);
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -448,7 +448,7 @@ export const bulkUpdateAccounts = async (req, res) => {
   try {
     const { data } = req.body;
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("Request body must contain a non-empty `data` array.");
+      throw new Error('Request body must contain a non-empty `data` array.');
     }
 
     const results = [];
@@ -476,16 +476,16 @@ export const bulkUpdateAccounts = async (req, res) => {
       // Only allow certain fields
       const updates = {};
       const allowedFields = [
-        "accountCode",
-        "accountName",
-        "accType",
-        "parentAccount",
-        "normalBalance",
-        "isLeaf",
-        "allowManualPost",
-        "currency",
-        "description",
-        "group",
+        'accountCode',
+        'accountName',
+        'accType',
+        'parentAccount',
+        'normalBalance',
+        'isLeaf',
+        'allowManualPost',
+        'currency',
+        'description',
+        'group',
       ];
       for (let f of allowedFields) {
         if (f in fields) {
@@ -510,15 +510,15 @@ export const bulkUpdateAccounts = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Updated ${results.length} account(s).`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ bulkUpdateAccounts Error:", error);
-    return res.status(400).json({ status: "failure", message: error.message });
+    console.error('❌ bulkUpdateAccounts Error:', error);
+    return res.status(400).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -527,7 +527,7 @@ export const archiveAccountById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
-      return res.status(400).json({ status: "failure", message: "Invalid ID" });
+      return res.status(400).json({ status: 'failure', message: 'Invalid ID' });
     }
     const acct = await BB0_AccountModel.findByIdAndUpdate(
       id,
@@ -537,16 +537,16 @@ export const archiveAccountById = async (req, res) => {
     if (!acct) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Account not found." });
+        .json({ status: 'failure', message: 'Account not found.' });
     }
     return res.status(200).json({
-      status: "success",
-      message: "Account archived.",
+      status: 'success',
+      message: 'Account archived.',
       data: acct,
     });
   } catch (error) {
-    console.error("❌ deleteAccountById Error:", error);
-    return res.status(500).json({ status: "failure", message: error.message });
+    console.error('❌ deleteAccountById Error:', error);
+    return res.status(500).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -557,7 +557,7 @@ export const unarchiveAccountById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
-      return res.status(400).json({ status: "failure", message: "Invalid ID" });
+      return res.status(400).json({ status: 'failure', message: 'Invalid ID' });
     }
     const acct = await BB0_AccountModel.findByIdAndUpdate(
       id,
@@ -567,16 +567,16 @@ export const unarchiveAccountById = async (req, res) => {
     if (!acct) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Account not found." });
+        .json({ status: 'failure', message: 'Account not found.' });
     }
     return res.status(200).json({
-      status: "success",
-      message: "Account unarchived.",
+      status: 'success',
+      message: 'Account unarchived.',
       data: acct,
     });
   } catch (error) {
-    console.error("❌ unarchiveAccountById Error:", error);
-    return res.status(500).json({ status: "failure", message: error.message });
+    console.error('❌ unarchiveAccountById Error:', error);
+    return res.status(500).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -590,13 +590,13 @@ export const deleteAccountById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
-      return res.status(400).json({ status: "failure", message: "Invalid ID" });
+      return res.status(400).json({ status: 'failure', message: 'Invalid ID' });
     }
     const acct = await BB0_AccountModel.findByIdAndDelete(id);
     if (!acct) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ acct not found." });
+        .json({ status: 'failure', message: '⚠️ acct not found.' });
     }
 
     // await createAuditLog({
@@ -610,12 +610,12 @@ export const deleteAccountById = async (req, res) => {
     // winstonLogger.info(`ℹ️ Deleted acct: ${id}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ acct deleted." });
+      .json({ status: 'success', message: '✅ acct deleted.' });
   } catch (error) {
-    console.error("❌ Delete Account Error", error);
+    console.error('❌ Delete Account Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error.",
+      status: 'failure',
+      message: 'Internal server error.',
       error: error.message,
     });
   }
@@ -629,8 +629,8 @@ export const bulkArchiveAccounts = async (req, res) => {
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({
-        status: "failure",
-        message: "Request body must contain a non-empty `ids` array.",
+        status: 'failure',
+        message: 'Request body must contain a non-empty `ids` array.',
       });
     }
     // Validate each ID
@@ -638,7 +638,7 @@ export const bulkArchiveAccounts = async (req, res) => {
       if (!isValidObjectId(id)) {
         return res
           .status(400)
-          .json({ status: "failure", message: `Invalid ID: ${id}` });
+          .json({ status: 'failure', message: `Invalid ID: ${id}` });
       }
     }
     const result = await BB0_AccountModel.updateMany(
@@ -646,12 +646,12 @@ export const bulkArchiveAccounts = async (req, res) => {
       { isArchived: true }
     );
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Archived ${result.nModified} account(s).`,
     });
   } catch (error) {
-    console.error("❌ bulkDeleteAccounts Error:", error);
-    return res.status(500).json({ status: "failure", message: error.message });
+    console.error('❌ bulkDeleteAccounts Error:', error);
+    return res.status(500).json({ status: 'failure', message: error.message });
   }
 };
 
@@ -659,7 +659,7 @@ export const bulkArchiveAccounts = async (req, res) => {
 export const bulkAllDeleteAccounts = async (req, res) => {
   try {
     // find all parentAccount references
-    const parents = await BB0_AccountModel.distinct("parentAccount", {
+    const parents = await BB0_AccountModel.distinct('parentAccount', {
       parentAccount: { $ne: null },
     });
     // leaf = those _ids not in parents
@@ -667,13 +667,13 @@ export const bulkAllDeleteAccounts = async (req, res) => {
       _id: { $nin: parents },
       isArchived: false,
     })
-      .select("_id accountCode accountName")
+      .select('_id accountCode accountName')
       .lean();
 
     if (!leaves.length) {
       return res.status(200).json({
-        status: "success",
-        message: "No leaf accounts to delete.",
+        status: 'success',
+        message: 'No leaf accounts to delete.',
       });
     }
 
@@ -681,27 +681,27 @@ export const bulkAllDeleteAccounts = async (req, res) => {
     const del = await BB0_AccountModel.deleteMany({ _id: { $in: leafIds } });
 
     // recompute counter to max remaining systemCode
-    const rem = await BB0_AccountModel.find({}, "sysCode").lean();
+    const rem = await BB0_AccountModel.find({}, 'sysCode').lean();
     let max = 0;
     rem.forEach(({ sysCode }) => {
       const m = sysCode.match(/LA_(\d+)$/);
       if (m) max = Math.max(max, parseInt(m[1], 10));
     });
     const reset = await BB0_LedgerAccountCounterModel.findOneAndUpdate(
-      { _id: "bb0_glAccCode" },
+      { _id: 'bb0_glAccCode' },
       { seq: max },
       { new: true, upsert: true }
     );
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Deleted ${del.deletedCount} leaf account(s).`,
       deleted: leaves,
       counter: reset.seq,
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -710,34 +710,34 @@ export const bulkAllDeleteAccountsCascade = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const all = await BB0_AccountModel.find({}, "_id").session(session).lean();
+    const all = await BB0_AccountModel.find({}, '_id').session(session).lean();
     const ids = all.map((a) => a._id);
 
     if (!ids.length) {
       await session.commitTransaction();
       return res
         .status(200)
-        .json({ status: "success", message: "No accounts to delete." });
+        .json({ status: 'success', message: 'No accounts to delete.' });
     }
 
     await BB0_AccountModel.deleteMany({ _id: { $in: ids } }).session(session);
     // reset counter to 0
     const reset = await BB0_LedgerAccountCounterModel.findOneAndUpdate(
-      { _id: "bb0_glAccCode" },
+      { _id: 'bb0_glAccCode' },
       { seq: 0 },
       { new: true, upsert: true, session }
     );
 
     await session.commitTransaction();
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Cascade-deleted ${ids.length} account(s).`,
       counter: reset.seq,
     });
   } catch (err) {
     await session.abortTransaction();
     console.error(err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   } finally {
     session.endSession();
   }
@@ -751,25 +751,25 @@ export const bulkAllDeleteAccountsCascade = async (req, res) => {
 export const duplicateAccountById = async (req, res) => {
   const { id } = req.params;
   if (!isValidObjectId(id)) {
-    return res.status(400).json({ status: "failure", message: "Invalid ID" });
+    return res.status(400).json({ status: 'failure', message: 'Invalid ID' });
   }
   const orig = await BB0_AccountModel.findById(id).lean();
   if (!orig) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Account not found." });
+      .json({ status: 'failure', message: 'Account not found.' });
   }
   // 1) Create a fresh GlobalParty for the clone
   const newParty = await BB0_GlobalPartyModel.create({
     name: `${orig.accountCode}-copy-party`,
-    partyType: ["Account"],
+    partyType: ['Account'],
   });
 
   // 2) Build new accountCode
   const copyCode = `${orig.accountCode}-copy-1`;
   if (await BB0_AccountModel.exists({ accountCode: copyCode })) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message: `"${copyCode}" already exists.`,
     });
   }
@@ -784,7 +784,7 @@ export const duplicateAccountById = async (req, res) => {
     updatedAt: undefined,
   });
 
-  return res.status(201).json({ status: "success", data: clone });
+  return res.status(201).json({ status: 'success', data: clone });
 };
 
 /**
@@ -794,10 +794,10 @@ export const replicateAccountById = async (req, res) => {
   try {
     const { id } = req.params;
     const { count } = req.body;
-    if (!isValidObjectId(id) || typeof count !== "number" || count < 1) {
+    if (!isValidObjectId(id) || typeof count !== 'number' || count < 1) {
       return res.status(400).json({
-        status: "failure",
-        message: "`id` must be valid and `count` ≥ 1",
+        status: 'failure',
+        message: '`id` must be valid and `count` ≥ 1',
       });
     }
 
@@ -805,16 +805,16 @@ export const replicateAccountById = async (req, res) => {
     if (!orig) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Account not found." });
+        .json({ status: 'failure', message: 'Account not found.' });
     }
 
-    const base = orig.accountCode.replace(/-copy-\d+$/, "");
+    const base = orig.accountCode.replace(/-copy-\d+$/, '');
 
     // 1) find existing copies
     const regex = new RegExp(`^${base}-copy-(\\d+)$`);
     const existing = await BB0_AccountModel.find(
       { accountCode: { $regex: regex } },
-      "accountCode"
+      'accountCode'
     ).lean();
 
     const used = existing
@@ -834,7 +834,7 @@ export const replicateAccountById = async (req, res) => {
       // 2) new GlobalParty for each clone
       const newParty = await BB0_GlobalPartyModel.create({
         name: `${copyCode}-party`,
-        partyType: ["Account"],
+        partyType: ['Account'],
       });
 
       // 3) create the clone
@@ -850,10 +850,10 @@ export const replicateAccountById = async (req, res) => {
       clones.push(clone);
     }
 
-    return res.status(201).json({ status: "success", data: clones });
+    return res.status(201).json({ status: 'success', data: clones });
   } catch (err) {
-    console.error("❌ replicateAccountById Error:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    console.error('❌ replicateAccountById Error:', err);
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -862,8 +862,8 @@ export const createTemplate = async (req, res) => {
     const { name, defaults } = req.body;
     if (!name || !defaults) {
       return res.status(400).json({
-        status: "failure",
-        message: "`name` and `defaults` are required.",
+        status: 'failure',
+        message: '`name` and `defaults` are required.',
       });
     }
 
@@ -881,15 +881,15 @@ export const createTemplate = async (req, res) => {
       },
     });
 
-    return res.status(201).json({ status: "success", data: tpl });
+    return res.status(201).json({ status: 'success', data: tpl });
   } catch (err) {
     if (err.code === 11000) {
       return res.status(409).json({
-        status: "failure",
+        status: 'failure',
         message: `Template name "${req.body.name}" already exists.`,
       });
     }
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -910,7 +910,7 @@ export const applyTemplate = async (req, res) => {
     if (!tpl) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Template not found." });
+        .json({ status: 'failure', message: 'Template not found.' });
     }
 
     // 2) Build the new account payload
@@ -930,17 +930,17 @@ export const applyTemplate = async (req, res) => {
     // 3) **Generate a new globalPartyId** just like createAccount does
     const newParty = await BB0_GlobalPartyModel.create({
       name: payload.accountCode,
-      partyType: ["Account"],
+      partyType: ['Account'],
     });
     payload.globalPartyId = newParty._id;
 
     // 4) Now create the account (with a unique party)
     const newAcct = await BB0_AccountModel.create(payload);
 
-    return res.status(201).json({ status: "success", data: newAcct });
+    return res.status(201).json({ status: 'success', data: newAcct });
   } catch (err) {
     return res.status(err.code === 11000 ? 409 : 400).json({
-      status: "failure",
+      status: 'failure',
       message: err.message,
     });
   }
@@ -956,7 +956,7 @@ export const applyTemplate1_NOT_IN_USE = async (req, res) => {
     if (!tpl) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Template not found." });
+        .json({ status: 'failure', message: 'Template not found.' });
     }
 
     // 2) Build the new account payload
@@ -978,10 +978,10 @@ export const applyTemplate1_NOT_IN_USE = async (req, res) => {
     //    If not, you can inline similar validation here.
     const newAcct = await BB0_AccountModel.create(payload);
 
-    return res.status(201).json({ status: "success", data: newAcct });
+    return res.status(201).json({ status: 'success', data: newAcct });
   } catch (err) {
     // you can inspect err.name === 'ValidationError' etc.
-    return res.status(400).json({ status: "failure", message: err.message });
+    return res.status(400).json({ status: 'failure', message: err.message });
   }
 };
 /**
@@ -993,25 +993,25 @@ export const createAccountTemplate_NOT_IN_USE = async (req, res) => {
     const { name, defaults } = req.body;
     if (!name || !defaults || !defaults.accType) {
       return res.status(400).json({
-        status: "failure",
+        status: 'failure',
         message:
-          "Template `name` and at least `defaults.accType` are required.",
+          'Template `name` and at least `defaults.accType` are required.',
       });
     }
     const tpl = await BB0_AccountTemplateModel.create({ name, defaults });
     return res.status(201).json({
-      status: "success",
-      message: "Template created.",
+      status: 'success',
+      message: 'Template created.',
       data: tpl,
     });
   } catch (err) {
     if (err.code === 11000) {
       return res.status(409).json({
-        status: "failure",
+        status: 'failure',
         message: `Template name "${req.body.name}" already exists.`,
       });
     }
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -1025,14 +1025,14 @@ export const applyAccountTemplate_NOT_IN_USE = async (req, res) => {
     const { templateId, accountCode, accountName, ...overrides } = req.body;
     if (!templateId || !accountCode || !accountName) {
       return res.status(400).json({
-        status: "failure",
-        message: "templateId, accountCode and accountName are required.",
+        status: 'failure',
+        message: 'templateId, accountCode and accountName are required.',
       });
     }
     const tpl = await BB0_AccountTemplateModel.findById(templateId);
     if (!tpl) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `Template ${templateId} not found.`,
       });
     }
@@ -1047,6 +1047,6 @@ export const applyAccountTemplate_NOT_IN_USE = async (req, res) => {
     req.body = body;
     return createAccount(req, res);
   } catch (err) {
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };

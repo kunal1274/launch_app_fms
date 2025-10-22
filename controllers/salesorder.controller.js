@@ -1,19 +1,19 @@
 // import { SalesOrderModel } from "../models/salesorders.muuSHakaH.model.js";
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import {
   SalesOrderModel,
   STATUS_TRANSITIONS,
-} from "../models/salesorder.model.js";
+} from '../models/salesorder.model.js';
 import {
   SalesInvoiceNumberCounterModel,
   SalesOrderCounterModel,
-} from "../models/counter.model.js";
-import { ItemModel } from "../models/item.model.js";
-import { CustomerModel } from "../models/customer.model.js";
-import { logError } from "../utility/logError.utils.js";
-import SalesStockService from "../services/salesStock.service.js";
-import { ARTransactionModel } from "../models/arTransaction.model.js";
-import VoucherService from "../services/voucher.service.js";
+} from '../models/counter.model.js';
+import { ItemModel } from '../models/item.model.js';
+import { CustomerModel } from '../models/customer.model.js';
+import { logError } from '../utility/logError.utils.js';
+import SalesStockService from '../services/salesStock.service.js';
+import { ARTransactionModel } from '../models/arTransaction.model.js';
+import VoucherService from '../services/voucher.service.js';
 
 /**
  * Helper function to validate status transitions
@@ -23,66 +23,66 @@ import VoucherService from "../services/voucher.service.js";
  */
 const isValidStatusTransition1 = (currentStatus, newStatus) => {
   const STATUS_TRANSITIONS = {
-    Draft: ["Approved", "Rejected", "Cancelled", "AdminMode", "AnyMode"],
-    Rejected: ["Draft", "Cancelled", "AdminMode", "AnyMode"],
-    Approved: ["Draft", "Confirmed", "Cancelled", "AdminMode", "AnyMode"],
+    Draft: ['Approved', 'Rejected', 'Cancelled', 'AdminMode', 'AnyMode'],
+    Rejected: ['Draft', 'Cancelled', 'AdminMode', 'AnyMode'],
+    Approved: ['Draft', 'Confirmed', 'Cancelled', 'AdminMode', 'AnyMode'],
     Confirmed: [
-      "Draft",
-      "PartiallyShipped",
-      "Shipped",
-      "Cancelled",
-      "AdminMode",
-      "AnyMode",
+      'Draft',
+      'PartiallyShipped',
+      'Shipped',
+      'Cancelled',
+      'AdminMode',
+      'AnyMode',
     ],
     PartiallyShipped: [
-      "PartiallyShipped", // the partially shipped can go to partially shipped in case two shipments are done one after another
-      "PartiallyDelivered", // when item is again delivered partially out of the shipped qty
-      "Shipped",
-      "Delivered",
-      "Cancelled",
-      "AdminMode",
-      "AnyMode",
+      'PartiallyShipped', // the partially shipped can go to partially shipped in case two shipments are done one after another
+      'PartiallyDelivered', // when item is again delivered partially out of the shipped qty
+      'Shipped',
+      'Delivered',
+      'Cancelled',
+      'AdminMode',
+      'AnyMode',
     ],
     Shipped: [
-      "PartiallyDelivered",
-      "Delivered",
-      "Cancelled",
-      "AdminMode",
-      "AnyMode",
+      'PartiallyDelivered',
+      'Delivered',
+      'Cancelled',
+      'AdminMode',
+      'AnyMode',
     ],
     PartiallyDelivered: [
-      "PartiallyDelivered",
-      "PartiallyInvoiced",
-      "Delivered",
-      "Invoiced",
-      "Cancelled",
-      "AdminMode",
-      "AnyMode",
+      'PartiallyDelivered',
+      'PartiallyInvoiced',
+      'Delivered',
+      'Invoiced',
+      'Cancelled',
+      'AdminMode',
+      'AnyMode',
     ],
-    Delivered: ["PartiallyInvoiced", "Invoiced", "AdminMode", "AnyMode"],
+    Delivered: ['PartiallyInvoiced', 'Invoiced', 'AdminMode', 'AnyMode'],
     PartiallyInvoiced: [
-      "PartiallyInvoiced",
-      "Invoiced",
-      "Cancelled",
-      "AdminMode",
-      "AnyMode",
+      'PartiallyInvoiced',
+      'Invoiced',
+      'Cancelled',
+      'AdminMode',
+      'AnyMode',
     ],
-    Invoiced: ["AdminMode", "AnyMode"],
-    Cancelled: ["AdminMode", "AnyMode"],
-    AdminMode: ["Draft", "AnyMode"],
+    Invoiced: ['AdminMode', 'AnyMode'],
+    Cancelled: ['AdminMode', 'AnyMode'],
+    AdminMode: ['Draft', 'AnyMode'],
     AnyMode: [
-      "Draft",
-      "Approved",
-      "Rejected",
-      "Confirmed",
-      "PartiallyShipped",
-      "Shipped",
-      "PartiallyDelivered",
-      "Delivered",
-      "PartiallyInvoiced",
-      "Invoiced",
-      "Cancelled",
-      "AdminMode",
+      'Draft',
+      'Approved',
+      'Rejected',
+      'Confirmed',
+      'PartiallyShipped',
+      'Shipped',
+      'PartiallyDelivered',
+      'Delivered',
+      'PartiallyInvoiced',
+      'Invoiced',
+      'Cancelled',
+      'AdminMode',
     ],
   };
 
@@ -90,22 +90,22 @@ const isValidStatusTransition1 = (currentStatus, newStatus) => {
 };
 
 export const isValidStatusTransition = {
-  Draft: ["Confirmed", "Cancelled", "AdminMode", "AnyMode"],
-  Confirmed: ["Draft", "Cancelled", "Invoiced", "AdminMode", "AnyMode"],
-  Invoiced: ["AdminMode", "AnyMode"],
-  Cancelled: ["AdminMode", "AnyMode"],
-  AdminMode: ["Draft", "AnyMode"],
-  AnyMode: ["Draft", "Confirmed", "Invoiced", "Cancelled", "AdminMode"],
+  Draft: ['Confirmed', 'Cancelled', 'AdminMode', 'AnyMode'],
+  Confirmed: ['Draft', 'Cancelled', 'Invoiced', 'AdminMode', 'AnyMode'],
+  Invoiced: ['AdminMode', 'AnyMode'],
+  Cancelled: ['AdminMode', 'AnyMode'],
+  AdminMode: ['Draft', 'AnyMode'],
+  AnyMode: ['Draft', 'Confirmed', 'Invoiced', 'Cancelled', 'AdminMode'],
 };
 
 // Helper function to generate an invoice number (same as your existing implementation)
 async function generateInvoiceNumber() {
   const counter = await SalesOrderCounterModel.findByIdAndUpdate(
-    { _id: "invoiceNumber" },
+    { _id: 'invoiceNumber' },
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
-  const seqNumber = counter.seq.toString().padStart(6, "0");
+  const seqNumber = counter.seq.toString().padStart(6, '0');
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
@@ -115,24 +115,24 @@ async function generateInvoiceNumber() {
   } else {
     financialYear = `${year - 1}-${year.toString().slice(-2)}`;
   }
-  const monthPrefix = now.toLocaleString("en-US", { month: "short" });
-  const companyPrefix = process.env.COMPANY_PREFIX || "DEF";
+  const monthPrefix = now.toLocaleString('en-US', { month: 'short' });
+  const companyPrefix = process.env.COMPANY_PREFIX || 'DEF';
   return `${companyPrefix}/${financialYear}/${monthPrefix}/INV-${seqNumber}`;
 }
 
 export async function getNextInvoiceNum() {
   const ctr = await SalesInvoiceNumberCounterModel.findByIdAndUpdate(
-    { _id: "salesInvoiceNum" },
+    { _id: 'salesInvoiceNum' },
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
 
   if (!ctr || ctr.seq === undefined) {
-    throw new Error("❌ Failed to generate sales invoice number");
+    throw new Error('❌ Failed to generate sales invoice number');
   }
 
   // Format exactly like you want, e.g. INV_000001
-  return `SINV_${ctr.seq.toString().padStart(6, "0")}`;
+  return `SINV_${ctr.seq.toString().padStart(6, '0')}`;
 }
 
 export const createSalesOrder = async (req, res) => {
@@ -142,8 +142,8 @@ export const createSalesOrder = async (req, res) => {
     // Check for required fields
     if (!salesOrderBody.customer || !salesOrderBody.item) {
       return res.status(422).send({
-        status: "failure",
-        message: "Customer and Item are required fields.",
+        status: 'failure',
+        message: 'Customer and Item are required fields.',
       });
     }
 
@@ -153,7 +153,7 @@ export const createSalesOrder = async (req, res) => {
     );
     if (!customerExists) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Customer with ID ${salesOrderBody.customer} does not exist.`,
       });
     }
@@ -162,7 +162,7 @@ export const createSalesOrder = async (req, res) => {
     const itemExists = await ItemModel.findById(salesOrderBody.item);
     if (!itemExists) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Item with ID ${salesOrderBody.item} does not exist.`,
       });
     }
@@ -176,55 +176,55 @@ export const createSalesOrder = async (req, res) => {
       `Sales order has been created successfully with id: ${
         dbResponseNewSalesOrder._id
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`
     );
 
     return res.status(201).send({
-      status: "success",
+      status: 'success',
       message: `Sales order has been created successfully with id: ${
         dbResponseNewSalesOrder._id
       } at ${new Date().toISOString()} equivalent to IST ${new Date().toLocaleString(
-        "en-US",
-        { timeZone: "Asia/Kolkata" }
+        'en-US',
+        { timeZone: 'Asia/Kolkata' }
       )}`,
       data: dbResponseNewSalesOrder,
     });
   } catch (error) {
     // Database Validation Error
     if (error instanceof mongoose.Error.ValidationError) {
-      logError("Sales Order Creation - Validation Error", error);
+      logError('Sales Order Creation - Validation Error', error);
       return res.status(422).send({
-        status: "failure",
-        message: "Validation error during sales order creation.",
+        status: 'failure',
+        message: 'Validation error during sales order creation.',
         error: error.message || error,
       });
     }
 
     // MongoDB Duplicate Key Error
     if (error.code === 11000) {
-      logError("Sales Order Creation - Duplicate Error", error);
+      logError('Sales Order Creation - Duplicate Error', error);
       return res.status(409).send({
-        status: "failure",
-        message: "A sales order with the same order number already exists.",
+        status: 'failure',
+        message: 'A sales order with the same order number already exists.',
       });
     }
 
     // Handle MongoDB connection or network issues
-    if (error.message.includes("network error")) {
-      logError("Sales Order Creation - Network Error", error);
+    if (error.message.includes('network error')) {
+      logError('Sales Order Creation - Network Error', error);
       return res.status(503).send({
-        status: "failure",
-        message: "Service temporarily unavailable. Please try again later.",
+        status: 'failure',
+        message: 'Service temporarily unavailable. Please try again later.',
       });
     }
 
     // General Server Error
-    logError("Sales Order Creation - Unknown Error", error);
+    logError('Sales Order Creation - Unknown Error', error);
     return res.status(500).send({
-      status: "failure",
-      message: "An unexpected error occurred. Please try again.",
+      status: 'failure',
+      message: 'An unexpected error occurred. Please try again.',
       error: error.message || error,
     });
   }
@@ -236,25 +236,25 @@ export const getSalesOrderById = async (req, res) => {
   try {
     // Use populate to fetch customer and item details
     const salesOrder = await SalesOrderModel.findById(salesOrderId)
-      .populate("customer", "name contactNum address")
-      .populate("item", "name description price type unit");
+      .populate('customer', 'name contactNum address')
+      .populate('item', 'name description price type unit');
 
     if (!salesOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Sales order with ID ${salesOrderId} not found.`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Sales order retrieved successfully.",
+      status: 'success',
+      message: 'Sales order retrieved successfully.',
       data: salesOrder,
     });
   } catch (error) {
-    logError("Get Sales Order By ID", error);
+    logError('Get Sales Order By ID', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error retrieving sales order with ID ${salesOrderId}.`,
       error: error.message,
     });
@@ -264,37 +264,37 @@ export const getSalesOrderById = async (req, res) => {
 export const getAllSalesOrders = async (req, res) => {
   const { archived } = req.query; // Check if archived filter is passed
   const filter = { archived: false };
-  if (archived === "false") filter = {};
-  if (archived === "true") filter.archived = true;
+  if (archived === 'false') filter = {};
+  if (archived === 'true') filter.archived = true;
   //if (archived === "false") filter.archived = false;
   try {
     // Retrieve all sales orders with customer and item details populated
     const salesOrders = await SalesOrderModel.find(filter)
-      .populate("customer", "name contactNum address")
+      .populate('customer', 'name contactNum address')
       .populate(
-        "item",
-        "name description price purchPrice salesPrice invPrice type unit"
+        'item',
+        'name description price purchPrice salesPrice invPrice type unit'
       );
 
     if (!salesOrders || salesOrders.length === 0) {
       return res.status(404).send({
-        status: "failure",
-        message: "No sales orders found.",
+        status: 'failure',
+        message: 'No sales orders found.',
       });
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Sales orders retrieved successfully.",
+      status: 'success',
+      message: 'Sales orders retrieved successfully.',
       count: salesOrders.length,
       user: req.user?.email,
       data: salesOrders,
     });
   } catch (error) {
-    logError("Get All Sales Orders", error);
+    logError('Get All Sales Orders', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error retrieving sales orders.",
+      status: 'failure',
+      message: 'Error retrieving sales orders.',
       error: error.message,
     });
   }
@@ -308,8 +308,8 @@ export const updateSalesOrderById = async (req, res) => {
     // Check for required fields
     if (!updatedData.customer || !updatedData.item) {
       return res.status(422).send({
-        status: "failure",
-        message: "Customer and Item are required fields.",
+        status: 'failure',
+        message: 'Customer and Item are required fields.',
       });
     }
 
@@ -318,35 +318,35 @@ export const updateSalesOrderById = async (req, res) => {
       updatedData,
       { new: true, runValidators: true }
     )
-      .populate("customer", "name contactNum address")
-      .populate("item", "name description price type unit");
+      .populate('customer', 'name contactNum address')
+      .populate('item', 'name description price type unit');
 
     if (!updatedSalesOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Sales order with ID ${salesOrderId} not found.`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Sales order updated successfully.",
+      status: 'success',
+      message: 'Sales order updated successfully.',
       data: updatedSalesOrder,
     });
   } catch (error) {
-    logError("Update Sales Order By ID", error);
+    logError('Update Sales Order By ID', error);
 
     // Validation Error Handling
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(422).send({
-        status: "failure",
-        message: "Validation error during sales order update.",
+        status: 'failure',
+        message: 'Validation error during sales order update.',
         error: error.message,
       });
     }
 
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error updating sales order with ID ${salesOrderId}.`,
       error: error.message,
     });
@@ -362,11 +362,11 @@ export const archiveSalesOrderById = async (req, res) => {
       { new: true } // Return the updated document
     );
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Sales order not found" });
+      return res.status(404).json({ message: 'Sales order not found' });
     }
     res.status(200).json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ message: "Error archiving sales order", error });
+    res.status(500).json({ message: 'Error archiving sales order', error });
   }
 };
 
@@ -379,11 +379,11 @@ export const unarchiveSalesOrderById = async (req, res) => {
       { new: true }
     );
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Sales order not found" });
+      return res.status(404).json({ message: 'Sales order not found' });
     }
     res.status(200).json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ message: "Error unarchiving sales order", error });
+    res.status(500).json({ message: 'Error unarchiving sales order', error });
   }
 };
 
@@ -392,23 +392,23 @@ export const getArchivedSalesOrders = async (req, res) => {
     const archivedOrders = await SalesOrderModel.find({ archived: true });
     if (!archivedOrders) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message:
-          "No Archived sales order found or failed to retrieve the archived SO",
+          'No Archived sales order found or failed to retrieve the archived SO',
         count: 0,
         data: [],
       });
     }
     return res.status(200).send({
-      status: "success",
-      message: "Archived Sales order are fetched successfully.",
+      status: 'success',
+      message: 'Archived Sales order are fetched successfully.',
       count: archivedOrders.length,
       data: archivedOrders,
     });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error fetching archived sales orders", error });
+      .json({ message: 'Error fetching archived sales orders', error });
   }
 };
 
@@ -416,8 +416,8 @@ export const deleteSalesOrderById = async (req, res) => {
   const { salesOrderId } = req.params;
   if (!salesOrderId) {
     return res.status(422).send({
-      status: "failure",
-      message: `The request parameter or body can't be blank`,
+      status: 'failure',
+      message: 'The request parameter or body can\'t be blank',
     });
   }
 
@@ -435,20 +435,20 @@ export const deleteSalesOrderById = async (req, res) => {
 
     if (!deletedSalesOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Sales order with ID ${salesOrderId} not found.`,
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `Sales order with ID ${salesOrderId} deleted successfully.`,
       data: deletedSalesOrder,
     });
   } catch (error) {
-    logError("Delete Sales Order By ID", error);
+    logError('Delete Sales Order By ID', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error deleting sales order with ID ${salesOrderId}.`,
       error: error.message,
     });
@@ -457,30 +457,30 @@ export const deleteSalesOrderById = async (req, res) => {
 
 export const deleteAllSalesOrders = async (req, res) => {
   try {
-    console.log("Starting bulk delete...");
+    console.log('Starting bulk delete...');
 
     // Delete all sales orders
     const deletedResponse = await SalesOrderModel.deleteMany({});
-    console.log("Deleted Response:", deletedResponse);
+    console.log('Deleted Response:', deletedResponse);
 
     // Reset the counter
     const resetCounter = await SalesOrderCounterModel.findOneAndUpdate(
-      { _id: "salesOrderCode" },
+      { _id: 'salesOrderCode' },
       { seq: 0 }, // Reset sequence to 0
       { new: true, upsert: true } // Create document if it doesn't exist
     );
-    console.log("Counter Reset Response:", resetCounter);
+    console.log('Counter Reset Response:', resetCounter);
 
     if (deletedResponse.deletedCount === 0) {
       return res.status(200).send({
-        status: "success",
-        message: "No sales orders to delete.",
+        status: 'success',
+        message: 'No sales orders to delete.',
         data: { deletedCount: 0 },
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `${deletedResponse.deletedCount} sales orders deleted successfully.`,
       data: {
         deletedCount: deletedResponse.deletedCount,
@@ -488,10 +488,10 @@ export const deleteAllSalesOrders = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error deleting sales orders:", error);
+    console.error('Error deleting sales orders:', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error deleting all sales orders.",
+      status: 'failure',
+      message: 'Error deleting all sales orders.',
       error: error.message,
     });
   }
@@ -522,12 +522,12 @@ export const addPayment = async (req, res) => {
     //     .json({ error: "A positive payment amount is required." });
     // }
     if (!amount) {
-      return res.status(400).json({ error: "A payment amount is required." });
+      return res.status(400).json({ error: 'A payment amount is required.' });
     }
     // Retrieve the sales order
     const order = await SalesOrderModel.findById(salesOrderId);
     if (!order) {
-      return res.status(404).json({ error: "Sales Order not found." });
+      return res.status(404).json({ error: 'Sales Order not found.' });
     }
     // // If order.status is not "Invoiced", treat payment as advance
     // if (order.status !== "Invoiced") {
@@ -562,12 +562,12 @@ export const changeSalesOrderStatus1 = async (req, res) => {
     const { newStatus, invoiceDate, dueDate } = req.body; // optionally provided
 
     if (!newStatus) {
-      return res.status(400).json({ error: "New status is required" });
+      return res.status(400).json({ error: 'New status is required' });
     }
 
     const order = await SalesOrderModel.findById(salesOrderId);
     if (!order) {
-      return res.status(404).json({ error: "Sales Order not found" });
+      return res.status(404).json({ error: 'Sales Order not found' });
     }
 
     // Validate status transition
@@ -577,7 +577,7 @@ export const changeSalesOrderStatus1 = async (req, res) => {
       });
     }
 
-    if (newStatus === "Invoiced") {
+    if (newStatus === 'Invoiced') {
       // Generate a new invoice number
       const newInvoiceNum = await generateInvoiceNumber();
 
@@ -607,7 +607,7 @@ export const changeSalesOrderStatus1 = async (req, res) => {
     // Update status
     order.status = newStatus;
     // Optionally update 'updatedBy' field
-    order.updatedBy = req.user?.username || "Unknown"; // Assuming you have user info in req
+    order.updatedBy = req.user?.username || 'Unknown'; // Assuming you have user info in req
     await order.save();
 
     res.status(200).json(order);
@@ -625,12 +625,12 @@ export const changeSalesOrderStatus2 = async (req, res) => {
   if (!so) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Sales Order not found" });
+      .json({ status: 'failure', message: 'Sales Order not found' });
   }
   const allowed = STATUS_TRANSITIONS[so.status] || [];
   if (!allowed.includes(newStatus)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `Invalid status transition ${so.status} → ${newStatus}`,
     });
   }
@@ -644,16 +644,16 @@ export const changeSalesOrderStatus2 = async (req, res) => {
     const order = await SalesOrderModel.findById(salesOrderId).session(session);
 
     // 4) Perform your reserve / release / apply / reverse calls:
-    if (newStatus === "Confirmed" && order.status === "Draft") {
+    if (newStatus === 'Confirmed' && order.status === 'Draft') {
       await SalesStockService.reserveSO(order, session);
     }
     if (
-      ["Draft", "Cancelled"].includes(newStatus) &&
-      order.status === "Confirmed"
+      ['Draft', 'Cancelled'].includes(newStatus) &&
+      order.status === 'Confirmed'
     ) {
       await SalesStockService.releaseSO(order, session);
     }
-    if (newStatus === "Invoiced") {
+    if (newStatus === 'Invoiced') {
       await SalesStockService.releaseSO(order, session);
       await SalesStockService.applySO(order, session);
       order.invoiceDate = invoiceDate ? new Date(invoiceDate) : new Date();
@@ -661,7 +661,7 @@ export const changeSalesOrderStatus2 = async (req, res) => {
         ? new Date(dueDate)
         : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     }
-    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+    if (newStatus === 'Cancelled' && order.status === 'Invoiced') {
       await SalesStockService.reverseSO(order, session);
     }
 
@@ -671,14 +671,14 @@ export const changeSalesOrderStatus2 = async (req, res) => {
 
     // 6) Commit everything
     await session.commitTransaction();
-    return res.json({ status: "success", data: order });
+    return res.json({ status: 'success', data: order });
   } catch (err) {
     // 7) Abort on any error
     await session.abortTransaction();
-    console.error("❌ changeSalesOrderStatus failed:", err);
+    console.error('❌ changeSalesOrderStatus failed:', err);
     return res.status(400).json({
-      status: "failure",
-      message: err.message || "Could not change sales order status",
+      status: 'failure',
+      message: err.message || 'Could not change sales order status',
     });
   } finally {
     // 8) End the session
@@ -695,12 +695,12 @@ export const changeSalesOrderStatus3 = async (req, res) => {
   if (!so) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Sales Order not found" });
+      .json({ status: 'failure', message: 'Sales Order not found' });
   }
   const allowed = STATUS_TRANSITIONS[so.status] || [];
   if (!allowed.includes(newStatus)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `Invalid status transition ${so.status} → ${newStatus}`,
     });
   }
@@ -714,16 +714,16 @@ export const changeSalesOrderStatus3 = async (req, res) => {
     const order = await SalesOrderModel.findById(salesOrderId).session(session);
 
     // 4) Perform your reserve / release / apply / reverse calls:
-    if (newStatus === "Confirmed" && order.status === "Draft") {
+    if (newStatus === 'Confirmed' && order.status === 'Draft') {
       await SalesStockService.reserveSO(order, session);
     }
     if (
-      ["Draft", "Cancelled"].includes(newStatus) &&
-      order.status === "Confirmed"
+      ['Draft', 'Cancelled'].includes(newStatus) &&
+      order.status === 'Confirmed'
     ) {
       await SalesStockService.releaseSO(order, session);
     }
-    if (newStatus === "Invoiced") {
+    if (newStatus === 'Invoiced') {
       await SalesStockService.releaseSO(order, session);
       await SalesStockService.applySO(order, session);
       order.invoiceDate = invoiceDate ? new Date(invoiceDate) : new Date();
@@ -731,7 +731,7 @@ export const changeSalesOrderStatus3 = async (req, res) => {
         ? new Date(dueDate)
         : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     }
-    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+    if (newStatus === 'Cancelled' && order.status === 'Invoiced') {
       await SalesStockService.reverseSO(order, session);
     }
 
@@ -741,14 +741,14 @@ export const changeSalesOrderStatus3 = async (req, res) => {
 
     // 6) Commit everything
     await session.commitTransaction();
-    return res.json({ status: "success", data: order });
+    return res.json({ status: 'success', data: order });
   } catch (err) {
     // 7) Abort on any error
     await session.abortTransaction();
-    console.error("❌ changeSalesOrderStatus failed:", err);
+    console.error('❌ changeSalesOrderStatus failed:', err);
     return res.status(400).json({
-      status: "failure",
-      message: err.message || "Could not change sales order status",
+      status: 'failure',
+      message: err.message || 'Could not change sales order status',
     });
   } finally {
     // 8) End the session
@@ -765,12 +765,12 @@ export const changeSalesOrderStatus = async (req, res) => {
   if (!so) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Sales Order not found" });
+      .json({ status: 'failure', message: 'Sales Order not found' });
   }
   const allowed = STATUS_TRANSITIONS[so.status] || [];
   if (!allowed.includes(newStatus)) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message: `Invalid status transition ${so.status} → ${newStatus}`,
     });
   }
@@ -779,19 +779,19 @@ export const changeSalesOrderStatus = async (req, res) => {
   try {
     session.startTransaction();
     const order = await SalesOrderModel.findById(salesOrderId).session(session);
-    if (newStatus === "Confirmed" && order.status === "Draft") {
+    if (newStatus === 'Confirmed' && order.status === 'Draft') {
       await SalesStockService.reserveSO(order, session);
     }
     if (
-      ["Draft", "Cancelled"].includes(newStatus) &&
-      order.status === "Confirmed"
+      ['Draft', 'Cancelled'].includes(newStatus) &&
+      order.status === 'Confirmed'
     ) {
       await SalesStockService.releaseSO(order, session);
     }
 
     // 1) Reserve/release unchanged...
-    if (newStatus === "Invoiced") {
-      if (!order.invoiceNum || order.invoiceNum === "NA") {
+    if (newStatus === 'Invoiced') {
+      if (!order.invoiceNum || order.invoiceNum === 'NA') {
         order.invoiceNum = await getNextInvoiceNum();
       }
       // a) release/reserve as before
@@ -804,7 +804,7 @@ export const changeSalesOrderStatus = async (req, res) => {
         [
           {
             txnDate: invoiceDate || new Date(),
-            sourceType: "SALES",
+            sourceType: 'SALES',
             sourceId: order._id,
             sourceLine: 1,
             customer: order.customer,
@@ -837,18 +837,18 @@ export const changeSalesOrderStatus = async (req, res) => {
         : new Date(Date.now() + 30 * 86400e3);
     }
 
-    if (newStatus === "Cancelled" && order.status === "Invoiced") {
+    if (newStatus === 'Cancelled' && order.status === 'Invoiced') {
       await SalesStockService.reverseSO(order, session);
     }
 
     order.status = newStatus;
     await order.save({ session });
     await session.commitTransaction();
-    res.json({ status: "success", data: order });
+    res.json({ status: 'success', data: order });
   } catch (err) {
     await session.abortTransaction();
     console.error(err);
-    res.status(400).json({ status: "failure", message: err.message });
+    res.status(400).json({ status: 'failure', message: err.message });
   } finally {
     session.endSession();
   }
@@ -866,7 +866,7 @@ export const generateInvoiceForOrder = async (req, res) => {
     if (!order) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Sales Order not found." });
+        .json({ status: 'failure', message: 'Sales Order not found.' });
     }
 
     // Generate a new invoice number
@@ -880,15 +880,15 @@ export const generateInvoiceForOrder = async (req, res) => {
     await order.save();
 
     return res.status(200).json({
-      status: "success",
-      message: "Invoice generated successfully.",
+      status: 'success',
+      message: 'Invoice generated successfully.',
       data: order,
     });
   } catch (error) {
-    console.error("Error generating invoice:", error);
+    console.error('Error generating invoice:', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Failed to generate invoice.",
+      status: 'failure',
+      message: 'Failed to generate invoice.',
       error: error.message || error,
     });
   }
@@ -898,25 +898,25 @@ export const deleteDraftSalesOrders = async (req, res) => {
   try {
     // Restrict deletion to only 'Draft' sales orders
     const deletedResponse = await SalesOrderModel.deleteMany({
-      status: "Draft",
+      status: 'Draft',
     });
 
     if (deletedResponse.deletedCount === 0) {
       return res.status(404).send({
-        status: "failure",
-        message: "No draft sales orders found to delete.",
+        status: 'failure',
+        message: 'No draft sales orders found to delete.',
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `Successfully deleted ${deletedResponse.deletedCount} draft sales order(s).`,
     });
   } catch (error) {
-    console.error("Error deleting draft sales orders:", error);
+    console.error('Error deleting draft sales orders:', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error deleting draft sales orders.",
+      status: 'failure',
+      message: 'Error deleting draft sales orders.',
       error: error.message,
     });
   }
@@ -931,14 +931,14 @@ export const patchSalesOrderById = async (req, res) => {
 
     if (!salesOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Sales order with ID ${salesOrderId} not found.`,
       });
     }
 
     // Track changes for audit
     const changes = [];
-    const changedBy = req.user?.name || "AdminUIPatch"; // Default to admin if no user info is available
+    const changedBy = req.user?.name || 'AdminUIPatch'; // Default to admin if no user info is available
 
     // If status is being updated, handle it separately
     if (patchedData.status && salesOrder.status !== patchedData.status) {
@@ -946,11 +946,11 @@ export const patchSalesOrderById = async (req, res) => {
         salesOrder,
         patchedData.status,
         changedBy,
-        patchedData.reason || "No Reason Provided"
+        patchedData.reason || 'No Reason Provided'
       );
 
       changes.push({
-        field: "status",
+        field: 'status',
         oldValue: salesOrder.status,
         newValue: patchedData.status,
       });
@@ -958,7 +958,7 @@ export const patchSalesOrderById = async (req, res) => {
     }
 
     // Update other fields
-    const allowedFields = ["customer", "item", "quantity", "price"];
+    const allowedFields = ['customer', 'item', 'quantity', 'price'];
     for (const field of allowedFields) {
       if (patchedData[field] && salesOrder[field] !== patchedData[field]) {
         changes.push({
@@ -981,22 +981,22 @@ export const patchSalesOrderById = async (req, res) => {
         field: change.field,
         oldValue: change.oldValue,
         newValue: change.newValue,
-        reason: patchedData.reason || "No Reason Provided",
+        reason: patchedData.reason || 'No Reason Provided',
         timestamp: new Date(),
       }));
       await SalesOrderEventLogModel.insertMany(logEntries);
     }
 
     return res.status(200).send({
-      status: "success",
-      message: "Sales order updated successfully.",
+      status: 'success',
+      message: 'Sales order updated successfully.',
       data: updatedSalesOrder,
     });
   } catch (error) {
-    console.error("Error updating sales order:", error);
+    console.error('Error updating sales order:', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error updating sales order.",
+      status: 'failure',
+      message: 'Error updating sales order.',
       error: error.message,
     });
   }
@@ -1012,20 +1012,20 @@ export const validateSalesOrderStatus = async (
 
   // Validate state transition
   const validTransitions = {
-    DRAFT: ["DRAFT", "CONFIRMED", "CANCELLED", "ADMINMODE"],
-    CONFIRMED: ["CONFIRMED", "SHIPPED", "INVOICED", "CANCELLED", "ADMINMODE"],
-    SHIPPED: ["SHIPPED", "DELIVERED", "INVOICED", "ADMINMODE"],
-    DELIVERED: ["DELIVERED", "INVOICED", "ADMINMODE"],
-    INVOICED: ["INVOICED", "ADMINMODE"],
-    CANCELLED: ["CANCELLED", "ADMINMODE"],
+    DRAFT: ['DRAFT', 'CONFIRMED', 'CANCELLED', 'ADMINMODE'],
+    CONFIRMED: ['CONFIRMED', 'SHIPPED', 'INVOICED', 'CANCELLED', 'ADMINMODE'],
+    SHIPPED: ['SHIPPED', 'DELIVERED', 'INVOICED', 'ADMINMODE'],
+    DELIVERED: ['DELIVERED', 'INVOICED', 'ADMINMODE'],
+    INVOICED: ['INVOICED', 'ADMINMODE'],
+    CANCELLED: ['CANCELLED', 'ADMINMODE'],
     ADMINMODE: [
-      "DRAFT",
-      "CONFIRMED",
-      "CANCELLED",
-      "SHIPPED",
-      "DELIVERED",
-      "INVOICED",
-      "ADMINMODE",
+      'DRAFT',
+      'CONFIRMED',
+      'CANCELLED',
+      'SHIPPED',
+      'DELIVERED',
+      'INVOICED',
+      'ADMINMODE',
     ],
   };
 
@@ -1054,20 +1054,20 @@ export const deleteAllSalesOrders1 = async (req, res) => {
     const deletedResponse = await SalesOrderModel.deleteMany({});
 
     const resetCounter = await SalesOrderCounterModel.findOneAndUpdate(
-      { _id: "salesOrderCode" },
+      { _id: 'salesOrderCode' },
       { seq: 0 }, // Reset sequence to 0
       { new: true, upsert: true } // Create document if it doesn't exist
     );
 
     if (deletedResponse.deletedCount === 0) {
       return res.status(404).send({
-        status: "failure",
-        message: "No sales orders found to delete.",
+        status: 'failure',
+        message: 'No sales orders found to delete.',
       });
     }
 
     return res.status(200).send({
-      status: "success",
+      status: 'success',
       message: `${deletedResponse.deletedCount} sales orders deleted successfully.`,
       data: {
         deletedCount: deletedResponse.deletedCount,
@@ -1075,10 +1075,10 @@ export const deleteAllSalesOrders1 = async (req, res) => {
       },
     });
   } catch (error) {
-    logError("Delete All Sales Orders", error);
+    logError('Delete All Sales Orders', error);
     return res.status(500).send({
-      status: "failure",
-      message: "Error deleting all sales orders.",
+      status: 'failure',
+      message: 'Error deleting all sales orders.',
       error: error.message,
     });
   }
@@ -1095,7 +1095,7 @@ export const addPaymentV1 = async (req, res) => {
     //     .json({ error: "A positive payment amount is required." });
     // }
     if (!amount) {
-      return res.status(400).json({ error: "A payment amount is required." });
+      return res.status(400).json({ error: 'A payment amount is required.' });
     }
 
     // Push the new payment object into the paidAmt array
@@ -1114,7 +1114,7 @@ export const addPaymentV1 = async (req, res) => {
       { new: true }
     );
     if (!order) {
-      return res.status(404).json({ error: "Sales Order not found." });
+      return res.status(404).json({ error: 'Sales Order not found.' });
     }
 
     // Recalculate netAmountAfterAdvance using the updated totalPaid (virtual)
@@ -1141,7 +1141,7 @@ export const splitSalesOrder = async (originalOrderId, splitDetails) => {
       originalOrderId
     ).session(session);
     if (!originalOrder) {
-      throw new Error("Original Sales Order not found");
+      throw new Error('Original Sales Order not found');
     }
 
     // Create a new sales order with a portion of the original order
@@ -1167,7 +1167,7 @@ export const splitSalesOrder = async (originalOrderId, splitDetails) => {
     session.endSession();
 
     return {
-      message: "Sales Order successfully split",
+      message: 'Sales Order successfully split',
       newOrder,
       originalOrder,
     };
@@ -1193,12 +1193,12 @@ export const transferSalesOrderItems = async (
     const toOrder = await SalesOrderModel.findById(toOrderId).session(session);
 
     if (!fromOrder || !toOrder) {
-      throw new Error("One or both Sales Orders not found");
+      throw new Error('One or both Sales Orders not found');
     }
 
     // Validate transfer quantity
     if (fromOrder.quantity < transferQuantity) {
-      throw new Error("Transfer quantity exceeds available quantity.");
+      throw new Error('Transfer quantity exceeds available quantity.');
     }
 
     // Adjust quantities
@@ -1232,14 +1232,14 @@ export const transferSalesOrderItems = async (
 export const patchSalesOrderByIdWithTracking = async (req, res) => {
   const { salesOrderId } = req.params;
   const updates = req.body;
-  const changedBy = req.user?.name || "SystemPatch"; // Assuming user info is in `req.user`
+  const changedBy = req.user?.name || 'SystemPatch'; // Assuming user info is in `req.user`
 
   try {
     // Find the existing sales order
     const salesOrder = await SalesOrderModel.findById(salesOrderId);
     if (!salesOrder) {
       return res.status(404).send({
-        status: "failure",
+        status: 'failure',
         message: `Sales order with ID ${salesOrderId} not found.`,
       });
     }
@@ -1250,32 +1250,32 @@ export const patchSalesOrderByIdWithTracking = async (req, res) => {
       const newStatus = updates.status;
 
       const validTransitions = {
-        Draft: ["Draft", "Confirmed", "Cancelled", "AdminMode"],
+        Draft: ['Draft', 'Confirmed', 'Cancelled', 'AdminMode'],
         Confirmed: [
-          "Confirmed",
-          "Shipped",
-          "Invoiced",
-          "Cancelled",
-          "AdminMode",
+          'Confirmed',
+          'Shipped',
+          'Invoiced',
+          'Cancelled',
+          'AdminMode',
         ],
-        Shipped: ["Shipped", "Delivered", "Invoiced", "AdminMode"],
-        Delivered: ["Delivered", "Invoiced", "AdminMode"],
-        Invoiced: ["Invoiced", "AdminMode"],
-        Cancelled: ["Cancelled", "AdminMode"],
+        Shipped: ['Shipped', 'Delivered', 'Invoiced', 'AdminMode'],
+        Delivered: ['Delivered', 'Invoiced', 'AdminMode'],
+        Invoiced: ['Invoiced', 'AdminMode'],
+        Cancelled: ['Cancelled', 'AdminMode'],
         AdminMode: [
-          "Draft",
-          "Confirmed",
-          "Cancelled",
-          "Shipped",
-          "Delivered",
-          "Invoiced",
-          "AdminMode",
+          'Draft',
+          'Confirmed',
+          'Cancelled',
+          'Shipped',
+          'Delivered',
+          'Invoiced',
+          'AdminMode',
         ],
       };
 
       if (!validTransitions[oldStatus].includes(newStatus)) {
         return res.status(400).send({
-          status: "failure",
+          status: 'failure',
           message: `Invalid status transition from ${oldStatus} to ${newStatus}.`,
         });
       }
@@ -1290,7 +1290,7 @@ export const patchSalesOrderByIdWithTracking = async (req, res) => {
 
     // Update sales order fields
     Object.keys(updates).forEach((key) => {
-      if (key !== "reason") salesOrder[key] = updates[key];
+      if (key !== 'reason') salesOrder[key] = updates[key];
     });
 
     // Append change history
@@ -1300,14 +1300,14 @@ export const patchSalesOrderByIdWithTracking = async (req, res) => {
     const updatedSalesOrder = await salesOrder.save();
 
     return res.status(200).send({
-      status: "success",
-      message: "Sales order updated successfully.",
+      status: 'success',
+      message: 'Sales order updated successfully.',
       data: updatedSalesOrder,
     });
   } catch (error) {
-    console.error("Error updating sales order:", error);
+    console.error('Error updating sales order:', error);
     return res.status(500).send({
-      status: "failure",
+      status: 'failure',
       message: `Error updating sales order with ID ${salesOrderId}.`,
       error: error.message,
     });
@@ -1322,7 +1322,7 @@ export const trackFieldChanges = async (
   changedBy,
   reason
 ) => {
-  const fieldsToTrack = ["quantity", "price", "status"]; // Specify fields to track
+  const fieldsToTrack = ['quantity', 'price', 'status']; // Specify fields to track
   const changeHistory = [];
 
   fieldsToTrack.forEach((field) => {
@@ -1332,7 +1332,7 @@ export const trackFieldChanges = async (
         oldValue: salesOrder[field],
         newValue: updates[field],
         changedBy,
-        reason: reason || "No reason provided",
+        reason: reason || 'No reason provided',
         timestamp: new Date(),
       });
     }

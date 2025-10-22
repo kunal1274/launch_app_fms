@@ -1,24 +1,24 @@
 // test/flowRunner.js
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import request from "supertest";
-import createTestOrientedApp from "../app.js";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import request from 'supertest';
+import createTestOrientedApp from '../app.js';
 
 // ───────────────────────────────────────────────────────────────────────────────
 // bootstrap dotenv
 // ───────────────────────────────────────────────────────────────────────────────
 dotenv.config({
-  path: path.resolve(process.cwd(), ".env.test"),
+  path: path.resolve(process.cwd(), '.env.test'),
 });
 
 jest.setTimeout(30000);
 
 function interp(template, ctx) {
   return template.replace(/{{([^}]+)}}/g, (_, expr) =>
-    expr.split(".").reduce((o, k) => (o && o[k] != null ? o[k] : ""), ctx)
+    expr.split('.').reduce((o, k) => (o && o[k] != null ? o[k] : ''), ctx)
   );
 }
 
@@ -32,8 +32,8 @@ async function runFlow() {
   const app = createTestOrientedApp();
   const manifest = JSON.parse(
     fs.readFileSync(
-      path.join(__dirname, "../flows/account-manifest.json"),
-      "utf8"
+      path.join(__dirname, '../flows/account-manifest.json'),
+      'utf8'
     )
   );
   const ctx = {};
@@ -97,18 +97,18 @@ async function runFlow() {
       progressed = true;
     }
     if (!progressed) {
-      throw new Error("Circular or missing dependencies in flow manifest");
+      throw new Error('Circular or missing dependencies in flow manifest');
     }
   }
 
   // write out a timestamped evidence file
   const outPath = path.join(
     process.cwd(),
-    "recordings",
+    'recordings',
     `evidence-${Date.now()}.json`
   );
   fs.writeFileSync(outPath, JSON.stringify(evidence, null, 2));
-  console.log("Wrote evidence log:", outPath);
+  console.log('Wrote evidence log:', outPath);
 }
 
 export default runFlow;

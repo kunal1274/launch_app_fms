@@ -1,24 +1,24 @@
 // controllers/shelf.controller.js
 
-import mongoose from "mongoose";
-import { ShelfModel } from "../models/shelf.model.js";
-import { BinCounterModel, ShelfCounterModel } from "../models/counter.model.js";
-import { createAuditLog } from "../audit_logging_service/utils/auditLogger.utils.js";
-import redisClient from "../middleware/redisClient.js";
-import logger, { logStackError } from "../utility/logger.util.js";
-import { winstonLogger, logError } from "../utility/logError.utils.js";
-import { RackModel } from "../models/rack.model.js";
-import { BinModel } from "../models/bin.model.js";
+import mongoose from 'mongoose';
+import { ShelfModel } from '../models/shelf.model.js';
+import { BinCounterModel, ShelfCounterModel } from '../models/counter.model.js';
+import { createAuditLog } from '../audit_logging_service/utils/auditLogger.utils.js';
+import redisClient from '../middleware/redisClient.js';
+import logger, { logStackError } from '../utility/logger.util.js';
+import { winstonLogger, logError } from '../utility/logError.utils.js';
+import { RackModel } from '../models/rack.model.js';
+import { BinModel } from '../models/bin.model.js';
 
 /** Helper: invalidate Shelf cache */
-const invalidateShelfCache = async (key = "/fms/api/v0/shelves") => {
+const invalidateShelfCache = async (key = '/fms/api/v0/shelves') => {
   try {
     await redisClient.del(key);
     logger.info(`Cache invalidated: ${key}`, {
-      context: "invalidateShelfCache",
+      context: 'invalidateShelfCache',
     });
   } catch (err) {
-    logStackError("❌ Shelf cache invalidation failed", err);
+    logStackError('❌ Shelf cache invalidation failed', err);
   }
 };
 
@@ -41,20 +41,20 @@ export const createShelf = async (req, res) => {
 
     // require name, type, and location
     if (!name || !type || !rack) {
-      logger.warn("Shelf Creation - Missing fields - name , type and rack ", {
-        context: "createShelf",
+      logger.warn('Shelf Creation - Missing fields - name , type and rack ', {
+        context: 'createShelf',
         body: req.body,
       });
       return res.status(422).json({
-        status: "failure",
-        message: "⚠️ name, type, and rack are required.",
+        status: 'failure',
+        message: '⚠️ name, type, and rack are required.',
       });
     }
 
     const rk = await RackModel.findById(rack);
     if (!rk) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Rack ${rack} not found.`,
       });
     }
@@ -71,13 +71,13 @@ export const createShelf = async (req, res) => {
       files,
       extras,
       active,
-      createdBy: req.user?.username || "SystemShelfCreation",
+      createdBy: req.user?.username || 'SystemShelfCreation',
     });
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Shelf",
-      action: "CREATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Shelf',
+      action: 'CREATE',
       recordId: shelf._id,
       changes: { newData: shelf },
     });
@@ -86,28 +86,28 @@ export const createShelf = async (req, res) => {
 
     winstonLogger.info(`✅ Shelf created: ${shelf._id}`);
     return res.status(201).json({
-      status: "success",
-      message: "✅ Shelf created successfully.",
+      status: 'success',
+      message: '✅ Shelf created successfully.',
       data: shelf,
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      logStackError("❌ Shelf Validation Error", error);
+      logStackError('❌ Shelf Validation Error', error);
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
     if (error.code === 11000) {
-      logStackError("❌ Shelf Duplicate Error", error);
+      logStackError('❌ Shelf Duplicate Error', error);
       return res.status(409).json({
-        status: "failure",
-        message: "A shelf with that code or name already exists.",
+        status: 'failure',
+        message: 'A shelf with that code or name already exists.',
       });
     }
-    logStackError("❌ Shelf Creation Error", error);
+    logStackError('❌ Shelf Creation Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -122,16 +122,16 @@ export const getAllShelves = async (req, res) => {
 
     winstonLogger.info(`✅ Fetched all shelves (${list.length})`);
     return res.status(200).json({
-      status: "success",
-      message: "✅ Shelves retrieved successfully.",
+      status: 'success',
+      message: '✅ Shelves retrieved successfully.',
       count: list.length,
       data: list,
     });
   } catch (error) {
-    logStackError("❌ Get All Shelves Error", error);
+    logStackError('❌ Get All Shelves Error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -143,15 +143,15 @@ export const getArchivedShelves = async (req, res) => {
     const archived = await ShelfModel.find({ archived: true });
     winstonLogger.info(`ℹ️ Retrieved ${archived.length} archived shelves.`);
     return res.status(200).json({
-      status: "success",
-      message: "✅ Archived shelves retrieved.",
+      status: 'success',
+      message: '✅ Archived shelves retrieved.',
       data: archived,
     });
   } catch (error) {
-    logError("❌ Get Archived Shelves", error);
+    logError('❌ Get Archived Shelves', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -165,17 +165,17 @@ export const getShelfById = async (req, res) => {
     if (!shelf) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Shelf not found." });
+        .json({ status: 'failure', message: '⚠️ Shelf not found.' });
     }
     winstonLogger.info(`✅ Retrieved shelf: ${shelfId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Shelf retrieved.", data: shelf });
+      .json({ status: 'success', message: '✅ Shelf retrieved.', data: shelf });
   } catch (error) {
-    logError("❌ Get Shelf By ID", error);
+    logError('❌ Get Shelf By ID', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -188,12 +188,12 @@ export const updateShelfById = async (req, res) => {
     const updateData = {
       ...req.body,
       // rack,
-      updatedBy: req.user?.username || "Unknown",
+      updatedBy: req.user?.username || 'Unknown',
     };
     const rk = await RackModel.findById(req.body.rack);
     if (!rk) {
       return res.status(404).json({
-        status: "failure",
+        status: 'failure',
         message: `⚠️ Rack ${req.body.rack} not found.`,
       });
     }
@@ -205,13 +205,13 @@ export const updateShelfById = async (req, res) => {
     if (!shelf) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Shelf not found." });
+        .json({ status: 'failure', message: '⚠️ Shelf not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Shelf",
-      action: "UPDATE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Shelf',
+      action: 'UPDATE',
       recordId: shelf._id,
       changes: { newData: shelf },
     });
@@ -221,17 +221,17 @@ export const updateShelfById = async (req, res) => {
     winstonLogger.info(`ℹ️ Updated shelf: ${shelfId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Shelf updated.", data: shelf });
+      .json({ status: 'success', message: '✅ Shelf updated.', data: shelf });
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       return res
         .status(422)
-        .json({ status: "failure", message: error.message });
+        .json({ status: 'failure', message: error.message });
     }
-    logError("❌ Update Shelf", error);
+    logError('❌ Update Shelf', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -245,13 +245,13 @@ export const deleteShelfById = async (req, res) => {
     if (!shelf) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Shelf not found." });
+        .json({ status: 'failure', message: '⚠️ Shelf not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Shelf",
-      action: "DELETE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Shelf',
+      action: 'DELETE',
       recordId: shelf._id,
       changes: null,
     });
@@ -261,12 +261,12 @@ export const deleteShelfById = async (req, res) => {
     winstonLogger.info(`ℹ️ Deleted shelf: ${shelfId}`);
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Shelf deleted." });
+      .json({ status: 'success', message: '✅ Shelf deleted.' });
   } catch (error) {
-    logError("❌ Delete Shelf", error);
+    logError('❌ Delete Shelf', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -278,19 +278,19 @@ export const archiveShelfById = async (req, res) => {
     const { shelfId } = req.params;
     const shelf = await ShelfModel.findByIdAndUpdate(
       shelfId,
-      { archived: true, updatedBy: req.user?.username || "Unknown" },
+      { archived: true, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!shelf) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Shelf not found." });
+        .json({ status: 'failure', message: '⚠️ Shelf not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Shelf",
-      action: "ARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Shelf',
+      action: 'ARCHIVE',
       recordId: shelf._id,
       changes: { newData: shelf },
     });
@@ -299,12 +299,12 @@ export const archiveShelfById = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "success", message: "✅ Shelf archived.", data: shelf });
+      .json({ status: 'success', message: '✅ Shelf archived.', data: shelf });
   } catch (error) {
-    logError("❌ Archive Shelf", error);
+    logError('❌ Archive Shelf', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -315,19 +315,19 @@ export const unarchiveShelfById = async (req, res) => {
     const { shelfId } = req.params;
     const shelf = await ShelfModel.findByIdAndUpdate(
       shelfId,
-      { archived: false, updatedBy: req.user?.username || "Unknown" },
+      { archived: false, updatedBy: req.user?.username || 'Unknown' },
       { new: true }
     );
     if (!shelf) {
       return res
         .status(404)
-        .json({ status: "failure", message: "⚠️ Shelf not found." });
+        .json({ status: 'failure', message: '⚠️ Shelf not found.' });
     }
 
     await createAuditLog({
-      user: req.user?.username || "67ec2fb004d3cc3237b58772",
-      module: "Shelf",
-      action: "UNARCHIVE",
+      user: req.user?.username || '67ec2fb004d3cc3237b58772',
+      module: 'Shelf',
+      action: 'UNARCHIVE',
       recordId: shelf._id,
       changes: { newData: shelf },
     });
@@ -335,15 +335,15 @@ export const unarchiveShelfById = async (req, res) => {
     await invalidateShelfCache();
 
     return res.status(200).json({
-      status: "success",
-      message: "✅ Shelf unarchived.",
+      status: 'success',
+      message: '✅ Shelf unarchived.',
       data: shelf,
     });
   } catch (error) {
-    logError("❌ Unarchive Shelf", error);
+    logError('❌ Unarchive Shelf', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Internal server error",
+      status: 'failure',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -354,8 +354,8 @@ export const bulkCreateShelves = async (req, res) => {
   const docs = req.body;
   if (!Array.isArray(docs) || docs.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Request body must be a non-empty array of shelf objects.",
+      status: 'failure',
+      message: '⚠️ Request body must be a non-empty array of shelf objects.',
     });
   }
 
@@ -378,10 +378,10 @@ export const bulkCreateShelves = async (req, res) => {
   });
   if (dupes.length) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Duplicate shelf name+rack in request: " +
-        [...new Set(dupes.map((d) => `${d.name}@${d.rack}`))].join(", "),
+        'Duplicate shelf name+rack in request: ' +
+        [...new Set(dupes.map((d) => `${d.name}@${d.rack}`))].join(', '),
     });
   }
 
@@ -390,26 +390,26 @@ export const bulkCreateShelves = async (req, res) => {
   if (rackIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
     return res
       .status(400)
-      .json({ status: "failure", message: "One or more invalid rack IDs." });
+      .json({ status: 'failure', message: 'One or more invalid rack IDs.' });
   }
   const rackCount = await RackModel.countDocuments({ _id: { $in: rackIds } });
   if (rackCount !== rackIds.length) {
     return res
       .status(404)
-      .json({ status: "failure", message: "Some parent racks not found." });
+      .json({ status: 'failure', message: 'Some parent racks not found.' });
   }
 
   // 3) DB-wide uniqueness: prevent existing name+rack collisions
   const conflictQ = combos.map(({ name, rack }) => ({ name, rack }));
   const conflicts = await ShelfModel.find({ $or: conflictQ })
-    .select("name rack")
+    .select('name rack')
     .lean();
   if (conflicts.length) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "These shelf name+rack pairs already exist: " +
-        conflicts.map((c) => `${c.name}@${c.rack}`).join(", "),
+        'These shelf name+rack pairs already exist: ' +
+        conflicts.map((c) => `${c.name}@${c.rack}`).join(', '),
     });
   }
 
@@ -419,13 +419,13 @@ export const bulkCreateShelves = async (req, res) => {
   session.startTransaction();
   try {
     const n = docs.length;
-    logger.info("💾 Bulk create: reserving shelf codes", {
-      context: "bulkCreateShelves",
+    logger.info('💾 Bulk create: reserving shelf codes', {
+      context: 'bulkCreateShelves',
       count: n,
     });
 
     const counter = await ShelfCounterModel.findOneAndUpdate(
-      { _id: "shelfCode" },
+      { _id: 'shelfCode' },
       { $inc: { seq: n } },
       { new: true, upsert: true, session }
     );
@@ -433,9 +433,9 @@ export const bulkCreateShelves = async (req, res) => {
     const start = end - n + 1;
 
     docs.forEach((d, i) => {
-      const seq = (start + i).toString().padStart(3, "0");
+      const seq = (start + i).toString().padStart(3, '0');
       d.code = `SH_${seq}`;
-      d.createdBy = req.user?.username || "SystemShelfCreation";
+      d.createdBy = req.user?.username || 'SystemShelfCreation';
     });
 
     const created = await ShelfModel.insertMany(docs, { session });
@@ -443,9 +443,9 @@ export const bulkCreateShelves = async (req, res) => {
     await Promise.all(
       created.map((sh) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Shelf",
-          action: "BULK_CREATE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Shelf',
+          action: 'BULK_CREATE',
           recordId: sh._id,
           changes: { newData: sh },
         })
@@ -457,17 +457,17 @@ export const bulkCreateShelves = async (req, res) => {
     await invalidateShelfCache();
 
     return res.status(201).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${created.length} shelves created successfully.`,
       data: created,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk create shelves error", error);
+    logStackError('❌ Bulk create shelves error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk shelf creation.",
+      status: 'failure',
+      message: 'Error during bulk shelf creation.',
       error: error.message,
     });
   }
@@ -478,9 +478,9 @@ export const bulkUpdateShelves = async (req, res) => {
   const updates = req.body;
   if (!Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "⚠️ Request body must be a non-empty array of { id or _id, update }. ",
+        '⚠️ Request body must be a non-empty array of { id or _id, update }. ',
     });
   }
 
@@ -491,7 +491,7 @@ export const bulkUpdateShelves = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(docId)) {
       return res
         .status(400)
-        .json({ status: "failure", message: `Invalid shelf ID: ${docId}` });
+        .json({ status: 'failure', message: `Invalid shelf ID: ${docId}` });
     }
     if (update.name || update.rack) {
       toCheck.push({ id: docId, name: update.name, rack: update.rack });
@@ -501,7 +501,7 @@ export const bulkUpdateShelves = async (req, res) => {
   // 2) Load existing shelves
   const ids = toCheck.map((c) => c.id);
   const originals = await ShelfModel.find({ _id: { $in: ids } })
-    .select("name rack")
+    .select('name rack')
     .lean();
   const origMap = new Map(originals.map((o) => [o._id.toString(), o]));
 
@@ -520,10 +520,10 @@ export const bulkUpdateShelves = async (req, res) => {
   });
   if (dupes2.length) {
     return res.status(400).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "Duplicate shelf name+rack in request: " +
-        [...new Set(dupes2.map((d) => `${d.name}@${d.rack}`))].join(", "),
+        'Duplicate shelf name+rack in request: ' +
+        [...new Set(dupes2.map((d) => `${d.name}@${d.rack}`))].join(', '),
     });
   }
 
@@ -533,13 +533,13 @@ export const bulkUpdateShelves = async (req, res) => {
     if (newRackIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid rack IDs in update." });
+        .json({ status: 'failure', message: 'Invalid rack IDs in update.' });
     }
     const cnt2 = await RackModel.countDocuments({ _id: { $in: newRackIds } });
     if (cnt2 !== newRackIds.length) {
       return res.status(404).json({
-        status: "failure",
-        message: "Some target racks do not exist.",
+        status: 'failure',
+        message: 'Some target racks do not exist.',
       });
     }
   }
@@ -551,14 +551,14 @@ export const bulkUpdateShelves = async (req, res) => {
     rack,
   }));
   const conflicts2 = await ShelfModel.find({ $or: conflictQs2 })
-    .select("name rack")
+    .select('name rack')
     .lean();
   if (conflicts2.length) {
     return res.status(409).json({
-      status: "failure",
+      status: 'failure',
       message:
-        "These shelf name+rack pairs already exist: " +
-        conflicts2.map((c) => `${c.name}@${c.rack}`).join(", "),
+        'These shelf name+rack pairs already exist: ' +
+        conflicts2.map((c) => `${c.name}@${c.rack}`).join(', '),
     });
   }
 
@@ -567,8 +567,8 @@ export const bulkUpdateShelves = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    logger.info("🔄 Bulk update shelves", {
-      context: "bulkUpdateShelves",
+    logger.info('🔄 Bulk update shelves', {
+      context: 'bulkUpdateShelves',
       count: updates.length,
     });
 
@@ -580,15 +580,15 @@ export const bulkUpdateShelves = async (req, res) => {
 
       const sh = await ShelfModel.findByIdAndUpdate(
         id,
-        { ...entry.update, updatedBy: req.user?.username || "Unknown" },
+        { ...entry.update, updatedBy: req.user?.username || 'Unknown' },
         { new: true, runValidators: true, session }
       );
       if (!sh) throw new Error(`Shelf not found: ${id}`);
 
       await createAuditLog({
-        user: req.user?.username || "67ec2fb004d3cc3237b58772",
-        module: "Shelf",
-        action: "BULK_UPDATE",
+        user: req.user?.username || '67ec2fb004d3cc3237b58772',
+        module: 'Shelf',
+        action: 'BULK_UPDATE',
         recordId: sh._id,
         changes: { newData: sh },
       });
@@ -601,17 +601,17 @@ export const bulkUpdateShelves = async (req, res) => {
     await invalidateShelfCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${results.length} shelves updated successfully.`,
       data: results,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk update shelves error", error);
+    logStackError('❌ Bulk update shelves error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk shelf update.",
+      status: 'failure',
+      message: 'Error during bulk shelf update.',
       error: error.message,
     });
   }
@@ -622,16 +622,16 @@ export const bulkDeleteShelves = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({
-      status: "failure",
-      message: "⚠️ Request body must include a non-empty array of ids.",
+      status: 'failure',
+      message: '⚠️ Request body must include a non-empty array of ids.',
     });
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    logger.info("🗑️ Bulk delete shelves", {
-      context: "bulkDeleteShelves",
+    logger.info('🗑️ Bulk delete shelves', {
+      context: 'bulkDeleteShelves',
       count: ids.length,
     });
 
@@ -639,14 +639,14 @@ export const bulkDeleteShelves = async (req, res) => {
       { _id: { $in: ids } },
       { session }
     );
-    if (deletedCount === 0) throw new Error("No shelves deleted.");
+    if (deletedCount === 0) throw new Error('No shelves deleted.');
 
     await Promise.all(
       ids.map((id) =>
         createAuditLog({
-          user: req.user?.username || "67ec2fb004d3cc3237b58772",
-          module: "Shelf",
-          action: "BULK_DELETE",
+          user: req.user?.username || '67ec2fb004d3cc3237b58772',
+          module: 'Shelf',
+          action: 'BULK_DELETE',
           recordId: id,
           changes: null,
         })
@@ -658,16 +658,16 @@ export const bulkDeleteShelves = async (req, res) => {
     await invalidateShelfCache();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `✅ ${deletedCount} shelves deleted successfully.`,
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    logStackError("❌ Bulk delete shelves error", error);
+    logStackError('❌ Bulk delete shelves error', error);
     return res.status(500).json({
-      status: "failure",
-      message: "Error during bulk shelf deletion.",
+      status: 'failure',
+      message: 'Error during bulk shelf deletion.',
       error: error.message,
     });
   }
@@ -679,19 +679,19 @@ export const bulkDeleteShelves = async (req, res) => {
 export const bulkAllDeleteShelves = async (req, res) => {
   try {
     // 1. Find all shelf IDs that have at least one Bin
-    const shelvesWithChildren = await BinModel.distinct("shelf");
+    const shelvesWithChildren = await BinModel.distinct('shelf');
 
     // 2. Leaf‐shelves are those NOT in that list
     const leafShelves = await ShelfModel.find({
       _id: { $nin: shelvesWithChildren },
     })
-      .select("_id code name")
+      .select('_id code name')
       .lean();
 
     if (leafShelves.length === 0) {
       return res.status(200).json({
-        status: "success",
-        message: "No leaf shelves to delete; every shelf has child bins.",
+        status: 'success',
+        message: 'No leaf shelves to delete; every shelf has child bins.',
         skippedDueToBins: shelvesWithChildren,
       });
     }
@@ -703,7 +703,7 @@ export const bulkAllDeleteShelves = async (req, res) => {
     });
 
     // 4. Recompute highest sequence from remaining codes
-    const remaining = await ShelfModel.find({}, "code").lean();
+    const remaining = await ShelfModel.find({}, 'code').lean();
     let maxSeq = 0;
     remaining.forEach(({ code }) => {
       const m = code.match(/(\d+)$/);
@@ -715,23 +715,23 @@ export const bulkAllDeleteShelves = async (req, res) => {
 
     // 5. Reset the shelfCode counter to maxSeq
     const resetCounter = await ShelfCounterModel.findByIdAndUpdate(
-      { _id: "shelfCode" },
+      { _id: 'shelfCode' },
       { seq: maxSeq },
       { new: true, upsert: true }
     );
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Deleted ${deleted.deletedCount} leaf shelf(s).`,
       deletedShelves: leafShelves,
       skippedDueToBins: shelvesWithChildren,
       counter: resetCounter,
     });
   } catch (err) {
-    console.error("❌ bulkAllDeleteShelves error:", err);
+    console.error('❌ bulkAllDeleteShelves error:', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error in bulkAllDeleteShelves",
+      status: 'failure',
+      message: 'Error in bulkAllDeleteShelves',
       error: err.message,
     });
   }
@@ -745,7 +745,7 @@ export const bulkAllDeleteShelvesCascade = async (req, res) => {
   session.startTransaction();
   try {
     // 1. Gather all Shelf IDs
-    const allShelves = await ShelfModel.find({}, "_id").session(session).lean();
+    const allShelves = await ShelfModel.find({}, '_id').session(session).lean();
     const shelfIds = allShelves.map((s) => s._id);
 
     if (shelfIds.length === 0) {
@@ -753,7 +753,7 @@ export const bulkAllDeleteShelvesCascade = async (req, res) => {
       session.endSession();
       return res
         .status(200)
-        .json({ status: "success", message: "No shelves to delete." });
+        .json({ status: 'success', message: 'No shelves to delete.' });
     }
 
     // 2. Delete child Bins
@@ -767,12 +767,12 @@ export const bulkAllDeleteShelvesCascade = async (req, res) => {
     // 4. Reset both shelfCode & binCode counters back to 0
     const [resetShelfCtr, resetBinCtr] = await Promise.all([
       ShelfCounterModel.findByIdAndUpdate(
-        { _id: "shelfCode" },
+        { _id: 'shelfCode' },
         { seq: 0 },
         { new: true, upsert: true, session }
       ),
       BinCounterModel.findByIdAndUpdate(
-        { _id: "binCode" },
+        { _id: 'binCode' },
         { seq: 0 },
         { new: true, upsert: true, session }
       ),
@@ -782,7 +782,7 @@ export const bulkAllDeleteShelvesCascade = async (req, res) => {
     session.endSession();
 
     return res.status(200).json({
-      status: "success",
+      status: 'success',
       message: `Cascade‐deleted ${deletedShelves.deletedCount} shelf(s) + all bins.`,
       counter: {
         shelf: resetShelfCtr,
@@ -792,10 +792,10 @@ export const bulkAllDeleteShelvesCascade = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ bulkAllDeleteShelvesCascade error:", err);
+    console.error('❌ bulkAllDeleteShelvesCascade error:', err);
     return res.status(500).json({
-      status: "failure",
-      message: "Error in bulkAllDeleteShelvesCascade",
+      status: 'failure',
+      message: 'Error in bulkAllDeleteShelvesCascade',
       error: err.message,
     });
   }

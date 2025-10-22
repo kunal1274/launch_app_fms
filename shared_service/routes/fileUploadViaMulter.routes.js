@@ -1,12 +1,12 @@
 // routes/upload.routes.js
-import express from "express";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import mongoose from "mongoose";
-import { uploadMulter } from "../../middleware/uploadMulterConfig.js";
-import * as ctrl from "../controllers/fileUpload.controller.js";
-import { SalesOrderModel } from "../../bb3_sales_management_service/models/bb3SalesOrder.model.js";
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import mongoose from 'mongoose';
+import { uploadMulter } from '../../middleware/uploadMulterConfig.js';
+import * as ctrl from '../controllers/fileUpload.controller.js';
+import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
 
 export const fileRouter = express.Router();
 
@@ -17,13 +17,13 @@ export const fileRouter = express.Router();
 
 // 4) Multer storage config
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => {
     // const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
     // cb(null, unique + path.extname(file.originalname));
     const now = new Date();
-    const readableDate = now.toISOString().slice(0, 10).replace(/-/g, "");
-    const time = now.toTimeString().split(" ")[0].replace(/:/g, "");
+    const readableDate = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const time = now.toTimeString().split(' ')[0].replace(/:/g, '');
     //const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const uniqueSuffix = `${readableDate}-${time}-${Math.round(
       Math.random() * 1e9
@@ -40,8 +40,8 @@ const upload = multer({ storage });
  * - pushes new file docs into salesOrder.attachedFiles
  */
 fileRouter.post(
-  "/:id/upload-files",
-  upload.array("files", 10),
+  '/:id/upload-files',
+  upload.array('files', 10),
   async (req, res) => {
     try {
       const soId = req.params.id;
@@ -59,24 +59,24 @@ fileRouter.post(
         soId,
         { $push: { attachedFiles: { $each: docs } } },
         { new: true, runValidators: true }
-      ).select("attachedFiles");
+      ).select('attachedFiles');
 
       if (!updated) {
         // rollback disk writes if desired…
         return res
           .status(404)
-          .json({ status: "failure", message: "Sales-order not found" });
+          .json({ status: 'failure', message: 'Sales-order not found' });
       }
 
       res.status(201).json({
-        status: "success",
+        status: 'success',
         files: updated.attachedFiles.slice(-docs.length),
       });
     } catch (err) {
-      console.error("💥 upload-to-SO error:", err);
+      console.error('💥 upload-to-SO error:', err);
       res.status(500).json({
-        status: "failure",
-        message: err.message || "Could not attach files to Sales-order",
+        status: 'failure',
+        message: err.message || 'Could not attach files to Sales-order',
       });
     }
   }
@@ -86,17 +86,17 @@ fileRouter.post(
  * GET    /api/sales-orders/:id/files
  * - returns the array of attachedFiles
  */
-fileRouter.get("/:id/files", async (req, res) => {
+fileRouter.get('/:id/files', async (req, res) => {
   try {
     const so = await SalesOrderModel.findById(req.params.id).select(
-      "attachedFiles"
+      'attachedFiles'
     );
     if (!so)
-      return res.status(404).json({ status: "failure", message: "Not found" });
-    res.json({ status: "success", files: so.attachedFiles });
+      return res.status(404).json({ status: 'failure', message: 'Not found' });
+    res.json({ status: 'success', files: so.attachedFiles });
   } catch (err) {
-    console.error("💥 get-SO-files error:", err);
-    res.status(500).json({ status: "failure", message: err.message });
+    console.error('💥 get-SO-files error:', err);
+    res.status(500).json({ status: 'failure', message: err.message });
   }
 });
 
@@ -139,7 +139,7 @@ fileRouter.get("/:id/files", async (req, res) => {
 
 // DELETE /api/sales-orders/:id/files/:fileId
 
-fileRouter.delete("/:id/files/:fileId", async (req, res) => {
+fileRouter.delete('/:id/files/:fileId', async (req, res) => {
   try {
     const { id: soId, fileId } = req.params;
     // 1) Load the sales-order
@@ -147,7 +147,7 @@ fileRouter.delete("/:id/files/:fileId", async (req, res) => {
     if (!so) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Sales-order not found" });
+        .json({ status: 'failure', message: 'Sales-order not found' });
     }
 
     // 2) Find the file subdoc
@@ -157,7 +157,7 @@ fileRouter.delete("/:id/files/:fileId", async (req, res) => {
     if (!fileSubdoc) {
       return res
         .status(404)
-        .json({ status: "failure", message: "File not found on this SO" });
+        .json({ status: 'failure', message: 'File not found on this SO' });
     }
 
     // 3) Remember the filename so we can unlink later
@@ -181,14 +181,14 @@ fileRouter.delete("/:id/files/:fileId", async (req, res) => {
 
     // 6) Delete from disk
     //const diskPath = path.join(process.cwd(), "uploads", filename);
-    const diskPath = path.join(process.cwd(), "uploads", fileName);
+    const diskPath = path.join(process.cwd(), 'uploads', fileName);
     fs.unlink(diskPath, (err) => {
-      if (err) console.warn("Could not remove file from disk:", err);
+      if (err) console.warn('Could not remove file from disk:', err);
     });
 
     return res.sendStatus(204);
   } catch (err) {
-    console.error("Delete SO-file error:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    console.error('Delete SO-file error:', err);
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 });

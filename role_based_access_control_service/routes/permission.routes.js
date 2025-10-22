@@ -1,5 +1,5 @@
 // routes/permission.routes.js
-import express from "express";
+import express from 'express';
 import {
   createPermission,
   getAllPermissions,
@@ -10,23 +10,23 @@ import {
   bulkUpdatePermissions,
   bulkDeletePermissions,
   bulkOperationsPartial,
-} from "../controllers/permission.controller.js";
+} from '../controllers/permission.controller.js';
 
 const permissionRouter = express.Router();
 
-permissionRouter.post("/", createPermission);
-permissionRouter.get("/", getAllPermissions);
-permissionRouter.get("/:id", getPermissionById);
-permissionRouter.patch("/:id", updatePermission);
-permissionRouter.delete("/:id", deletePermission);
+permissionRouter.post('/', createPermission);
+permissionRouter.get('/', getAllPermissions);
+permissionRouter.get('/:id', getPermissionById);
+permissionRouter.patch('/:id', updatePermission);
+permissionRouter.delete('/:id', deletePermission);
 
 // Additional
-permissionRouter.post("/bulk", bulkCreatePermissions);
-permissionRouter.patch("/bulk", bulkUpdatePermissions);
-permissionRouter.delete("/bulk", bulkDeletePermissions);
+permissionRouter.post('/bulk', bulkCreatePermissions);
+permissionRouter.patch('/bulk', bulkUpdatePermissions);
+permissionRouter.delete('/bulk', bulkDeletePermissions);
 
 // The new partial-ops route
-permissionRouter.post("/bulk-ops-partial", bulkOperationsPartial);
+permissionRouter.post('/bulk-ops-partial', bulkOperationsPartial);
 
 export default permissionRouter;
 

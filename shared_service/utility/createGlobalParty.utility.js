@@ -1,4 +1,4 @@
-import { GlobalPartyModel } from "../models/globalParty.model.js";
+import { GlobalPartyModel } from '../models/globalParty.model.js';
 
 async function createGlobalPartyId(partyTypeString, globalPartyId, name) {
   // 2) Prepare a variable to hold the final partyId

@@ -7,7 +7,7 @@ export const checkPermissions = (requiredPermissions = []) => {
   return (req, res, next) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "User is not authenticated." });
+        return res.status(401).json({ message: 'User is not authenticated.' });
       }
 
       // Gather all permissions from the user's assigned user roles
@@ -24,7 +24,7 @@ export const checkPermissions = (requiredPermissions = []) => {
 
       if (!hasAllPermissions) {
         return res.status(403).json({
-          message: "Access denied. You do not have the required permissions.",
+          message: 'Access denied. You do not have the required permissions.',
         });
       }
 
@@ -34,7 +34,7 @@ export const checkPermissions = (requiredPermissions = []) => {
       console.error(error);
       return res
         .status(403)
-        .json({ message: "Access denied due to an unexpected error." });
+        .json({ message: 'Access denied due to an unexpected error.' });
     }
   };
 };

@@ -1,6 +1,6 @@
 // cacheMiddleware.js
-import { dbgRedis } from "../index.js";
-import redisClient from "./redisClient.js";
+import { dbgRedis } from '../index.js';
+import redisClient from './redisClient.js';
 
 /**
  * Caching middleware for GET requests:
@@ -9,10 +9,10 @@ import redisClient from "./redisClient.js";
 export async function cacheMiddleware(req, res, next) {
   try {
     // Only cache GET requests by default. If you want to cache other methods, remove this check.
-    if (req.method !== "GET") {
+    if (req.method !== 'GET') {
       return next();
     }
-    dbgRedis("cache middleware mounting");
+    dbgRedis('cache middleware mounting');
     const cacheKey = req.originalUrl; // e.g. "/fms/api/v0/companies?archived=false"
     const cachedData = await redisClient.get(cacheKey);
 
@@ -25,7 +25,7 @@ export async function cacheMiddleware(req, res, next) {
     console.log(`🚫[Cache MISS] ${cacheKey}`);
     return next(); // proceed to controller/DB
   } catch (err) {
-    console.error("Error in cacheMiddleware:", err);
+    console.error('Error in cacheMiddleware:', err);
     return next(); // fallback if cache fails
   }
 }

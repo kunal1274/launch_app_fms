@@ -1,9 +1,9 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config(); // Loads .env into process.env
 
 // Project FMS server related imports
-import connectToDb from "./database/mongoDb.js";
-import createTestOrientedApp from "./app.js";
+import connectToDb from './database/mongoDb.js';
+import createTestOrientedApp from './app.js';
 
 // // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -24,5 +24,5 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-console.log("before start");
+console.log('before start');
 startServer();

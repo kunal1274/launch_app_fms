@@ -1,6 +1,6 @@
 // routes/bank.routes.js
 
-import express from "express";
+import express from 'express';
 import {
   // getAllBanks,
   // getBankById,
@@ -13,7 +13,7 @@ import {
   // archiveBankById,
   // unarchiveBankById,
   // getBankAccountBalance,
-} from "../controllers/bank.controller.js";
+} from '../controllers/bank.controller.js';
 
 const bankRouter = express.Router();
 
@@ -25,7 +25,7 @@ const bankRouter = express.Router();
 // bankRouter.get("/:id", getBankById);
 
 // 3. CREATE ONE BANK
-bankRouter.post("/", createBank);
+bankRouter.post('/', createBank);
 
 // 4. BULK CREATE BANKS
 // bankRouter.post("/bulk", bulkCreateBanks);

@@ -1,12 +1,12 @@
-import createError from "http-errors";
-import { SiteModel } from "../models/bb1.site.model.js";
+import createError from 'http-errors';
+import { SiteModel } from '../models/bb1.site.model.js';
 
 export const list = async (req, res, next) => {
   try {
     const rows = await SiteModel.find({ archived: false }).sort({
       createdAt: -1,
     });
-    console.log("rows", rows);
+    console.log('rows', rows);
     res.status(200).json({ siteData: rows });
   } catch (e) {
     next(e);
@@ -61,7 +61,7 @@ export const toggleArchive = async (req, res, next) => {
 /* param loader */
 export const loadById = async (req, res, next, id) => {
   const doc = await SiteModel.findById(id);
-  if (!doc) return next(createError(404, "Site not found"));
+  if (!doc) return next(createError(404, 'Site not found'));
   req.site = doc;
   next();
 };

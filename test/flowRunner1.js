@@ -1,11 +1,11 @@
-import "dotenv/config";
-import fs from "fs";
-import path from "path";
-import mongoose from "mongoose";
-import request from "supertest";
+import 'dotenv/config';
+import fs from 'fs';
+import path from 'path';
+import mongoose from 'mongoose';
+import request from 'supertest';
 
-import { fileURLToPath } from "url";
-import createTestOrientedApp from "../app.js";
+import { fileURLToPath } from 'url';
+import createTestOrientedApp from '../app.js';
 
 // allow longer flows
 jest.setTimeout(30000);
@@ -15,13 +15,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // pick up manifest path from args or default
 const manifestPath =
-  process.argv[2] || path.join(__dirname, "../flows/manifest.json");
-const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  process.argv[2] || path.join(__dirname, '../flows/manifest.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
 // simple interpolation of {{node.key}} against ctx
 function interp(template, ctx) {
   return template.replace(/{{([^}]+)}}/g, (_, expr) =>
-    expr.split(".").reduce((o, k) => (o && o[k] != null ? o[k] : ""), ctx)
+    expr.split('.').reduce((o, k) => (o && o[k] != null ? o[k] : ''), ctx)
   );
 }
 
@@ -92,15 +92,15 @@ async function runFlow() {
       progressed = true;
     }
     if (!progressed)
-      throw new Error("Circular or missing dependencies in flow manifest");
+      throw new Error('Circular or missing dependencies in flow manifest');
   }
 
   // dump evidence
-  const outDir = path.join(process.cwd(), "recordings");
+  const outDir = path.join(process.cwd(), 'recordings');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
   const outFile = path.join(outDir, `evidence-${Date.now()}.json`);
   fs.writeFileSync(outFile, JSON.stringify(evidence, null, 2));
-  console.log("Wrote evidence log:", outFile);
+  console.log('Wrote evidence log:', outFile);
 }
 
 export default runFlow;

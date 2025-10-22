@@ -1,22 +1,22 @@
-import { SalesOrderModel } from "../../models/salesorder.model.js";
-import callOpenAI from "../services/callOpenAi.js";
+import { SalesOrderModel } from '../../models/salesorder.model.js';
+import callOpenAI from '../services/callOpenAi.js';
 
 /* helper to always emit KPIs even if the LLM forgets one */
 function ensureKpis(obj) {
   const keys = [
-    "summary",
-    "paymentRisk",
-    "profitMargin",
-    "outstandingShipments",
-    "outstandingDeliveries",
-    "shipmentBottlenecks",
-    "alerts",
-    "otherRisks",
-    "mitigationRecommendations",
-    "timelines",
+    'summary',
+    'paymentRisk',
+    'profitMargin',
+    'outstandingShipments',
+    'outstandingDeliveries',
+    'shipmentBottlenecks',
+    'alerts',
+    'otherRisks',
+    'mitigationRecommendations',
+    'timelines',
   ];
   keys.forEach((k) => {
-    if (!(k in obj)) obj[k] = "—";
+    if (!(k in obj)) obj[k] = '—';
   });
   return obj;
 }
@@ -24,7 +24,7 @@ function ensureKpis(obj) {
 /* POST  /api/ai/query  */
 export const chatQuery = async (req, res, next) => {
   try {
-    const { question, orderNum = "" } = req.body;
+    const { question, orderNum = '' } = req.body;
 
     // try to load the single SO first
     let contextDocs = [];
@@ -65,7 +65,7 @@ export const orderInsights = async (req, res, next) => {
     Tailor them to this sales‑order:\n${JSON.stringify(so)}
     `;
     //console.log(prompt);
-    const answer = await callOpenAI(prompt, 1024, "json");
+    const answer = await callOpenAI(prompt, 1024, 'json');
     // console.log(
     //   `answer is ${answer}, and parsed json is : ${JSON.parse(answer)}`
     // );

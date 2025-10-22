@@ -1,11 +1,11 @@
 // models/glJournal.model.js
 
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 import {
   GlobalNumberingModel,
   LocalNumberingModel,
   SharedNumberingModel,
-} from "./counter.model.js";
+} from './counter.model.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. Define the sub‐schema for each GL line
@@ -26,11 +26,11 @@ const glLineSchema = new Schema(
     remarks: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     account: {
       type: Schema.Types.ObjectId,
-      ref: "Accounts",
+      ref: 'Accounts',
       required: true,
       // We store the actual Account _id instead of the bare string code.
     },
@@ -70,45 +70,45 @@ const glLineSchema = new Schema(
     debit: {
       type: Number,
       default: 0,
-      min: [0, "Debit cannot be negative."],
+      min: [0, 'Debit cannot be negative.'],
     },
     credit: {
       type: Number,
       default: 0,
-      min: [0, "Credit cannot be negative."],
+      min: [0, 'Credit cannot be negative.'],
     },
     currency: {
       type: String,
-      required: [true, "Currency is required on each line."],
+      required: [true, 'Currency is required on each line.'],
       trim: true,
     },
     exchangeRate: {
       // Rate to convert from line’s currency into functional currency.
       // e.g., if functional currency is INR and line currency is USD, exchangeRate = 75 means 1 USD = 75 INR.
       type: Number,
-      required: [true, "Exchange rate is required."],
-      min: [0, "Exchange rate must be non-negative."],
+      required: [true, 'Exchange rate is required.'],
+      min: [0, 'Exchange rate must be non-negative.'],
     },
     localAmount: {
       // This must equal (debit − credit) × exchangeRate, rounded to two decimals.
       type: Number,
       required: [
         true,
-        "Local amount is required (debit − credit) × exchangeRate.",
+        'Local amount is required (debit − credit) × exchangeRate.',
       ],
     },
 
     // ← NEW optional sub‐ledger links on each line
-    item: { type: Schema.Types.ObjectId, ref: "Items" },
-    customer: { type: Schema.Types.ObjectId, ref: "Customers" },
-    vendor: { type: Schema.Types.ObjectId, ref: "Vendors" },
-    bankAccount: { type: Schema.Types.ObjectId, ref: "Banks" },
+    item: { type: Schema.Types.ObjectId, ref: 'Items' },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customers' },
+    vendor: { type: Schema.Types.ObjectId, ref: 'Vendors' },
+    bankAccount: { type: Schema.Types.ObjectId, ref: 'Banks' },
 
     // Link to subledger (if any)
     subledger: {
       sourceType: {
         type: String,
-        enum: ["AR", "AP", "BANK_TRANSFER", "FX_REVAL"],
+        enum: ['AR', 'AP', 'BANK_TRANSFER', 'FX_REVAL'],
         default: null,
       },
       txnId: {
@@ -122,21 +122,21 @@ const glLineSchema = new Schema(
     // OPTIONAL: If you want to link an inventory dimension to this GL line,
     // copy/paste the dims object from your voucher model:
     dims: {
-      site: { type: Schema.Types.ObjectId, ref: "Sites" },
-      warehouse: { type: Schema.Types.ObjectId, ref: "Warehouses" },
-      zone: { type: Schema.Types.ObjectId, ref: "Zones" },
-      location: { type: Schema.Types.ObjectId, ref: "Locations" },
-      aisle: { type: Schema.Types.ObjectId, ref: "Aisles" },
-      rack: { type: Schema.Types.ObjectId, ref: "Racks" },
-      shelf: { type: Schema.Types.ObjectId, ref: "Shelves" },
-      bin: { type: Schema.Types.ObjectId, ref: "Bins" },
-      config: { type: Schema.Types.ObjectId, ref: "Configurations" },
-      color: { type: Schema.Types.ObjectId, ref: "Colors" },
-      size: { type: Schema.Types.ObjectId, ref: "Sizes" },
-      style: { type: Schema.Types.ObjectId, ref: "Styles" },
-      version: { type: Schema.Types.ObjectId, ref: "Versions" },
-      batch: { type: Schema.Types.ObjectId, ref: "Batches" },
-      serial: { type: Schema.Types.ObjectId, ref: "Serials" },
+      site: { type: Schema.Types.ObjectId, ref: 'Sites' },
+      warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouses' },
+      zone: { type: Schema.Types.ObjectId, ref: 'Zones' },
+      location: { type: Schema.Types.ObjectId, ref: 'Locations' },
+      aisle: { type: Schema.Types.ObjectId, ref: 'Aisles' },
+      rack: { type: Schema.Types.ObjectId, ref: 'Racks' },
+      shelf: { type: Schema.Types.ObjectId, ref: 'Shelves' },
+      bin: { type: Schema.Types.ObjectId, ref: 'Bins' },
+      config: { type: Schema.Types.ObjectId, ref: 'Configurations' },
+      color: { type: Schema.Types.ObjectId, ref: 'Colors' },
+      size: { type: Schema.Types.ObjectId, ref: 'Sizes' },
+      style: { type: Schema.Types.ObjectId, ref: 'Styles' },
+      version: { type: Schema.Types.ObjectId, ref: 'Versions' },
+      batch: { type: Schema.Types.ObjectId, ref: 'Batches' },
+      serial: { type: Schema.Types.ObjectId, ref: 'Serials' },
     },
     active: {
       type: Boolean,
@@ -147,20 +147,20 @@ const glLineSchema = new Schema(
     status: {
       type: String,
       enum: [
-        "DRAFT",
-        "POSTED",
-        "CANCELLED",
-        "REVERSED",
-        "ADJUSTED",
-        "ADMIN_MODE",
-        "ANY_MODE",
+        'DRAFT',
+        'POSTED',
+        'CANCELLED',
+        'REVERSED',
+        'ADJUSTED',
+        'ADMIN_MODE',
+        'ANY_MODE',
       ],
-      default: "DRAFT",
+      default: 'DRAFT',
       required: true,
     },
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
 
     files: [
@@ -174,7 +174,7 @@ const glLineSchema = new Schema(
     ],
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
 
     // Extra metadata—could store sub-ledger IDs or notes
@@ -188,7 +188,7 @@ const glLineSchema = new Schema(
 );
 
 // assign lineNum sequentially
-glLineSchema.pre("validate", function (next) {
+glLineSchema.pre('validate', function (next) {
   // nothing here – handled at parent level
   const hasAcct = !!this.account;
   const hasSub = !!this.subledger?.subledgerType;
@@ -196,7 +196,7 @@ glLineSchema.pre("validate", function (next) {
     return next(
       new mongoose.Error.ValidationError(
         new Error(
-          "Each line must have exactly one of `account` or `subledger` defined."
+          'Each line must have exactly one of `account` or `subledger` defined.'
         )
       )
     );
@@ -210,13 +210,13 @@ glLineSchema.pre("validate", function (next) {
 const approvalStepSchema = new Schema(
   {
     step: { type: Number, required: true },
-    assignedTo: { type: Schema.Types.ObjectId, ref: "Users", required: true },
+    assignedTo: { type: Schema.Types.ObjectId, ref: 'Users', required: true },
     status: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED", "CHANGES_REQUESTED"],
-      default: "PENDING",
+      enum: ['PENDING', 'APPROVED', 'REJECTED', 'CHANGES_REQUESTED'],
+      default: 'PENDING',
     },
-    actedBy: { type: Schema.Types.ObjectId, ref: "Users" },
+    actedBy: { type: Schema.Types.ObjectId, ref: 'Users' },
     actedAt: { type: Date },
     comment: { type: String },
   },
@@ -226,10 +226,10 @@ const approvalStepSchema = new Schema(
 const historySchema = new Schema(
   {
     ts: { type: Date, default: Date.now },
-    user: { type: Schema.Types.ObjectId, ref: "Users" },
+    user: { type: Schema.Types.ObjectId, ref: 'Users' },
     action: { type: String }, // e.g. "SUBMIT","APPROVE","DELEGATE",...
     step: { type: Number },
-    to: { type: Schema.Types.ObjectId, ref: "Users" }, // for delegation
+    to: { type: Schema.Types.ObjectId, ref: 'Users' }, // for delegation
     comment: { type: String },
   },
   { _id: false }
@@ -243,7 +243,7 @@ const glJournalSchema = new Schema(
     // **New**: link back to the template
     template: {
       type: Schema.Types.ObjectId,
-      ref: "JournalTemplates",
+      ref: 'JournalTemplates',
       required: false,
     },
     globalJournalNum: { type: String, required: true, unique: true }, // "GJ-000001" across company for across company journal inc
@@ -279,35 +279,35 @@ const glJournalSchema = new Schema(
     reference: {
       type: String,
       trim: true,
-      default: "",
+      default: '',
     },
     createdBy: {
       type: String,
       required: true,
-      default: "system", // you can override with req.user
+      default: 'system', // you can override with req.user
     },
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
 
     // NEW status field
     status: {
       type: String,
       enum: [
-        "DRAFT",
-        "PENDING_APPROVAL",
-        "APPROVED",
-        "REJECTED",
-        "CHANGES_REQUESTED",
-        "POSTED",
-        "CANCELLED",
-        "REVERSED",
-        "ADJUSTED",
-        "ADMIN_MODE",
-        "ANY_MODE",
+        'DRAFT',
+        'PENDING_APPROVAL',
+        'APPROVED',
+        'REJECTED',
+        'CHANGES_REQUESTED',
+        'POSTED',
+        'CANCELLED',
+        'REVERSED',
+        'ADJUSTED',
+        'ADMIN_MODE',
+        'ANY_MODE',
       ],
-      default: "DRAFT",
+      default: 'DRAFT',
       required: true,
     },
     active: {
@@ -329,15 +329,15 @@ const glJournalSchema = new Schema(
     remarks: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     lines: {
       // Must have at least one line
       type: [glLineSchema],
-      required: [true, "A GL Journal must have at least one line."],
+      required: [true, 'A GL Journal must have at least one line.'],
       validate: {
         validator: (arr) => Array.isArray(arr) && arr.length > 0,
-        message: "A GL Journal must have at least one line.",
+        message: 'A GL Journal must have at least one line.',
       },
     },
     // — Workflow & history —
@@ -368,12 +368,12 @@ glJournalSchema.methods.initWorkflow = function (stepUsers, actorId) {
   this.workflow = stepUsers.map((u, i) => ({
     step: i + 1,
     assignedTo: u,
-    status: "PENDING",
+    status: 'PENDING',
   }));
   this.history.push({
     user: actorId,
-    action: "SUBMIT",
-    comment: `Submitted for approval to steps [${stepUsers.join(",")}]`,
+    action: 'SUBMIT',
+    comment: `Submitted for approval to steps [${stepUsers.join(',')}]`,
   });
 };
 
@@ -387,26 +387,26 @@ glJournalSchema.methods.addHistory = function (entry) {
 // ───────────────────────────────────────────────────
 // 3) Auto‐generate all four numbers & assign lineNum/sequence
 // ───────────────────────────────────────────────────
-glJournalSchema.pre("validate", async function (next) {
+glJournalSchema.pre('validate', async function (next) {
   if (this.isNew) {
     // 1) GJ
     const g = await GlobalNumberingModel.findOneAndUpdate(
-      { _id: "GJ" },
+      { _id: 'GJ' },
       { $inc: { seq: 1 } },
       { upsert: true, new: true }
     );
-    this.globalJournalNum = `GJ-${String(g.seq).padStart(6, "0")}`;
+    this.globalJournalNum = `GJ-${String(g.seq).padStart(6, '0')}`;
 
     // 2) Local JN (uses company code)
     const companyCode =
-      this.company?.toString().slice(-3).toUpperCase() || "LX";
+      this.company?.toString().slice(-3).toUpperCase() || 'LX';
     const ljId = `LJ_${companyCode}`;
     const l = await LocalNumberingModel.findOneAndUpdate(
       { _id: ljId },
       { $inc: { seq: 1 } },
       { upsert: true, new: true }
     );
-    this.localJournalNum = `LJ${companyCode}-${String(l.seq).padStart(6, "0")}`;
+    this.localJournalNum = `LJ${companyCode}-${String(l.seq).padStart(6, '0')}`;
 
     // 3) Shared order per company
     const shId = `SH_${companyCode}`;
@@ -417,26 +417,26 @@ glJournalSchema.pre("validate", async function (next) {
     );
     this.localSharedOrderNum = `SH${companyCode}-${String(sh.seq).padStart(
       6,
-      "0"
+      '0'
     )}`;
 
     // 4) Global shared
     const gs = await GlobalNumberingModel.findOneAndUpdate(
-      { _id: "GSH" },
+      { _id: 'GSH' },
       { $inc: { seq: 1 } },
       { upsert: true, new: true }
     );
-    this.globalSharedOrderNum = `GSH-${String(gs.seq).padStart(6, "0")}`;
+    this.globalSharedOrderNum = `GSH-${String(gs.seq).padStart(6, '0')}`;
   }
 
   // 2) If a template was provided, pull its settings:
   if (this.template) {
     const tpl = await mongoose
-      .model("JournalTemplates")
+      .model('JournalTemplates')
       .findById(this.template)
       .lean();
     if (!tpl) {
-      return next(new Error("Invalid templateId"));
+      return next(new Error('Invalid templateId'));
     }
     this.allowHeader = tpl.allowHeader;
     this.mandatorySingleHeader = tpl.mandatorySingleHeader;
@@ -455,7 +455,7 @@ glJournalSchema.pre("validate", async function (next) {
       return next(
         new mongoose.Error.ValidationError(
           new Error(
-            "Only one header line is allowed when allowSingleHeaderOnly is checked."
+            'Only one header line is allowed when allowSingleHeaderOnly is checked.'
           )
         )
       );
@@ -491,7 +491,7 @@ glJournalSchema.pre("validate", async function (next) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. Pre-save hook: ensure total debits = total credits
 // ─────────────────────────────────────────────────────────────────────────────
-glJournalSchema.pre("save", function (next) {
+glJournalSchema.pre('save', function (next) {
   // const journal = this;
   // let totalDebits = 0;
   // let totalCredits = 0;
@@ -598,4 +598,4 @@ glJournalSchema.index({ localSharedOrderNum: 1 });
 glJournalSchema.index({ globalSharedOrderNum: 1 });
 
 export const GLJournalModel =
-  mongoose.models.GLJournals || model("GLJournals", glJournalSchema);
+  mongoose.models.GLJournals || model('GLJournals', glJournalSchema);

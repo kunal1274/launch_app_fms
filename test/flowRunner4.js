@@ -1,18 +1,18 @@
 // test/flowRunner.js
-require("dotenv").config({
-  path: require("path").resolve(process.cwd(), ".env.test"),
+require('dotenv').config({
+  path: require('path').resolve(process.cwd(), '.env.test'),
 });
 
 jest.setTimeout(30000);
-const mongoose = require("mongoose");
-const fs = require("fs");
-const path = require("path");
-const request = require("supertest");
-const createTestOrientedApp = require("../app");
+const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const request = require('supertest');
+const createTestOrientedApp = require('../app');
 
 function interp(template, ctx) {
   return template.replace(/{{([^}]+)}}/g, (_, expr) =>
-    expr.split(".").reduce((o, k) => (o && o[k] != null ? o[k] : ""), ctx)
+    expr.split('.').reduce((o, k) => (o && o[k] != null ? o[k] : ''), ctx)
   );
 }
 
@@ -26,8 +26,8 @@ async function runFlow() {
   const app = createTestOrientedApp();
   const manifest = JSON.parse(
     fs.readFileSync(
-      path.join(__dirname, "../flows/account-manifest.json"),
-      "utf8"
+      path.join(__dirname, '../flows/account-manifest.json'),
+      'utf8'
     )
   );
   const ctx = {};
@@ -91,18 +91,18 @@ async function runFlow() {
       progressed = true;
     }
     if (!progressed) {
-      throw new Error("Circular or missing dependencies in flow manifest");
+      throw new Error('Circular or missing dependencies in flow manifest');
     }
   }
 
   // write out a timestamped evidence file
   const outPath = path.join(
     process.cwd(),
-    "recordings",
+    'recordings',
     `evidence-${Date.now()}.json`
   );
   fs.writeFileSync(outPath, JSON.stringify(evidence, null, 2));
-  console.log("Wrote evidence log:", outPath);
+  console.log('Wrote evidence log:', outPath);
 }
 
 module.exports = runFlow;

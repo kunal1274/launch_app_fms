@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { JournalTemplateModel } from "../models/journalTemplate.model.js";
+import mongoose from 'mongoose';
+import { JournalTemplateModel } from '../models/journalTemplate.model.js';
 
 /**
  * Create a new Journal Template
@@ -7,18 +7,18 @@ import { JournalTemplateModel } from "../models/journalTemplate.model.js";
 export const createTemplate = async (req, res) => {
   try {
     const tpl = await JournalTemplateModel.create(req.body);
-    return res.status(201).json({ status: "success", data: tpl });
+    return res.status(201).json({ status: 'success', data: tpl });
   } catch (err) {
-    console.error("❌ createTemplate Error:", err);
-    if (err.name === "ValidationError") {
-      return res.status(422).json({ status: "failure", message: err.message });
+    console.error('❌ createTemplate Error:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({ status: 'failure', message: err.message });
     }
     if (err.code === 11000) {
       return res
         .status(409)
-        .json({ status: "failure", message: "Template name must be unique." });
+        .json({ status: 'failure', message: 'Template name must be unique.' });
     }
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -28,10 +28,10 @@ export const createTemplate = async (req, res) => {
 export const listTemplates = async (req, res) => {
   try {
     const templates = await JournalTemplateModel.find().lean();
-    return res.status(200).json({ status: "success", data: templates });
+    return res.status(200).json({ status: 'success', data: templates });
   } catch (err) {
-    console.error("❌ listTemplates Error:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    console.error('❌ listTemplates Error:', err);
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -44,18 +44,18 @@ export const getTemplateById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid template ID" });
+        .json({ status: 'failure', message: 'Invalid template ID' });
     }
     const tpl = await JournalTemplateModel.findById(id).lean();
     if (!tpl) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Template not found." });
+        .json({ status: 'failure', message: 'Template not found.' });
     }
-    return res.status(200).json({ status: "success", data: tpl });
+    return res.status(200).json({ status: 'success', data: tpl });
   } catch (err) {
-    console.error("❌ getTemplateById Error:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    console.error('❌ getTemplateById Error:', err);
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -72,15 +72,15 @@ export const updateTemplate = async (req, res) => {
     if (!updated) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Template not found." });
+        .json({ status: 'failure', message: 'Template not found.' });
     }
-    return res.status(200).json({ status: "success", data: updated });
+    return res.status(200).json({ status: 'success', data: updated });
   } catch (err) {
-    console.error("❌ updateTemplate Error:", err);
-    if (err.name === "ValidationError") {
-      return res.status(422).json({ status: "failure", message: err.message });
+    console.error('❌ updateTemplate Error:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({ status: 'failure', message: err.message });
     }
-    return res.status(500).json({ status: "failure", message: err.message });
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };
 
@@ -94,13 +94,13 @@ export const deleteTemplate = async (req, res) => {
     if (!result) {
       return res
         .status(404)
-        .json({ status: "failure", message: "Template not found." });
+        .json({ status: 'failure', message: 'Template not found.' });
     }
     return res
       .status(200)
-      .json({ status: "success", message: "Template deleted." });
+      .json({ status: 'success', message: 'Template deleted.' });
   } catch (err) {
-    console.error("❌ deleteTemplate Error:", err);
-    return res.status(500).json({ status: "failure", message: err.message });
+    console.error('❌ deleteTemplate Error:', err);
+    return res.status(500).json({ status: 'failure', message: err.message });
   }
 };

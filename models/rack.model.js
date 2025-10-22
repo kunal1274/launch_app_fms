@@ -1,5 +1,5 @@
-import mongoose, { Schema, model } from "mongoose";
-import { RackCounterModel } from "./counter.model.js";
+import mongoose, { Schema, model } from 'mongoose';
+import { RackCounterModel } from './counter.model.js';
 
 // Sales Order Schema
 const rackSchema = new Schema(
@@ -22,15 +22,15 @@ const rackSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Physical", "Virtual"],
-        message: "⚠️ {VALUE} is not a valid type. Use 'Physical' or 'Virtual'.",
+        values: ['Physical', 'Virtual'],
+        message: '⚠️ {VALUE} is not a valid type. Use \'Physical\' or \'Virtual\'.',
       },
-      default: "Physical",
+      default: 'Physical',
     },
 
     aisle: {
       type: Schema.Types.ObjectId,
-      ref: "Aisles", // Reference to the Customer model
+      ref: 'Aisles', // Reference to the Customer model
       required: true,
     },
 
@@ -45,18 +45,18 @@ const rackSchema = new Schema(
     archived: { type: Boolean, default: false }, // New field
     company: {
       type: Schema.Types.ObjectId,
-      ref: "Companies",
+      ref: 'Companies',
     },
     groups: [
       {
         type: Schema.Types.ObjectId,
-        ref: "GlobalGroups", // from group.model.js
+        ref: 'GlobalGroups', // from group.model.js
       },
     ],
     createdBy: {
       type: String,
       required: true,
-      default: "SystemRackCreation",
+      default: 'SystemRackCreation',
     },
     updatedBy: {
       type: String,
@@ -104,7 +104,7 @@ const rackSchema = new Schema(
   }
 );
 
-rackSchema.pre("save", async function (next) {
+rackSchema.pre('save', async function (next) {
   if (!this.isNew) {
     return next();
   }
@@ -117,7 +117,7 @@ rackSchema.pre("save", async function (next) {
     const existingRack = await RackModel.findOne({
       name: this.name,
     }).collation({
-      locale: "en",
+      locale: 'en',
       strength: 2, // Case-insensitive collation
     });
 
@@ -127,36 +127,36 @@ rackSchema.pre("save", async function (next) {
 
     // Increment counter for item code
     const dbResponseNewCounter = await RackCounterModel.findOneAndUpdate(
-      { _id: "rackCode" },
+      { _id: 'rackCode' },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
 
-    console.log("ℹ️ Counter increment result:", dbResponseNewCounter);
+    console.log('ℹ️ Counter increment result:', dbResponseNewCounter);
 
     if (!dbResponseNewCounter || dbResponseNewCounter.seq === undefined) {
-      throw new Error("❌ Failed to generate rack code");
+      throw new Error('❌ Failed to generate rack code');
     }
 
     // Generate item code
-    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, "0");
+    const seqNumber = dbResponseNewCounter.seq.toString().padStart(3, '0');
     this.code = `RK_${seqNumber}`;
 
     next();
   } catch (error) {
-    console.error("❌ Error caught during rack save:", error.stack);
+    console.error('❌ Error caught during rack save:', error.stack);
 
     next(error);
   } finally {
-    console.log("ℹ️ Finally rack counter closed");
+    console.log('ℹ️ Finally rack counter closed');
   }
 });
 
 rackSchema.pre(/^find/, function (next) {
-  this.populate("aisle", "code name description type active");
+  this.populate('aisle', 'code name description type active');
   next();
 });
 
 rackSchema.index({ name: 1, location: 1 });
 
-export const RackModel = mongoose.models.Racks || model("Racks", rackSchema);
+export const RackModel = mongoose.models.Racks || model('Racks', rackSchema);

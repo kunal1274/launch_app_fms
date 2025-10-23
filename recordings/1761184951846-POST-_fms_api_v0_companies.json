@@ -1,0 +1,19 @@
+{
+  "ts": 1761184951846,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Beta Manufacturing Inc",
+    "companyCode": "BETA002",
+    "email": "beta@manufacturing.com",
+    "contactNumber": "+1987654321",
+    "primaryGSTAddress": "456 Beta Avenue, Manufacturing City, MC 54321, Manufacturing Country",
+    "businessType": "Manufacturing",
+    "currency": "EUR",
+    "website": "https://www.beta-manufacturing.com",
+    "active": true,
+    "remarks": "Industrial manufacturing company"
+  },
+  "status": 409,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"A company with this code number or email id  already exists.\"}"
+}

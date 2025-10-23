@@ -1,0 +1,14 @@
+{
+  "ts": 1761191213093,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/verify-otp",
+  "body": {
+    "email": "kunal1274@gmail.com",
+    "otp": "389503"
+  },
+  "status": 200,
+  "response": {
+    "msg": "✅ OTP verified successfully recorded at 🕒 local time 2025-10-23 09:16:53 and in detailed 📅 23rd Oct 2025, Thursday, 9:16 am (local time)",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imt1bmFsMTI3NEBnbWFpbC5jb20iLCJpYXQiOjE3NjExOTEyMTMsImV4cCI6MTc2MTE5MjExM30.i-C_uhz_ji3s1bMGeLUDFWQqeJYGXNF8hAUc1aLI_Gk"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "ts": 1761154023489,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/verify-otp",
+  "body": {
+    "email": "kunal1274@gmail.com",
+    "otp": "030808"
+  },
+  "status": 400,
+  "response": {
+    "msg": "🤕 Invalid or expired OTP"
+  }
+}

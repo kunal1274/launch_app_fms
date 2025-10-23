@@ -1,0 +1,8 @@
+{
+  "ts": 1761140607967,
+  "method": "OPTIONS",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {},
+  "status": 500,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"An unexpected error occurred from the Backend for launch-app-fms\"}"
+}

@@ -1,7 +1,7 @@
 // controllers/file.controller.js
 import fs from 'fs';
 import path from 'path';
-import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
+// import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
 
 const buildMeta = (f) => ({
   fileName: f.filename,
@@ -15,11 +15,13 @@ const buildMeta = (f) => ({
 export const saveFiles = async (req, res, next) => {
   try {
     const metas = req.files.map(buildMeta);
-    const so = await SalesOrderModel.findByIdAndUpdate(
-      req.params.id,
-      { $push: { files: { $each: metas } } },
-      { new: true, select: 'files' }
-    );
+    // BB functionality - commented out
+    // const so = await SalesOrderModel.findByIdAndUpdate(
+    //   req.params.id,
+    //   { $push: { files: { $each: metas } } },
+    //   { new: true, select: 'files' }
+    // );
+    const so = { files: [] }; // Placeholder for BB functionality
     res.json(so.files);
   } catch (e) {
     next(e);
@@ -28,7 +30,9 @@ export const saveFiles = async (req, res, next) => {
 
 export const listFiles = async (req, res, next) => {
   try {
-    const so = await SalesOrderModel.findById(req.params.id).select('files');
+    // BB functionality - commented out
+    // const so = await SalesOrderModel.findById(req.params.id).select('files');
+    const so = null; // Placeholder for BB functionality
     if (!so) return res.status(404).send('Sales order not found');
     res.json(so.files);
   } catch (e) {
@@ -40,18 +44,21 @@ export const deleteFile = async (req, res, next) => {
   try {
     const { id: fileId, id: soId } = { ...req.params, id: req.params.id };
 
-    const so = await SalesOrderModel.findById(soId).select('files');
+    // BB functionality - commented out
+    // const so = await SalesOrderModel.findById(soId).select('files');
+    const so = null; // Placeholder for BB functionality
     if (!so) return res.status(404).send('Sales order not found');
 
-    const f = so.files.id(req.params.fileId);
+    // const f = so.files.id(req.params.fileId);
+    const f = null; // Placeholder for BB functionality
     if (!f) return res.status(404).send('File not found');
 
     // fs.unlinkSync(
     //   path.join(process.cwd(), "uploads", "sales-orders", f.fileName)
     // );
-    fs.unlinkSync(path.join(process.cwd(), 'uploads', f.fileName));
-    f.remove();
-    await so.save();
+    // fs.unlinkSync(path.join(process.cwd(), 'uploads', f.fileName));
+    // f.remove();
+    // await so.save();
     res.json(so.files);
   } catch (e) {
     next(e);

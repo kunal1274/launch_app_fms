@@ -1,0 +1,1597 @@
+{
+  "ts": 1761192751530,
+  "method": "GET",
+  "path": "/fms/api/v0/companies?page=1&limit=50&sortBy=createdAt&sortOrder=desc",
+  "body": {},
+  "status": 304,
+  "response": [
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "DEMO",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxen1@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e7cbfbe4d5a291f0dcc7c9",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "RELKART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxen4@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e7f1c7770fa136811c7b1d",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "RECART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxen7@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e8223c8b5f064f731fd12d",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "REKART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxen6@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e8227e8b5f064f731fd130",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "REMART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxen9@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e8332a5ac028d4bd15256f",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "REJART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyratxe@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e8334c8bf6ad3887018a94",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "RESART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyrtxe@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67e83db91aef84e41642eaa3",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "REUART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companyrxe@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67eac4f17a446f2653f14584",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "RETART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companrxe@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67eada2ff6478d7518781916",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "REART",
+      "companyName": "Ratxen Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companxe@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67eada66f6fb74634775b916",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "XESTART",
+      "companyName": "XESTART Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "companxestart@gmail.com",
+      "extras": {},
+      "files": [],
+      "groups": [],
+      "id": "67ffbf2bed149d7e986b5856",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "ESTART",
+      "companyName": "ESTART Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "compestart@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT"
+      },
+      "files": [],
+      "groups": [],
+      "id": "67ffbfd0ed149d7e986b5859",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "ETART",
+      "companyName": "ESTART Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "cpestart@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "67ffc089ed149d7e986b585c",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "START",
+      "companyName": "ESTART Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "cpstart@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "680a1074a4097d76f15dd833",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "TUART",
+      "companyName": "ESTART Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "cptuart@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "680a3803d792d862cb46fb1e",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "STUART",
+      "companyName": "STUART Solutions Private Limited",
+      "contactNumber": "4949489585",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "cuart@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "680b0a1ffe745b413612a810",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankNum": "04942349561873",
+          "name": "HDFC Bank Hyderabad",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": ""
+        },
+        {
+          "code": "kunal1274",
+          "type": "UPI",
+          "bankNum": "kunal12765@okhdfcbank",
+          "name": "UPI for kunal",
+          "ifsc": "",
+          "swift": "",
+          "active": true,
+          "qrDetails": ""
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "BHILAI",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "cuabhilait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "680b7015719715616c90f412",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankNum": "04942349561873",
+          "name": "HDFC Bank Hyderabad",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": ""
+        },
+        {
+          "code": "kunal1274",
+          "type": "UPI",
+          "bankNum": "kunal12765@okhdfcbank",
+          "name": "UPI for kunal",
+          "ifsc": "",
+          "swift": "",
+          "active": true,
+          "qrDetails": ""
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "HYUIT",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "chyuithilait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "680c86693d3eba10bd5ed668",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankNum": "04942349561873",
+          "name": "HDFC Bank Hyderabad",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": ""
+        },
+        {
+          "code": "kunal1274",
+          "type": "UPI",
+          "bankNum": "kunal12765@okhdfcbank",
+          "name": "UPI for kunal",
+          "ifsc": "",
+          "swift": "",
+          "active": true,
+          "qrDetails": ""
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "SHKUSU",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "chyushukusulait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "680f222b9a6215e00b450e2d",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "SHIKUUSU",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckushikuusulait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68124fc37035e3cd7545d37b",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "IKUUSU",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckkuusulait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68124ffda8ace8f386dc297f",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "IKUU",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckkuusurtit@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68127af7ebce0fc90911c2bc",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "ILU2",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ilu2@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "68127c0cebce0fc90911c2c7",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "ILU3",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ilu3@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "68127c0cebce0fc90911c2cb",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "ILU1",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ilu1@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "68127c0cebce0fc90911c2c3",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "ILU5",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ilu5@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "68127c5bebce0fc90911c2f0",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "ILU6",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ilu6@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "68127c5bebce0fc90911c2f4",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        },
+        {
+          "code": "HDFC1873",
+          "type": "BankAndUpi",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "ILU4",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ilu4@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "groups": [],
+      "id": "68127c5bebce0fc90911c2f8",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "IKUUS6U",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckkuus6ulait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68491f5ccd3f36c0592917ff",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "IKU56SU",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckkuusulai54t@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "684aa3c1b6c0970654624c1f",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "IKU45S6U",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckkuu346ulait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68515ecc242d3ccf8b5d652f",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    },
+    {
+      "active": true,
+      "archived": false,
+      "bankDetails": [
+        {
+          "code": "HDFC1873",
+          "type": "Bank",
+          "bankAccNum": "04942349561873",
+          "bankName": "HDFC Bank Hyderabad",
+          "accountHolderName": "Testing Holder Name",
+          "ifsc": "HDFC004484",
+          "swift": "HDFCIBERIIT",
+          "active": true,
+          "qrDetails": "erjeoueotueotu3493759hkhiy@#@$29847dfhekhiyd#$3947349hdhe"
+        }
+      ],
+      "businessType": "Trading",
+      "companyCode": "IKR45S6U",
+      "companyName": "STUART Solutions Private Limited",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "ckkru346ulait@gmail.com",
+      "extras": {
+        "creditLimit": 454590,
+        "taxNo": "456343ERT",
+        "arrayTest": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "objectTest": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "arrayOfObjects": [
+          {
+            "rollNum": 45,
+            "class": "7A"
+          },
+          {
+            "rollNum": 19,
+            "class": "9C"
+          }
+        ]
+      },
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "6851607e0be7bc0679a0c4c6",
+      "logoImage": "",
+      "primaryGSTAddress": "Gurguragm sector 17c 122101",
+      "remarks": "",
+      "secondaryOfficeAddress": "",
+      "sysCode": "CMP_002",
+      "taxInfo": {
+        "gstNumber": "308308503850",
+        "tanNumber": "84hd87383857",
+        "panNumber": "Detoeuoeiu934"
+      },
+      "tertiaryShippingAddress": "",
+      "updatedBy": null,
+      "website": "https://www.ratxen.com"
+    }
+  ]
+}

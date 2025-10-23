@@ -1,0 +1,19 @@
+{
+  "ts": 1761184951987,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Gamma Services Corp",
+    "companyCode": "GAMMA003",
+    "email": "gamma@services.com",
+    "contactNumber": "+1555666777",
+    "primaryGSTAddress": "789 Gamma Road, Services City, SC 98765, Services Country",
+    "businessType": "Services",
+    "currency": "GBP",
+    "website": "https://www.gamma-services.com",
+    "active": false,
+    "remarks": "Professional services company"
+  },
+  "status": 422,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"❌ Validation error during customer creation.\",\"error\":\"Companies validation failed: businessType: ⚠️ Services is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.\"}"
+}

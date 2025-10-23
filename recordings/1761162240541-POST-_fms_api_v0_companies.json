@@ -1,0 +1,25 @@
+{
+  "ts": 1761162240541,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Test Company Ltd",
+    "companyCode": "TC001",
+    "email": "test@company.com",
+    "phone": "+1234567890",
+    "address": {
+      "street": "123 Test Street",
+      "city": "Test City",
+      "state": "Test State",
+      "zipCode": "12345",
+      "country": "Test Country"
+    },
+    "isActive": true,
+    "description": "Test company for API integration testing"
+  },
+  "status": 422,
+  "response": {
+    "status": "failure",
+    "message": "⚠️ Company code, company name, primary GST address, and email are required."
+  }
+}

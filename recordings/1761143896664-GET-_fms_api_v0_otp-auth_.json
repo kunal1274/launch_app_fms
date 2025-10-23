@@ -1,0 +1,36 @@
+{
+  "ts": 1761143896664,
+  "method": "GET",
+  "path": "/fms/api/v0/otp-auth/",
+  "body": {},
+  "status": 200,
+  "response": [
+    {
+      "email": "kunalratxen2@gmail.com",
+      "expiresAt": "2025-04-15T19:29:30.893Z",
+      "id": "67feb016931472d3807a8067",
+      "method": "email",
+      "otp": "3009",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "kunalratxen@gmail.com",
+      "expiresAt": "2025-10-22T14:21:20.759Z",
+      "id": "68f8e4dc0dbebef0be41260a",
+      "method": "email",
+      "otp": "206345",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "ctrmratxen@gmail.com",
+      "expiresAt": "2025-10-22T14:53:06.424Z",
+      "id": "68f8ec4eaf9f4c0f22e4386e",
+      "method": "email",
+      "otp": "833579",
+      "otpType": "numeric",
+      "phoneNumber": null
+    }
+  ]
+}

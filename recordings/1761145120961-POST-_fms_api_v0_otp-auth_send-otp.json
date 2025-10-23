@@ -1,0 +1,13 @@
+{
+  "ts": 1761145120961,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {
+    "email": "ctrmratxen@gmail.com",
+    "method": "email"
+  },
+  "status": 200,
+  "response": {
+    "msg": "✅ OTP sent via email successfully recorded at 🕒 local time 2025-10-22 20:28:40 and in detailed 📅 22nd Oct 2025, Wednesday, 8:28 pm (local time)"
+  }
+}

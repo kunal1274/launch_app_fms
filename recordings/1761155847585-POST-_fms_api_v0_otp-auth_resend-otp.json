@@ -1,0 +1,18 @@
+{
+  "ts": 1761155847585,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/resend-otp",
+  "body": {
+    "email": "test@example.com",
+    "method": "email"
+  },
+  "status": 200,
+  "response": {
+    "success": true,
+    "message": "New OTP sent successfully",
+    "expiresAt": "2025-10-22T18:12:23.966Z",
+    "canResend": true,
+    "remainingResends": 1,
+    "resendCooldown": 0
+  }
+}

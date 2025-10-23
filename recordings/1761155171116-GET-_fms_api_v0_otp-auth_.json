@@ -1,0 +1,81 @@
+{
+  "ts": 1761155171116,
+  "method": "GET",
+  "path": "/fms/api/v0/otp-auth/",
+  "body": {},
+  "status": 200,
+  "response": [
+    {
+      "email": "kunalratxen2@gmail.com",
+      "expiresAt": "2025-04-15T19:29:30.893Z",
+      "id": "67feb016931472d3807a8067",
+      "method": "email",
+      "otp": "3009",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "adityaclassesratxen@gmail.com",
+      "expiresAt": "2025-10-22T14:59:21.045Z",
+      "id": "68f8edc5741829e78d9bd8d2",
+      "method": "email",
+      "otp": "058758",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "adityaclassesratxen1@gmail.com",
+      "expiresAt": "2025-10-22T15:00:18.517Z",
+      "id": "68f8edfe1c92f1bc75a59365",
+      "method": "email",
+      "otp": "330689",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "ctrmratxen1@gmail.com",
+      "expiresAt": "2025-10-22T15:00:38.363Z",
+      "id": "68f8ee12a0f3d730c34b934f",
+      "method": "email",
+      "otp": "600248",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "kunalratxen@gmail.com",
+      "expiresAt": "2025-10-22T16:06:08.112Z",
+      "id": "68f8fd6c6d701b9a0fc7bc42",
+      "method": "email",
+      "otp": "143946",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "ctrmratxen@gmail.com",
+      "expiresAt": "2025-10-22T16:15:50.160Z",
+      "id": "68f8ffb27fefd3328d2f452d",
+      "method": "email",
+      "otp": "917785",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "test@example.com",
+      "expiresAt": "2025-10-22T17:38:00.097Z",
+      "id": "68f912f4fc08a6da0c26f7bd",
+      "method": "email",
+      "otp": "150060",
+      "otpType": "numeric",
+      "phoneNumber": null
+    },
+    {
+      "email": "kunal1274@gmail.com",
+      "expiresAt": "2025-10-22T18:00:47.342Z",
+      "id": "68f9184bfc08a6da0c26f7e2",
+      "method": "email",
+      "otp": "317160",
+      "otpType": "numeric",
+      "phoneNumber": null
+    }
+  ]
+}

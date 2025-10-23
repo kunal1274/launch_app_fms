@@ -1,0 +1,12 @@
+{
+  "ts": 1761143880098,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {
+    "email": "ctrmratxen@gmail.com"
+  },
+  "status": 400,
+  "response": {
+    "msg": "⚠️ Phone number or email is required, and method must be specified"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "ts": 1761151539890,
+  "method": "GET",
+  "path": "/fms/api/v0",
+  "body": {},
+  "status": 400,
+  "response": "This is final and invalid path coming from node js backend launch-app-fms"
+}

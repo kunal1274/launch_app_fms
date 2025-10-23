@@ -1,0 +1,8 @@
+{
+  "ts": 1761190148551,
+  "method": "OPTIONS",
+  "path": "/fms/api/v0/otp-auth/verify-otp",
+  "body": {},
+  "status": 200,
+  "response": ""
+}

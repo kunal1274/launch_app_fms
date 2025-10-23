@@ -1,0 +1,11 @@
+{
+  "ts": 1761155127459,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/resend-otp",
+  "body": {
+    "email": "kunal1274@gmail.com",
+    "method": "email"
+  },
+  "status": 400,
+  "response": "This is final and invalid path coming from node js backend launch-app-fms"
+}

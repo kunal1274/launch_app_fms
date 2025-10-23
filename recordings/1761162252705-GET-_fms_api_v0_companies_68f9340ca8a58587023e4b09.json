@@ -1,0 +1,34 @@
+{
+  "ts": 1761162252705,
+  "method": "GET",
+  "path": "/fms/api/v0/companies/68f9340ca8a58587023e4b09",
+  "body": {},
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Company retrieved successfully.",
+    "data": {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "TC001",
+      "companyName": "Test Company Ltd",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "test@company.com",
+      "extras": {},
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68f9340ca8a58587023e4b09",
+      "primaryGSTAddress": "123 Test Street, Test City, Test State 12345, Test Country",
+      "remarks": "Test company for API integration testing",
+      "sysCode": "CMP_003",
+      "updatedBy": null,
+      "website": "https://www.testcompany.com"
+    }
+  }
+}

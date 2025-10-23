@@ -1,0 +1,12 @@
+{
+  "ts": 1761162253244,
+  "method": "GET",
+  "path": "/fms/api/v0/companies/non-existent-id",
+  "body": {},
+  "status": 500,
+  "response": {
+    "status": "failure",
+    "message": "❌ Internal Server Error",
+    "error": "Cast to ObjectId failed for value \"non-existent-id\" (type string) at path \"_id\" for model \"Companies\""
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "ts": 1761161619399,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {
+    "name": "team@ratxen.com",
+    "email": "team@ratxen.com",
+    "password": "Team@12345678",
+    "confirmPassword": "Team@12345678"
+  },
+  "status": 201,
+  "response": {
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+      "user": {
+        "id": "68f93193efaa8534b059b49f",
+        "name": "team@ratxen.com",
+        "email": "team@ratxen.com"
+      },
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGY5MzE5M2VmYWE4NTM0YjA1OWI0OWYiLCJlbWFpbCI6InRlYW1AcmF0eGVuLmNvbSIsIm5hbWUiOiJ0ZWFtQHJhdHhlbi5jb20iLCJpYXQiOjE3NjExNjE2MTksImV4cCI6MTc2MTc2NjQxOX0.4iIxYl2b9Oc8uB36IwOgk_2uv9B-Osh84mTkCQ7YvoQ"
+    }
+  }
+}

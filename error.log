@@ -41,3 +41,9 @@
 {"error":{},"level":"error","message":"Error in verifyOtp"}
 {"error":{},"level":"error","message":"Error in verifyOtp"}
 {"error":{},"level":"error","message":"Error in verifyOtp"}
+{"error":{"code":"EAUTH","command":"AUTH PLAIN","response":"534-5.7.9 Please log in with your web browser and then try again. For more\n534-5.7.9 information, go to\n534 5.7.9  https://support.google.com/mail/?p=WebLoginRequired d9443c01a7336-292471d5612sm139110285ad.65 - gsmtp","responseCode":534},"level":"error","message":"Error in sendOtp"}
+{"error":{},"level":"error","message":"Error in registerUser"}
+{"email":"kunal1274@gmail.com","level":"error","message":"Missing identifier or method"}
+{"email":"kunal1274@gmail.com","level":"error","message":"Missing identifier or method"}
+{"email":"ctrmratxen@gmail.com","level":"error","message":"Missing identifier or method"}
+{"error":{},"level":"error","message":"Error in resendOtp"}

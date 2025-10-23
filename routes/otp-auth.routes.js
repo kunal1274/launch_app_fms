@@ -3,6 +3,7 @@ import express from 'express';
 import {
   sendOtp,
   verifyOtp,
+  registerUser,
   createOtp,
   getAllOtps,
   getOtpById,
@@ -23,6 +24,9 @@ otpAuthRouter.post('/send-otp', sendOtp);
 
 // Route to verify OTP
 otpAuthRouter.post('/verify-otp', verifyOtp);
+
+// Route to register user (creates user after OTP verification)
+otpAuthRouter.post('/register', registerUser);
 
 // Validate token route
 otpAuthRouter.post('/me', authenticateJWT, async (req, res) => {

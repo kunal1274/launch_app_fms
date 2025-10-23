@@ -1,0 +1,15 @@
+{
+  "ts": 1761156869838,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/resend-otp",
+  "body": {
+    "email": "test@example.com",
+    "method": "email"
+  },
+  "status": 500,
+  "response": {
+    "success": false,
+    "msg": "❌ Server Error",
+    "error": {}
+  }
+}

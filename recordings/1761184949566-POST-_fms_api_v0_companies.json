@@ -1,0 +1,13 @@
+{
+  "ts": 1761184949566,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Test Company",
+    "companyCode": "TEST",
+    "email": "invalid-email",
+    "primaryGSTAddress": "Test Address"
+  },
+  "status": 422,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"❌ Validation error during customer creation.\",\"error\":\"Companies validation failed: email: ⚠️ Email must be a valid email format (e.g. user@example.com).\"}"
+}

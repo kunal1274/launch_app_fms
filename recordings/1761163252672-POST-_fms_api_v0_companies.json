@@ -1,0 +1,43 @@
+{
+  "ts": 1761163252672,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Integration Test Company Ltd",
+    "companyCode": "ITC001",
+    "email": "integration@testcompany.com",
+    "contactNumber": "+1234567890",
+    "primaryGSTAddress": "123 Integration Street, Test City, Test State 12345, Test Country",
+    "businessType": "Trading",
+    "currency": "INR",
+    "website": "https://www.integrationtestcompany.com",
+    "active": true,
+    "remarks": "Company created for integration testing"
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": " ✅ Company created successfully.",
+    "data": {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "ITC001",
+      "companyName": "Integration Test Company Ltd",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "integration@testcompany.com",
+      "extras": {},
+      "files": [],
+      "globalPartyId": "68f937f2a8a58587023e4b5e",
+      "groups": [],
+      "id": "68f937f4a8a58587023e4b61",
+      "primaryGSTAddress": "123 Integration Street, Test City, Test State 12345, Test Country",
+      "remarks": "Company created for integration testing",
+      "sysCode": "CMP_004",
+      "updatedBy": null,
+      "website": "https://www.integrationtestcompany.com"
+    }
+  }
+}

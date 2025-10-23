@@ -1,0 +1,11 @@
+{
+  "ts": 1761190099221,
+  "method": "DELETE",
+  "path": "/fms/api/v0/companies/67e7c8228e979afe43f8b4f9",
+  "body": {},
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Company deleted successfully."
+  }
+}

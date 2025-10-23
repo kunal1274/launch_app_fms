@@ -1,0 +1,8 @@
+{
+  "ts": 1761150511573,
+  "method": "OPTIONS",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {},
+  "status": 200,
+  "response": ""
+}

@@ -1,0 +1,18 @@
+{
+  "ts": 1761158259806,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {
+    "email": "test@example.com",
+    "method": "email"
+  },
+  "status": 200,
+  "response": {
+    "success": true,
+    "msg": "✅ OTP sent via email successfully recorded at 🕒 local time 2025-10-23 00:07:39 and in detailed 📅 23rd Oct 2025, Thursday, 12:07 am (local time)",
+    "expiresAt": "2025-10-22T18:52:36.845Z",
+    "canResend": false,
+    "resendCooldown": 60,
+    "remainingResends": 2
+  }
+}

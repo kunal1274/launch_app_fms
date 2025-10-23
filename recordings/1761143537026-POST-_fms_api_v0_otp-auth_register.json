@@ -1,0 +1,16 @@
+{
+  "ts": 1761143537026,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {
+    "name": "ctrm",
+    "email": "ctrmratxen@gmail.com",
+    "password": "Test@123456",
+    "confirmPassword": "Test@123456"
+  },
+  "status": 409,
+  "response": {
+    "success": false,
+    "message": "User with this email already exists"
+  }
+}

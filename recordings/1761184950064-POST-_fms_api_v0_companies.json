@@ -1,0 +1,13 @@
+{
+  "ts": 1761184950064,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Test Company",
+    "companyCode": "TEST@#$%",
+    "email": "test@test.com",
+    "primaryGSTAddress": "Test Address"
+  },
+  "status": 422,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"❌ Validation error during customer creation.\",\"error\":\"Companies validation failed: companyCode: ⚠️ Company Code can only contain alphanumeric characters, dashes, or underscores.\"}"
+}

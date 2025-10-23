@@ -7,23 +7,25 @@ import {
   getLocalTimeString,
   getFormattedLocalDateTime,
 } from '../utility/getLocalTime.js';
-import {
-  createOtp,
-  deleteOtp,
-  getAllOtps,
-  getOtpById,
-  sendOtp,
-  updateOtp,
-  verifyOtp,
-} from '../controllers/bb0.userOtp.controller.js';
+// BB functionality - commented out
+// import {
+//   createOtp,
+//   deleteOtp,
+//   getAllOtps,
+//   getOtpById,
+//   sendOtp,
+//   updateOtp,
+//   verifyOtp,
+// } from '../controllers/bb0.userOtp.controller.js';
 
 const otpAuthRouter = express.Router();
 
+// BB functionality - commented out
 // Route to send OTP
-otpAuthRouter.post('/send-otp', sendOtp);
+// otpAuthRouter.post('/send-otp', sendOtp);
 
 // Route to verify OTP
-otpAuthRouter.post('/verify-otp', verifyOtp);
+// otpAuthRouter.post('/verify-otp', verifyOtp);
 
 // Validate token route
 otpAuthRouter.post('/me', authenticateJWT, async (req, res) => {
@@ -39,11 +41,12 @@ otpAuthRouter.post('/me', authenticateJWT, async (req, res) => {
   });
 });
 
+// BB functionality - commented out
 // BASIC CRUD
-otpAuthRouter.post('/', createOtp);
-otpAuthRouter.get('/', getAllOtps);
-otpAuthRouter.get('/:id', getOtpById);
-otpAuthRouter.patch('/:id', updateOtp);
-otpAuthRouter.delete('/:id', deleteOtp);
+// otpAuthRouter.post('/', createOtp);
+// otpAuthRouter.get('/', getAllOtps);
+// otpAuthRouter.get('/:id', getOtpById);
+// otpAuthRouter.patch('/:id', updateOtp);
+// otpAuthRouter.delete('/:id', deleteOtp);
 
 export default otpAuthRouter;

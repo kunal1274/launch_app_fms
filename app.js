@@ -33,9 +33,10 @@ import passport from 'passport';
 
 // Local files
 import { recordApiFlow } from './middleware/recordApiFlow.js';
-import bb0_ledgerAccountRouter from './bb0/am_svc/routes/bb0.account.routes.js';
+// BB functionality - commented out
+// import bb0_ledgerAccountRouter from './bb0/am_svc/routes/bb0.account.routes.js';
 import { requestTimer } from './middleware/requestTimer.js';
-import logger from './bb0/shm_svc/utility/bb0.logger.util.js';
+// import logger from './bb0/shm_svc/utility/bb0.logger.util.js';
 
 // import { siteRouter } from "./routes/sites.routes.js";
 // import { customerRouter } from "./routes/customer.routes.js";
@@ -74,26 +75,58 @@ const createTestOrientedApp = () => {
   //AumMrigahApp.use("/fms/api", limiter); // specific to router
   app.use(limiter); // to everything
 
-  const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map((ele) => {
-      return ele.trim();
-    })
+  // Dynamic CORS configuration for development and production
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Get allowed origins from environment variables
+  const devOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((ele) => ele.trim())
     : [];
 
-  // console.log("Allowed Origins", process.env.ALLOWED_ORIGINS);
-  // dbgServer("Allowed Origins: %O", allowedOrigins);
+  const prodOrigins = process.env.ALLOWED_ORIGINS_PROD
+    ? process.env.ALLOWED_ORIGINS_PROD.split(',').map((ele) => ele.trim())
+    : [];
+
+  // Combine origins based on environment
+  const allowedOrigins = isDevelopment ? devOrigins : [...devOrigins, ...prodOrigins];
+
+  // Allow wildcard for development if enabled
+  const allowWildcardDev = process.env.CORS_ALLOW_WILDCARD_DEV === 'true';
+
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('Allowed Origins:', allowedOrigins);
+  console.log('Allow Wildcard Dev:', allowWildcardDev);
 
   const corsOptions = {
     origin: (origin, callback) => {
-      // Allow requests with no origin (for Postman, mobile apps)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      // Allow requests with no origin (for Postman, mobile apps, server-to-server)
+      if (!origin) {
+        return callback(null, true);
       }
+
+      // In development, allow wildcard if enabled
+      if (isDevelopment && allowWildcardDev) {
+        return callback(null, true);
+      }
+
+      // Check if origin is in allowed list
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // In production, also check for Vercel preview deployments
+      if (isProduction && origin.includes('.vercel.app')) {
+        return callback(null, true);
+      }
+
+      // Log rejected origin for debugging
+      console.log('CORS rejected origin:', origin);
+      callback(new Error('Not allowed by CORS'));
     },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true, // Allow cookies
+    optionsSuccessStatus: 200, // For legacy browser support
   };
 
   app.use(cors(corsOptions));
@@ -103,7 +136,9 @@ const createTestOrientedApp = () => {
   // we are using after the request processed through json and cors
   // Define a stream for morgan to use Winston
   const stream = {
-    write: (message) => logger.http(message.trim()),
+    // BB functionality - commented out
+    // write: (message) => logger.http(message.trim()),
+    write: (message) => console.log(message.trim()), // Fallback for BB functionality
   };
 
   app.use(morgan('combined', { stream }));
@@ -112,7 +147,8 @@ const createTestOrientedApp = () => {
     res.send(`Hello from Express on Render at Port number ${PORT}!`);
   });
 
-  app.use('/bb0/api/v0/accounts', bb0_ledgerAccountRouter);
+  // BB functionality - commented out
+  // app.use('/bb0/api/v0/accounts', bb0_ledgerAccountRouter);
 
   // dbgRoutes("Mounting sites router on /fms/api/v0/sites");
   // app.use("/fms/api/v0/customers", customerRouter);

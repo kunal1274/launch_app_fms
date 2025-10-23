@@ -1,0 +1,16 @@
+{
+  "ts": 1761142290633,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {
+    "email": "kunalratxen@gmail.com",
+    "name": "Kunal Kumar",
+    "password": "12345678",
+    "confirmPassword": "12345678"
+  },
+  "status": 409,
+  "response": {
+    "success": false,
+    "message": "User with this email already exists"
+  }
+}

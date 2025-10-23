@@ -1,0 +1,16 @@
+{
+  "ts": 1761184949424,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "",
+    "companyCode": "TEST",
+    "email": "test@test.com",
+    "primaryGSTAddress": "Test Address"
+  },
+  "status": 422,
+  "response": {
+    "status": "failure",
+    "message": "⚠️ Company code, company name, primary GST address, and email are required."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "ts": 1761189384264,
+  "method": "GET",
+  "path": "/favicon.ico",
+  "body": {},
+  "status": 400,
+  "response": "This is final and invalid path coming from node js backend launch-app-fms"
+}

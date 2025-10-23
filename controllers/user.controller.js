@@ -287,3 +287,6 @@ export const {
   deleteUser,
   getUserStats,
 } = userController;
+
+// Export default controller instance
+export default userController;

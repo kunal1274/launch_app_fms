@@ -1,0 +1,46 @@
+{
+  "ts": 1761163253042,
+  "method": "PUT",
+  "path": "/fms/api/v0/companies/68f937f4a8a58587023e4b61",
+  "body": {
+    "companyName": "Updated Integration Test Company Ltd",
+    "companyCode": "ITC001",
+    "email": "integration@testcompany.com",
+    "contactNumber": "+1234567890",
+    "primaryGSTAddress": "123 Integration Street, Test City, Test State 12345, Test Country",
+    "businessType": "Trading",
+    "currency": "INR",
+    "website": "https://www.integrationtestcompany.com",
+    "active": true,
+    "remarks": "Updated company for integration testing",
+    "updatedBy": "Unknown"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Company updated successfully.",
+    "data": {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "ITC001",
+      "companyName": "Updated Integration Test Company Ltd",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "integration@testcompany.com",
+      "extras": {},
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68f937f4a8a58587023e4b61",
+      "primaryGSTAddress": "123 Integration Street, Test City, Test State 12345, Test Country",
+      "remarks": "Updated company for integration testing",
+      "sysCode": "CMP_004",
+      "updatedBy": "Unknown",
+      "website": "https://www.integrationtestcompany.com"
+    }
+  }
+}

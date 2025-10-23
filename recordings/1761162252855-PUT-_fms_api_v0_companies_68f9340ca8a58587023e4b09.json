@@ -1,0 +1,46 @@
+{
+  "ts": 1761162252855,
+  "method": "PUT",
+  "path": "/fms/api/v0/companies/68f9340ca8a58587023e4b09",
+  "body": {
+    "companyName": "Updated Test Company Ltd",
+    "companyCode": "TC001",
+    "email": "test@company.com",
+    "contactNumber": "+1234567890",
+    "primaryGSTAddress": "123 Test Street, Test City, Test State 12345, Test Country",
+    "businessType": "Trading",
+    "currency": "INR",
+    "website": "https://www.testcompany.com",
+    "active": true,
+    "remarks": "Updated test company description",
+    "updatedBy": "Unknown"
+  },
+  "status": 200,
+  "response": {
+    "status": "success",
+    "message": "✅ Company updated successfully.",
+    "data": {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "TC001",
+      "companyName": "Updated Test Company Ltd",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "test@company.com",
+      "extras": {},
+      "files": [],
+      "globalPartyId": {
+        "active": true
+      },
+      "groups": [],
+      "id": "68f9340ca8a58587023e4b09",
+      "primaryGSTAddress": "123 Test Street, Test City, Test State 12345, Test Country",
+      "remarks": "Updated test company description",
+      "sysCode": "CMP_003",
+      "updatedBy": "Unknown",
+      "website": "https://www.testcompany.com"
+    }
+  }
+}

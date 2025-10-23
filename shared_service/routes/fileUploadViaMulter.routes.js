@@ -6,7 +6,7 @@ import fs from 'fs';
 import mongoose from 'mongoose';
 import { uploadMulter } from '../../middleware/uploadMulterConfig.js';
 import * as ctrl from '../controllers/fileUpload.controller.js';
-import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
+// import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
 
 export const fileRouter = express.Router();
 
@@ -55,11 +55,13 @@ fileRouter.post(
         fileUploadedAt: new Date(),
       }));
 
-      const updated = await SalesOrderModel.findByIdAndUpdate(
-        soId,
-        { $push: { attachedFiles: { $each: docs } } },
-        { new: true, runValidators: true }
-      ).select('attachedFiles');
+      // BB functionality - commented out
+      // const updated = await SalesOrderModel.findByIdAndUpdate(
+      //   soId,
+      //   { $push: { attachedFiles: { $each: docs } } },
+      //   { new: true, runValidators: true }
+      // ).select('attachedFiles');
+      const updated = null; // Placeholder for BB functionality
 
       if (!updated) {
         // rollback disk writes if desired…
@@ -88,9 +90,11 @@ fileRouter.post(
  */
 fileRouter.get('/:id/files', async (req, res) => {
   try {
-    const so = await SalesOrderModel.findById(req.params.id).select(
-      'attachedFiles'
-    );
+    // BB functionality - commented out
+    // const so = await SalesOrderModel.findById(req.params.id).select(
+    //   'attachedFiles'
+    // );
+    const so = null; // Placeholder for BB functionality
     if (!so)
       return res.status(404).json({ status: 'failure', message: 'Not found' });
     res.json({ status: 'success', files: so.attachedFiles });
@@ -143,7 +147,9 @@ fileRouter.delete('/:id/files/:fileId', async (req, res) => {
   try {
     const { id: soId, fileId } = req.params;
     // 1) Load the sales-order
-    const so = await SalesOrderModel.findById(soId);
+    // BB functionality - commented out
+    // const so = await SalesOrderModel.findById(soId);
+    const so = null; // Placeholder for BB functionality
     if (!so) {
       return res
         .status(404)

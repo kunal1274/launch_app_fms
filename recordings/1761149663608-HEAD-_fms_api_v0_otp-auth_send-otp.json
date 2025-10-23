@@ -1,0 +1,10 @@
+{
+  "ts": 1761149663608,
+  "method": "HEAD",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {},
+  "status": 500,
+  "response": {
+    "message": "Failed to fetch OTP record"
+  }
+}

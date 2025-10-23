@@ -1,0 +1,14 @@
+{
+  "ts": 1761189845071,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/verify-otp",
+  "body": {
+    "email": "ctrmratxen@gmail.com",
+    "otp": "261035"
+  },
+  "status": 200,
+  "response": {
+    "msg": "✅ OTP verified successfully recorded at 🕒 local time 2025-10-23 08:54:05 and in detailed 📅 23rd Oct 2025, Thursday, 8:54 am (local time)",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImN0cm1yYXR4ZW5AZ21haWwuY29tIiwiaWF0IjoxNzYxMTg5ODQ0LCJleHAiOjE3NjExOTA3NDR9.dD3XJHpwvcaSN6z4-iCNjMgWt23wbYpmBtJcoLSS-og"
+  }
+}

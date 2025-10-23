@@ -1,0 +1,19 @@
+{
+  "ts": 1761141982164,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/send-otp",
+  "body": {
+    "email": "kunalratxen@gmail.com",
+    "method": "email"
+  },
+  "status": 500,
+  "response": {
+    "msg": "❌ Server Error",
+    "error": {
+      "code": "EAUTH",
+      "response": "534-5.7.9 Please log in with your web browser and then try again. For more\n534-5.7.9 information, go to\n534 5.7.9  https://support.google.com/mail/?p=WebLoginRequired d9443c01a7336-292471d5612sm139110285ad.65 - gsmtp",
+      "responseCode": 534,
+      "command": "AUTH PLAIN"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "ts": 1761143565972,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {
+    "name": "aditya classes ratxen",
+    "email": "adityaclassesratxen@gmail.com",
+    "password": "Test@123456",
+    "confirmPassword": "Test@123456"
+  },
+  "status": 201,
+  "response": {
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+      "user": {
+        "id": "68f8eb0de7fff6165e6e842c",
+        "name": "aditya classes ratxen",
+        "email": "adityaclassesratxen@gmail.com"
+      },
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGY4ZWIwZGU3ZmZmNjE2NWU2ZTg0MmMiLCJlbWFpbCI6ImFkaXR5YWNsYXNzZXNyYXR4ZW5AZ21haWwuY29tIiwibmFtZSI6ImFkaXR5YSBjbGFzc2VzIHJhdHhlbiIsImlhdCI6MTc2MTE0MzU2NSwiZXhwIjoxNzYxNzQ4MzY1fQ.rzbF0fpEDhYhPdPGqZ_YsBvIgJ08UrXdEaQGNLKm4gs"
+    }
+  }
+}

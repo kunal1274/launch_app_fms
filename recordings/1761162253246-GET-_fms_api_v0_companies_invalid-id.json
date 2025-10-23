@@ -1,0 +1,12 @@
+{
+  "ts": 1761162253246,
+  "method": "GET",
+  "path": "/fms/api/v0/companies/invalid-id",
+  "body": {},
+  "status": 500,
+  "response": {
+    "status": "failure",
+    "message": "❌ Internal Server Error",
+    "error": "Cast to ObjectId failed for value \"invalid-id\" (type string) at path \"_id\" for model \"Companies\""
+  }
+}

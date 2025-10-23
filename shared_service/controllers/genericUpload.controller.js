@@ -1,9 +1,9 @@
-import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
+// import { SalesOrderModel } from '../../bb3_sales_management_service/models/bb3SalesOrder.model.js';
 import { CompanyModel } from '../../models/company.model.js';
 import { ItemModel } from '../../models/item.model.js';
 
 const MAP = {
-  'sales-orders': SalesOrderModel,
+  // 'sales-orders': SalesOrderModel, // BB functionality - commented out
   items: ItemModel,
   companies: CompanyModel,
 };

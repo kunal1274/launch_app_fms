@@ -1,0 +1,8 @@
+{
+  "ts": 1761190099242,
+  "method": "OPTIONS",
+  "path": "/fms/api/v0/companies?page=1&limit=50&sortBy=createdAt&sortOrder=desc",
+  "body": {},
+  "status": 200,
+  "response": ""
+}

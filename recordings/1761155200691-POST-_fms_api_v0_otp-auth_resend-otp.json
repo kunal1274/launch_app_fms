@@ -1,0 +1,18 @@
+{
+  "ts": 1761155200691,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/resend-otp",
+  "body": {
+    "email": "kunal1274@gmail.com",
+    "method": "email"
+  },
+  "status": 200,
+  "response": {
+    "success": true,
+    "message": "New OTP sent successfully",
+    "expiresAt": "2025-10-22T18:01:37.822Z",
+    "canResend": true,
+    "remainingResends": 1,
+    "resendCooldown": 0
+  }
+}

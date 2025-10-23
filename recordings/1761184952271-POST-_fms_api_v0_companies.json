@@ -1,0 +1,19 @@
+{
+  "ts": 1761184952271,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Alpha Technologies Ltd",
+    "companyCode": "UNIQUE001",
+    "email": "duplicate@test.com",
+    "contactNumber": "+1234567890",
+    "primaryGSTAddress": "123 Alpha Street, Tech City, TC 12345, Tech Country",
+    "businessType": "Technology",
+    "currency": "USD",
+    "website": "https://www.alpha-tech.com",
+    "active": true,
+    "remarks": "Leading technology company"
+  },
+  "status": 422,
+  "response": "[object Object]{\"status\":\"failure\",\"message\":\"❌ Validation error during customer creation.\",\"error\":\"Companies validation failed: businessType: ⚠️ Technology is not a valid currency. Use among these only Individual or Manufacturing, Service Provider, Trading, Distributor,Retailer,Wholesaler.\"}"
+}

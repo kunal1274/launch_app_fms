@@ -8,6 +8,7 @@ console.log('EMAIL_PASS:', !!process.env.EMAIL_PASS);
 
 import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { winstonLogger } from '../utility/logError.utils.js';
 import { UserGlobalModel } from '../models/userGlobal.model.js';
 import { UserOtpModel } from '../models/userOtp.model.js';
@@ -72,10 +73,15 @@ import { dbgEmail } from '../index.js';
 
 // Nodemailer configuration for sending emails
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false
   },
   debug: true,
   logger: true,
@@ -230,9 +236,128 @@ export const sendOtp = async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: 'Your OTP Code',
-        text: `Your OTP is: ${otp}`,
-        html: `<b>Your OTP is: ${otp}</b>`,
+        subject: 'Your New OTP Code',
+        text: `Your new verification code is: ${otp}\n\nThis code will expire in 15 minutes.\n\nIf you didn't request this code, please ignore this email.`,
+        html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Your New OTP Code</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f8f9fa;
+            }
+            .email-container {
+              background-color: #ffffff;
+              border-radius: 12px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px 20px;
+              text-align: center;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 28px;
+              font-weight: 600;
+            }
+            .content {
+              padding: 40px 30px;
+              text-align: center;
+            }
+            .intro-text {
+              font-size: 18px;
+              color: #555;
+              margin-bottom: 30px;
+            }
+            .otp-container {
+              background-color: #f8f9fa;
+              border: 2px solid #e9ecef;
+              border-radius: 12px;
+              padding: 25px;
+              margin: 30px 0;
+              display: inline-block;
+            }
+            .otp-code {
+              font-size: 36px;
+              font-weight: 700;
+              color: #2563eb;
+              letter-spacing: 8px;
+              margin: 0;
+              font-family: 'Courier New', monospace;
+            }
+            .expiry-notice {
+              color: #6b7280;
+              font-size: 16px;
+              margin: 20px 0;
+            }
+            .disclaimer {
+              color: #9ca3af;
+              font-size: 14px;
+              margin-top: 30px;
+              padding-top: 20px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .footer {
+              background-color: #f8f9fa;
+              padding: 20px;
+              text-align: center;
+              color: #6b7280;
+              font-size: 14px;
+            }
+            .security-note {
+              background-color: #fef3c7;
+              border: 1px solid #f59e0b;
+              border-radius: 8px;
+              padding: 15px;
+              margin: 20px 0;
+              color: #92400e;
+            }
+            .security-note strong {
+              color: #b45309;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="header">
+              <h1>Your New OTP Code</h1>
+            </div>
+            
+            <div class="content">
+              <p class="intro-text">Your new verification code is:</p>
+              
+              <div class="otp-container">
+                <p class="otp-code">${otp}</p>
+              </div>
+              
+              <p class="expiry-notice">This code will expire in 15 minutes.</p>
+              
+              <div class="security-note">
+                <strong>Security Notice:</strong> Never share this code with anyone. Our team will never ask for your OTP code.
+              </div>
+              
+              <p class="disclaimer">If you didn't request this code, please ignore this email.</p>
+            </div>
+            
+            <div class="footer">
+              <p>This is an automated message from FMS Ratxen. Please do not reply to this email.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+        `,
       };
       await transporter.sendMail(mailOptions);
       winstonLogger.info('OTP sent via Email', { email });
@@ -366,6 +491,118 @@ export const verifyOtp = async (req, res) => {
     return res.status(500).json({
       msg: `❌ Server Error recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
       error: err,
+    });
+  }
+};
+
+/**
+ * registerUser - Controller to register a new user with name and password after OTP verification
+ * Expects in the request body:
+ *  - email (required)
+ *  - name (required)
+ *  - password (required)
+ *  - confirmPassword (required)
+ */
+export const registerUser = async (req, res) => {
+  const { email, name, password, confirmPassword } = req.body;
+  
+  // Validate required fields
+  if (!email || !name || !password || !confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'All fields are required: email, name, password, confirmPassword'
+    });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid email format'
+    });
+  }
+
+  // Validate password match
+  if (password !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'Passwords do not match'
+    });
+  }
+
+  // Validate password strength
+  if (password.length < 8) {
+    return res.status(400).json({
+      success: false,
+      message: 'Password must be at least 8 characters long'
+    });
+  }
+
+  try {
+    // Check if user already exists
+    const existingUser = await UserGlobalModel.findOne({
+      email: email.toLowerCase().trim()
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'User with this email already exists'
+      });
+    }
+
+    // Create global party ID
+    const partyId = await createGlobalPartyId(
+      'User',
+      null,
+      email
+    );
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create new user
+    const newUser = await UserGlobalModel.create({
+      email: email.toLowerCase().trim(),
+      name,
+      password: hashedPassword,
+      method: 'email',
+      signInMethod: 'password',
+      globalPartyId: partyId,
+      isActive: true
+    });
+
+    // Generate JWT token
+    const payload = {
+      userId: newUser._id,
+      email: newUser.email,
+      name: newUser.name
+    };
+    
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: '7d'
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      data: {
+        user: {
+          id: newUser._id,
+          name: newUser.name,
+          email: newUser.email
+        },
+        token
+      }
+    });
+
+  } catch (error) {
+    winstonLogger.error('Error in registerUser', { error });
+    return res.status(500).json({
+      success: false,
+      message: 'Registration failed',
+      error: error.message
     });
   }
 };

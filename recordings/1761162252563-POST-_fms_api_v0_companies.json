@@ -1,0 +1,43 @@
+{
+  "ts": 1761162252563,
+  "method": "POST",
+  "path": "/fms/api/v0/companies",
+  "body": {
+    "companyName": "Test Company Ltd",
+    "companyCode": "TC001",
+    "email": "test@company.com",
+    "contactNumber": "+1234567890",
+    "primaryGSTAddress": "123 Test Street, Test City, Test State 12345, Test Country",
+    "businessType": "Trading",
+    "currency": "INR",
+    "website": "https://www.testcompany.com",
+    "active": true,
+    "remarks": "Test company for API integration testing"
+  },
+  "status": 201,
+  "response": {
+    "status": "success",
+    "message": " ✅ Company created successfully.",
+    "data": {
+      "active": true,
+      "archived": false,
+      "bankDetails": [],
+      "businessType": "Trading",
+      "companyCode": "TC001",
+      "companyName": "Test Company Ltd",
+      "createdBy": "SystemCompanyCreation",
+      "currency": "INR",
+      "email": "test@company.com",
+      "extras": {},
+      "files": [],
+      "globalPartyId": "68f9340ca8a58587023e4b06",
+      "groups": [],
+      "id": "68f9340ca8a58587023e4b09",
+      "primaryGSTAddress": "123 Test Street, Test City, Test State 12345, Test Country",
+      "remarks": "Test company for API integration testing",
+      "sysCode": "CMP_003",
+      "updatedBy": null,
+      "website": "https://www.testcompany.com"
+    }
+  }
+}

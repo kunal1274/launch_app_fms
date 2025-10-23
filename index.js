@@ -51,9 +51,10 @@ import googleAlternativeApiAuthRouter from './routes/api-auth.routes.js';
 import userGlobalRouter from './routes/userGlobal.routes.js';
 import permissionRouter from './role_based_access_control_service/routes/permission.routes.js';
 import userRoleRouter from './role_based_access_control_service/routes/userRole.routes.js';
-import salesOrderRoutes from './bb3_sales_management_service/routes/bb3SalesOrder.routes.js';
+// BB functionality - commented out
+// import salesOrderRoutes from './bb3_sales_management_service/routes/bb3SalesOrder.routes.js';
 import aiRoutes from './chatgpt_ai_service/routes/ai.routes.js';
-import siteRoutes from './bb1_inventory_management_service/routes/bb1.site.routes.js';
+// import siteRoutes from './bb1_inventory_management_service/routes/bb1.site.routes.js';
 import multer from 'multer';
 // import { genericUploadRouter } from "./shared_service/routes/genericUpload.routes.js";
 // import { uploadMulter } from "./middleware/uploadMulterConfig.js";
@@ -158,8 +159,25 @@ AumMrigahApp.use(passport.session());
 dbgServer('passport session initialized ');
 
 //// Security middleware
-AumMrigahApp.use(helmet()); // Secure HTTP headers
-dbgSecurity('Helmet enabled for secure headers');
+// Configure Helmet for development with relaxed CORS
+const helmetConfig = {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:", "data:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+};
+
+AumMrigahApp.use(helmet(helmetConfig)); // Secure HTTP headers with relaxed CORS
+dbgSecurity('Helmet enabled for secure headers with relaxed CORS');
 AumMrigahApp.use(xss()); // Prevent XSS
 dbgSecurity('xss enabled for secure headers');
 AumMrigahApp.disable('x-powered-by'); // Hide the X-Powered-By header
@@ -179,26 +197,58 @@ const limiter = rateLimit({
 AumMrigahApp.use(limiter); // to everything
 dbgServer('limiter initialized ');
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map((ele) => {
-    return ele.trim();
-  })
+// Dynamic CORS configuration for development and production
+const isDevelopment = process.env.NODE_ENV === 'development';
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Get allowed origins from environment variables
+const devOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((ele) => ele.trim())
   : [];
 
-// console.log("Allowed Origins", process.env.ALLOWED_ORIGINS);
+const prodOrigins = process.env.ALLOWED_ORIGINS_PROD
+  ? process.env.ALLOWED_ORIGINS_PROD.split(',').map((ele) => ele.trim())
+  : [];
+
+// Combine origins based on environment
+const allowedOrigins = isDevelopment ? devOrigins : [...devOrigins, ...prodOrigins];
+
+// Allow wildcard for development if enabled
+const allowWildcardDev = process.env.CORS_ALLOW_WILDCARD_DEV === 'true';
+
+dbgServer('Environment: %s', process.env.NODE_ENV);
 dbgServer('Allowed Origins: %O', allowedOrigins);
+dbgServer('Allow Wildcard Dev: %s', allowWildcardDev);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (for Postman, mobile apps)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (for Postman, mobile apps, server-to-server)
+    if (!origin) {
+      return callback(null, true);
     }
+
+    // In development, allow wildcard if enabled
+    if (isDevelopment && allowWildcardDev) {
+      return callback(null, true);
+    }
+
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // In production, also check for Vercel preview deployments
+    if (isProduction && origin.includes('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Log rejected origin for debugging
+    dbgServer('CORS rejected origin: %s', origin);
+    callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true, // Allow cookies
+  optionsSuccessStatus: 200, // For legacy browser support
 };
 
 AumMrigahApp.use(cors(corsOptions));
@@ -322,7 +372,8 @@ AumMrigahApp.use('/fms/api/v0/stock-balances', stockBalanceRouter);
 dbgRoutesBB3(
   'Mounting sale order Routes-BB3 router on /bb/api/v3/sales-orders'
 );
-AumMrigahApp.use('/fms/api/v0/sales-orders', salesOrderRoutes);
+// BB functionality - commented out
+// AumMrigahApp.use('/fms/api/v0/sales-orders', salesOrderRoutes);
 // AumMrigahApp.use("/fms/api/v0/sales-orders", printRoutes);
 
 // dbgRoutesBB3("Mounting upload-BB3 router on /bb/api/v3/upload");
@@ -418,8 +469,9 @@ AumMrigahApp.use('/fms/api/v0/sales-orders', fileRouter);
 // );
 
 // // Inventory Management Service -bb1
-dbgRoutesBB1('Mounting siteRoutes-BB1 router on /bb/api/v1/sites');
-AumMrigahApp.use('/bb/api/v1/sites', siteRoutes);
+// BB functionality - commented out
+// dbgRoutesBB1('Mounting siteRoutes-BB1 router on /bb/api/v1/sites');
+// AumMrigahApp.use('/bb/api/v1/sites', siteRoutes);
 
 // // Chatgpt ai service - bb3
 dbgRoutesBB3('Mounting aiRoutes-BB3 router on /bb/api/v3/ai');

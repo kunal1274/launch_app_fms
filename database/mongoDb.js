@@ -7,15 +7,11 @@ import logger from '../utility/logger.util.js';
  * Database connection configuration
  */
 const dbConfig = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
   minPoolSize: parseInt(process.env.DB_POOL_MIN) || 2,
   maxIdleTimeMS: 30000,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-  bufferMaxEntries: 0,
-  bufferCommands: false,
   sanitizeFilter: true, // to do the filter on query
 };
 

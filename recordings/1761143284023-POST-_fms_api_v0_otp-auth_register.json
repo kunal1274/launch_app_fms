@@ -1,0 +1,24 @@
+{
+  "ts": 1761143284023,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {
+    "email": "ctrmratxen@gmail.com",
+    "name": "ctrm ratxen",
+    "password": "12345678",
+    "confirmPassword": "12345678"
+  },
+  "status": 201,
+  "response": {
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+      "user": {
+        "id": "68f8e9f36a159f4b4667743a",
+        "name": "ctrm ratxen",
+        "email": "ctrmratxen@gmail.com"
+      },
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGY4ZTlmMzZhMTU5ZjRiNDY2Nzc0M2EiLCJlbWFpbCI6ImN0cm1yYXR4ZW5AZ21haWwuY29tIiwibmFtZSI6ImN0cm0gcmF0eGVuIiwiaWF0IjoxNzYxMTQzMjg0LCJleHAiOjE3NjE3NDgwODR9.oPbRuizOZ6UwUEEHLorfREiqkOK0eE3kIwrW_eoQkDM"
+    }
+  }
+}

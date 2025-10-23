@@ -1,0 +1,24 @@
+{
+  "ts": 1761142361565,
+  "method": "POST",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {
+    "email": "testuser@example.com",
+    "name": "Test User",
+    "password": "12345678",
+    "confirmPassword": "12345678"
+  },
+  "status": 201,
+  "response": {
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+      "user": {
+        "id": "68f8e6593a0897939807536d",
+        "name": "Test User",
+        "email": "testuser@example.com"
+      },
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGY4ZTY1OTNhMDg5NzkzOTgwNzUzNmQiLCJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwibmFtZSI6IlRlc3QgVXNlciIsImlhdCI6MTc2MTE0MjM2MSwiZXhwIjoxNzYxNzQ3MTYxfQ.RPcRsytBohWnhayAatT13S89g9ozoi7FcEZdtfyDe7k"
+    }
+  }
+}

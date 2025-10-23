@@ -1,0 +1,8 @@
+{
+  "ts": 1761142990231,
+  "method": "OPTIONS",
+  "path": "/fms/api/v0/otp-auth/register",
+  "body": {},
+  "status": 200,
+  "response": ""
+}

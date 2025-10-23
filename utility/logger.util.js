@@ -133,9 +133,31 @@ const logger = winston.createLogger({
 });
 
 /**
+ * JSON format logger for structured logging
+ */
+const jsonFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json()
+);
+
+const loggerJsonFormat = winston.createLogger({
+  level: 'info',
+  format: jsonFormat,
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({
+      filename: 'logs/errorJsonFormat.json',
+      level: 'error',
+    }),
+    new winston.transports.File({ filename: 'logs/combinedJsonFormat.json' }),
+  ],
+});
+
+/**
  * Enhanced logging functions
  */
-export const logUtils = {
+const logUtils = {
   /**
    * Log error with stack trace
    */
@@ -249,7 +271,7 @@ export const logUtils = {
 /**
  * Enhanced stack trace logging
  */
-export const logStackError = (context, error) => {
+const logStackError = (context, error) => {
   const parsedStack = stackTrace.parse(error);
   const caller = parsedStack[0];
 
@@ -270,7 +292,7 @@ export const logStackError = (context, error) => {
 /**
  * Request logging middleware
  */
-export const requestLogger = (req, res, next) => {
+const requestLogger = (req, res, next) => {
   const start = Date.now();
 
   res.on('finish', () => {
@@ -284,7 +306,7 @@ export const requestLogger = (req, res, next) => {
 /**
  * Error logging middleware
  */
-export const errorLogger = (error, req, res, next) => {
+const errorLogger = (error, req, res, next) => {
   logUtils.logError('Request Error', error, {
     method: req.method,
     url: req.originalUrl,
@@ -300,7 +322,7 @@ export const errorLogger = (error, req, res, next) => {
 /**
  * Audit logging middleware
  */
-export const auditLogger = (action, resource) => {
+const auditLogger = (action, resource) => {
   return (req, res, next) => {
     const originalSend = res.send;
     
@@ -325,7 +347,7 @@ export const auditLogger = (action, resource) => {
 /**
  * Performance logging middleware
  */
-export const performanceLogger = (operation) => {
+const performanceLogger = (operation) => {
   return (req, res, next) => {
     const start = Date.now();
 
@@ -356,4 +378,4 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 export default logger;
-export { logUtils, requestLogger, errorLogger, auditLogger, performanceLogger };
+export { logUtils, logStackError, requestLogger, errorLogger, auditLogger, performanceLogger, loggerJsonFormat };

@@ -150,6 +150,34 @@ export const sendOtp = async (req, res) => {
     });
   }
 
+  // For email method, allow OTP for both existing and new users
+  if (method === 'email' && email) {
+    try {
+      const existingUser = await UserGlobalModel.findOne({ 
+        email: email.toLowerCase(),
+        isActive: true 
+      });
+      
+      if (existingUser) {
+        winstonLogger.info('OTP requested for existing user', { 
+          email, 
+          userId: existingUser._id,
+          signInMethod: existingUser.signInMethod 
+        });
+      } else {
+        winstonLogger.info('OTP requested for new user - will be created after verification', { email });
+      }
+    } catch (error) {
+      winstonLogger.error('Error checking user existence', { 
+        error: error.message,
+        email 
+      });
+      return res.status(500).json({
+        msg: '❌ Error validating user. Please try again.',
+      });
+    }
+  }
+
   if (!['whatsapp', 'sms', 'email'].includes(method)) {
     return res
       .status(400)
@@ -371,11 +399,61 @@ export const sendOtp = async (req, res) => {
         `,
       };
       try {
-        await transporter.sendMail(mailOptions);
-        winstonLogger.info('OTP sent via Email', { email });
-        return res.status(200).json({
-          msg: `✅ OTP sent via email successfully recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
-        });
+        // Check if email sending is explicitly disabled
+        const skipEmail = process.env.SKIP_EMAIL === 'true';
+        
+        if (skipEmail) {
+          console.log('🚧 Email sending disabled via SKIP_EMAIL=true');
+          winstonLogger.info('OTP generated with email sending disabled', { email, otp });
+          return res.status(200).json({
+            msg: `✅ OTP generated (email disabled): ${otp}`,
+            otp: otp,
+            emailDisabled: true
+          });
+        }
+        
+        // Try to send email with retry logic
+        let emailSent = false;
+        let lastError = null;
+        
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            console.log(`📧 Attempting to send email (attempt ${attempt}/3)...`);
+            await transporter.sendMail(mailOptions);
+            emailSent = true;
+            winstonLogger.info('OTP sent via Email', { email, attempt });
+            break;
+          } catch (retryError) {
+            lastError = retryError;
+            console.error(`❌ Email attempt ${attempt} failed:`, retryError.message);
+            
+            if (attempt < 3) {
+              // Wait before retry (exponential backoff)
+              const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+              console.log(`⏳ Waiting ${delay}ms before retry...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
+          }
+        }
+        
+        if (emailSent) {
+          return res.status(200).json({
+            msg: `✅ OTP sent via email successfully recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
+          });
+        } else {
+          // Email failed but OTP is saved - return success with warning
+          winstonLogger.warn('Email sending failed but OTP saved', { 
+            email: email,
+            error: lastError?.message,
+            otp: otp // Include OTP in response for manual verification
+          });
+          
+          return res.status(200).json({
+            msg: `⚠️ OTP generated and saved, but email delivery failed. Please check your email or try again. OTP: ${otp}`,
+            otp: otp, // Include OTP in response for development/testing
+            emailDeliveryFailed: true
+          });
+        }
       } catch (emailError) {
         winstonLogger.error('Failed to send email', { 
           error: emailError.message,
@@ -490,12 +568,27 @@ export const verifyOtp = async (req, res) => {
         email ? email : phoneNumber
       );
 
-      await UserGlobalModel.create({
-        email,
-        phoneNumber,
+      const newUser = await UserGlobalModel.create({
+        email: email ? email.toLowerCase().trim() : null,
+        phoneNumber: phoneNumber || null,
         method: email ? 'email' : 'phone',
         signInMethod: 'otp',
         globalPartyId: partyIdNew,
+        name: email ? email.split('@')[0] : phoneNumber,
+        isActive: true,
+      });
+      
+      winstonLogger.info('New user created via OTP', { 
+        userId: newUser._id,
+        email: newUser.email,
+        phoneNumber: newUser.phoneNumber,
+        signInMethod: newUser.signInMethod 
+      });
+    } else {
+      winstonLogger.info('Existing user verified via OTP', { 
+        userId: existingGlobalUser._id,
+        email: existingGlobalUser.email,
+        signInMethod: existingGlobalUser.signInMethod 
       });
     }
 
@@ -626,6 +719,135 @@ export const registerUser = async (req, res) => {
       success: false,
       message: 'Registration failed',
       error: error.message
+    });
+  }
+};
+
+/**
+ * loginWithPassword - Controller to authenticate user with email and password
+ * Expects in the request body:
+ *  - email: User's email address
+ *  - password: User's password
+ */
+export const loginWithPassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate required fields
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email and password are required'
+    });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide a valid email address'
+    });
+  }
+
+  try {
+    // Find user by email
+    const user = await UserGlobalModel.findOne({ 
+      email: email.toLowerCase()
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check if user is active (not explicitly inactive)
+    if (user.isActive === false) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is inactive. Please contact support.'
+      });
+    }
+
+    // Check if user has a password set
+    if (!user.password) {
+      return res.status(401).json({
+        success: false,
+        message: 'Password not set for this account. Please use OTP login or register first.'
+      });
+    }
+
+    // Verify password
+    console.log('🔐 Password verification debug:', {
+      email: user.email,
+      hasPassword: !!user.password,
+      passwordLength: user.password?.length,
+      signInMethod: user.signInMethod,
+      userId: user._id
+    });
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('🔐 Password comparison result:', isPasswordValid);
+    
+    if (!isPasswordValid) {
+      winstonLogger.warn('Password verification failed', { 
+        email: user.email,
+        userId: user._id,
+        signInMethod: user.signInMethod
+      });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    winstonLogger.info('Password verification successful', { 
+      email: user.email,
+      userId: user._id,
+      signInMethod: user.signInMethod
+    });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user._id, 
+        email: user.email,
+        role: user.role 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    winstonLogger.info('User logged in with password', { 
+      email: user.email,
+      userId: user._id 
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        token: token,
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          isActive: user.isActive
+        }
+      }
+    });
+
+  } catch (error) {
+    winstonLogger.error('Password login error', { 
+      error: error.message,
+      email: email 
+    });
+    
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error during login'
     });
   }
 };

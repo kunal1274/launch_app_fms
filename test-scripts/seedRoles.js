@@ -9,7 +9,7 @@ import { UserRoleModel } from '../role_based_access_control_service/models/userR
 dotenv.config();
 
 async function seedJournalTemplateRoles() {
-  await mongoose.connect(process.env.MONGODB_URI);
+  await mongoose.connect(process.env.ATLAS_URI || process.env.ATLAS_URI_DEV || process.env.LOCAL_MONGODB_URI);
 
   // 1. Define the permission keys we care about
   const KEYS = [

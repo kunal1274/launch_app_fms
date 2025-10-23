@@ -4,6 +4,7 @@ import {
   sendOtp,
   verifyOtp,
   registerUser,
+  loginWithPassword,
   createOtp,
   getAllOtps,
   getOtpById,
@@ -27,6 +28,9 @@ otpAuthRouter.post('/verify-otp', verifyOtp);
 
 // Route to register user (creates user after OTP verification)
 otpAuthRouter.post('/register', registerUser);
+
+// Route to login with password
+otpAuthRouter.post('/login-password', loginWithPassword);
 
 // Validate token route
 otpAuthRouter.post('/me', authenticateJWT, async (req, res) => {

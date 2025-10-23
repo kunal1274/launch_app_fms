@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import redis from 'redis';
 
 const HEALTH_CHECK_PORT = process.env.HEALTH_CHECK_PORT || 3001;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_production';
+const MONGODB_URI = process.env.ATLAS_URI || process.env.ATLAS_URI_DEV || process.env.LOCAL_MONGODB_URI || 'mongodb://localhost:27017/fms_test_database';
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 class HealthChecker {

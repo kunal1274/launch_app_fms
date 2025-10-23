@@ -8,24 +8,19 @@ NODE_ENV=development
 PORT=3000
 EMAIL_USER=adhikariratxen@gmail.com
 EMAIL_PASS=fkclmsoibzfhnzsw
+SKIP_EMAIL=true
 
 # =============================================================================
 # DATABASE CONFIGURATION
 # =============================================================================
+# MongoDB Atlas Connection String
+#ATLAS_URI1=mongodb+srv://username:password@cluster.mongodb.net/database_name?retryWrites=true&w=majority
 # use for local testing or dev server testing if mongodb is not installed locally 
-LOCAL_MONGODB_URI=mongodb://localhost:27017/fms_test_database
-
-# Development Database (Atlas)
 ATLAS_URI_DEV=mongodb+srv://devratxen:4ylT1J9z1JNOfJ2Y@scalernodebackend2.pnctyau.mongodb.net/fms-cloud-dev-db?retryWrites=true&w=majority
-
 # use for deployed on render test server 
 ATLAS_URI_TEST=mongodb+srv://devratxen:4ylT1J9z1JNOfJ2Y@scalernodebackend2.pnctyau.mongodb.net/fms-cloud-test-db?retryWrites=true&w=majority
-
 # use for deployed on render prod server 
 ATLAS_URI_PROD=mongodb+srv://devratxen:4ylT1J9z1JNOfJ2Y@scalernodebackend2.pnctyau.mongodb.net/fms-cloud-prod-db?retryWrites=true&w=majority
-
-# Default Database (Development)
-ATLAS_URI=mongodb+srv://devratxen:4ylT1J9z1JNOfJ2Y@scalernodebackend2.pnctyau.mongodb.net/fms-cloud-dev-db?retryWrites=true&w=majority
 
 # =============================================================================
 # SESSION & SECURITY
@@ -107,7 +102,7 @@ DEFAULT_TIMEZONE=UTC
 DEBUG=fms:*
 
 # Test database URI (for testing environment)
-TEST_DATABASE_URI=mongodb://localhost:27017/fms_test_database
+LOCAL_MONGODB_URI=mongodb://localhost:27017/fms_test_database
 
 # =============================================================================
 # FEATURE FLAGS

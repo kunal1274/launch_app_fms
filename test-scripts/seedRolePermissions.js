@@ -14,7 +14,7 @@ const TEMPLATE_PERMS = [
 ];
 
 async function seed() {
-  await mongoose.connect(process.env.MONGODB_URI);
+  await mongoose.connect(process.env.ATLAS_URI || process.env.ATLAS_URI_DEV || process.env.LOCAL_MONGODB_URI);
 
   // 1) ensure all permission docs exist
   for (let p of TEMPLATE_PERMS) {

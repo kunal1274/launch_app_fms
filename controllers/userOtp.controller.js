@@ -81,8 +81,12 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
   tls: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3'
   },
+  connectionTimeout: 60000, // 60 seconds
+  greetingTimeout: 30000,   // 30 seconds
+  socketTimeout: 60000,     // 60 seconds
   debug: true,
   logger: true,
 });
@@ -104,11 +108,18 @@ transporter
   .verify()
   .then(() => {
     dbgEmail('✅ SMTP connection OK');
+    console.log('✅ Email transporter verified successfully');
   })
   .catch((err) => {
     dbgEmail('❌ SMTP connection failed:', {
       message: err.message,
       stack: err.stack,
+    });
+    console.error('❌ Email transporter verification failed:', {
+      message: err.message,
+      code: err.code,
+      command: err.command,
+      response: err.response
     });
     // Optionally throw or process.exit here
   });
@@ -359,11 +370,23 @@ export const sendOtp = async (req, res) => {
         </html>
         `,
       };
-      await transporter.sendMail(mailOptions);
-      winstonLogger.info('OTP sent via Email', { email });
-      return res.status(200).json({
-        msg: `✅ OTP sent via email successfully recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
-      });
+      try {
+        await transporter.sendMail(mailOptions);
+        winstonLogger.info('OTP sent via Email', { email });
+        return res.status(200).json({
+          msg: `✅ OTP sent via email successfully recorded at 🕒 local time ${getLocalTimeString()} and in detailed 📅 ${getFormattedLocalDateTime()}`,
+        });
+      } catch (emailError) {
+        winstonLogger.error('Failed to send email', { 
+          error: emailError.message,
+          email: email,
+          stack: emailError.stack 
+        });
+        return res.status(500).json({ 
+          msg: '❌ Failed to send email. Please try again later.',
+          error: emailError.message 
+        });
+      }
     } else {
       return res
         .status(400)

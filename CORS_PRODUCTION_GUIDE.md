@@ -24,8 +24,8 @@ VITE_PROXY_TARGET=http://localhost:3000
 
 ### Backend (Render/Heroku/etc.)
 ```env
-# Production origins - UPDATE THESE WITH YOUR ACTUAL DOMAINS
-ALLOWED_ORIGINS_PROD=https://your-app-name.vercel.app,https://your-custom-domain.com
+# Production origins - ACTUAL DOMAINS
+ALLOWED_ORIGINS_PROD=https://launch-fms-test.vercel.app
 
 # Disable wildcard for production
 CORS_ALLOW_WILDCARD_DEV=false
@@ -36,8 +36,8 @@ NODE_ENV=production
 
 ### Frontend (Vercel/Netlify/etc.)
 ```env
-VITE_API_BASE=https://your-backend-url.onrender.com/fms/api/v0
-VITE_PROXY_TARGET=https://your-backend-url.onrender.com
+VITE_API_BASE=https://fms-qkmw.onrender.com/fms/api/v0
+VITE_PROXY_TARGET=https://fms-qkmw.onrender.com
 ```
 
 ## 🔒 Security Features
